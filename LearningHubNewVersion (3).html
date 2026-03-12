@@ -1725,10 +1725,14 @@ const RB={
     if(this.cur>=this.lines.length) return false;
     const line=this.lines[this.cur].toLowerCase();
     const norm=this.normalizeText(transcript);
-    // Require matching the last 3 meaningful words of the line
-    const keyWords=(line.match(/\b\w{3,}\b/g)||line.split(/\s+/)).slice(-3);
-    if(!keyWords.length) return false;
+    const allWords=(line.match(/\b\w{3,}\b/g)||line.split(/\s+/));
+    const keyWords=allWords.slice(-3);
+    const lastWord=allWords[allWords.length-1];
+    if(!keyWords.length||!lastWord) return false;
     const tWords=norm.split(/\s+/);
+    // Last word MUST be present in transcript
+    const lastWordMatched=tWords.some(tw=>tw===lastWord||(Math.abs(tw.length-lastWord.length)<=2&&this.levenshtein(tw,lastWord)<=1));
+    if(!lastWordMatched) return false;
     let matched=0;
     for(const kw of keyWords){
       if(tWords.some(tw=>tw===kw||(Math.abs(tw.length-kw.length)<=2&&this.levenshtein(tw,kw)<=1))) matched++;
