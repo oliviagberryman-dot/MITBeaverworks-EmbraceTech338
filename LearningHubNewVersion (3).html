@@ -2076,18 +2076,21 @@ const RB={
           messages:[{role:'user',content:`Define the word "${word}" simply for a child aged 8-12. Return ONLY a valid JSON object with no markdown, no code blocks, no extra text — just the raw JSON:\n{"word":"${word}","pos":"noun","def":"a clear simple definition under 20 words","example":"a short example sentence using the word"}`}]
         })
       });
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:200,
+          messages:[{role:'user',content:`Define the word "${word}" simply for a child aged 8-12. Return ONLY a valid JSON object with no markdown, no code blocks, no extra text — just the raw JSON:\n{"word":"${word}","pos":"noun","def":"a clear simple definition under 20 words","example":"a short example sentence using the word"}`}]
+        })
+      });
       const d=await r.json();
       let txt=d.content?.map(b=>b.text||'').join('').trim()||'';
-      // strip any markdown fences or extra whitespace
-      txt=txt.replace(/```json?/g,'').replace(/```/g,'').trim();
-      // extract just the JSON object if there's surrounding text
-      const jsonMatch=txt.match(/\{[\s\S]*\}/);
-      if(!jsonMatch) throw new Error('No JSON found');
-      const info=JSON.parse(jsonMatch[0]);
-      if(!info.word||!info.def) throw new Error('Invalid response');
+      txt=txt.replace(/^```json?\s*/,'').replace(/\s*```$/,'').trim();
+      const info=JSON.parse(txt);
       this.showVocab(info);
     }catch(e){
-      console.error('Vocab error:',e);
       ov.style.display='none'; ov.innerHTML='';
       this.setStatus('❌ Couldn\'t look up "'+word+'" — try again');
       toast('❌ Definition failed — check your connection');
