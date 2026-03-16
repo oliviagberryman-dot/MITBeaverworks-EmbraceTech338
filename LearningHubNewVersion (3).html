@@ -1685,7 +1685,7 @@ const RB={
     const lineWords=this.lines[this.cur].toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
     const spokenWords=this._lineAccum.replace(/[^a-z\s]/g,'').split(/\s+/);
     let bestMatch=this.wordIdx;
-    for(let li=this.wordIdx; li<lineWords.length; li++){
+   for(let li=this.wordIdx; li<Math.min(this.wordIdx+4, lineWords.length); li++){
       const lw=lineWords[li];
       if(spokenWords.some(sw=>sw===lw||(sw.length>3&&lw.length>3&&this.levenshtein(sw,lw)<=1))){
         bestMatch=li;
