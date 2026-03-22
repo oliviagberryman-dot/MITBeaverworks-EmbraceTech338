@@ -2074,6 +2074,7 @@ const RB={
       txt=txt.replace(/^```json?\s*/,'').replace(/\s*```$/,'').trim();
       const info=JSON.parse(txt);
       this.showVocab(info);
+           toast('✅ fetch worked');
     }catch(e){
       ov.style.display='none'; ov.innerHTML='';
       this.setStatus('❌ Couldn\'t look up "'+word+'" — try again');
