@@ -2134,1105 +2134,166 @@ const RB={
 /* ════════════════════════════════════
    MATH FUN ZONE
 ════════════════════════════════════ */
-/* ══ MATH FUN ZONE — FULL ENGINE (replaces const MZ={...}; block in hub) ══ */
+const MZ={
+  currentGame:null, qNum:0, TOTAL_Q:5, currentAnswer:null, answered:false,
+  currentOpts:[], score:0, streak:0, timIv:null, timeLeft:30, TIMER_MAX:30, mascot:'🐬',
 
-/* ══ MATH FUN ZONE — FULL STANDALONE ENGINE (adapted for hub) ══ */
-/* All game state, logic, and UI from math-games.html             */
+  MASCOTS:{addition:['🐬','🐳','🦈','🐙'],subtraction:['🦊','🐯','🦁','🐺'],multiply:['🦋','🐝','🐞','🦄'],division:['🐸','🦜','🐢','🦎']},
+  CORRECT:['Amazing! 🌟','You got it! 🎉','Super! ⭐','Brilliant! 🌈','Awesome! 💫','Correct! 🏆','Great job! 🎊','Fantastic! ✨'],
+  WRONG:["Not quite! Try again! 💪","Oops! Keep going! 🌟","Almost! You can do it! 🔥","Don't give up! 💛"],
+  STREAK:['','','Double! 🔥 Keep going!','Triple! 🌟 You\'re on fire!','Incredible! 4 in a row! 🏆','AMAZING! 5 in a row! 👑'],
+  WM:{zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,to:2,too:2,'for':4,won:1,ate:8},
+  GT:{addition:['addition','add','adding','plus'],subtraction:['subtraction','subtract','minus','take away'],multiply:['multiply','times','times tables','multiplication'],division:['division','divide']},
 
-'use strict';
+  onShow(){ if(!this.currentGame) setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say addition, subtraction, times tables, or division!',null,{rate:.88}),300); },
+  onHide(){ ttsStop(); clearInterval(this.timIv); },
 
-/* ─────────────────────────────────────────────────
-   THEME DATA
-───────────────────────────────────────────────── */
-const ZONES={
-  addition:   {bodyClass:'zone-add',  mascot:'🐬', bgColor:'#3eb5ff', shapes:['#b8f0ff','#d4f7c5','#a8e4ff']},
-  subtraction:{bodyClass:'zone-sub',  mascot:'🦊', bgColor:'#ff8c3d', shapes:['#ffd6b8','#ffecb8','#ffc8a8']},
-  multiply:   {bodyClass:'zone-mul',  mascot:'🦋', bgColor:'#b36bff', shapes:['#e8b8ff','#ffb8e8','#d4b8ff']},
-  division:   {bodyClass:'zone-div',  mascot:'🐸', bgColor:'#3ddc68', shapes:['#b8d8ff','#b8fff5','#b8ffc8']},
-};
-
-const MASCOTS={
-  addition:   ['🐬','🐳','🦈','🐙'],
-  subtraction:['🦊','🐯','🦁','🐺'],
-  multiply:   ['🦋','🐝','🐞','🦄'],
-  division:   ['🐸','🦜','🐢','🦎'],
-};
-
-const CORRECT_MSGS=['Amazing! 🌟','You got it! 🎉','Super! ⭐','Brilliant! 🌈','Awesome! 💫','Correct! 🏆','Great job! 🎊','Fantastic! ✨'];
-const WRONG_MSGS  =['Not quite! Try again! 💪','Oops! Keep going! 🌟','Almost! You can do it! 🔥','Don\'t give up! 💛'];
-const STREAK_MSGS =[null,null,'Double! 🔥 Keep going!','Triple! 🌟 You\'re on fire!','Incredible! 4 in a row! 🏆','AMAZING! 5 in a row! 👑'];
-
-/* ─────────────────────────────────────────────────
-   STATE
-───────────────────────────────────────────────── */
-let currentGame=null;
-let currentA=0,currentB=0;
-let qNum=0;
-const TOTAL_Q=5;
-let currentAnswer=null;
-let answered=false;
-let currentOpts=[];
-let score=0;
-let streak=0;
-// speechLock is a hub global
-let currentMascot='🐬';
-
-/* Per-game difficulty: 'easy' | 'medium' | 'hard' */
-const difficulty={addition:'easy',subtraction:'easy',multiply:'easy',division:'easy'};
-
-/* Difficulty number ranges */
-const DIFF={
-  addition:{
-    easy:  {aMin:1,  aMax:20,  bMin:1,  bMax:20},
-    medium:{aMin:10, aMax:99,  bMin:10, bMax:99},
-    hard:  {aMin:100,aMax:499, bMin:100,bMax:499},
-  },
-  subtraction:{
-    easy:  {aMin:1,  aMax:20,  bMin:1,  bMax:20},
-    medium:{aMin:10, aMax:99,  bMin:10, bMax:99},
-    hard:  {aMin:100,aMax:499, bMin:10, bMax:499},
-  },
-  multiply:{
-    easy:  {aMin:1,aMax:5,  bMin:1,bMax:5},
-    medium:{aMin:2,aMax:9,  bMin:2,bMax:9},
-    hard:  {aMin:2,aMax:12, bMin:2,bMax:12},
-  },
-  division:{
-    easy:  {aMin:1,aMax:5,  bMin:1,bMax:5},
-    medium:{aMin:2,aMax:9,  bMin:2,bMax:9},
-    hard:  {aMin:2,aMax:12, bMin:2,bMax:12},
-  },
-};
-
-function setDiff(game,level){
-  difficulty[game]=level;
-  /* Update button active states for this game */
-  document.querySelectorAll(`.diff-btn[data-game="${game}"]`).forEach(b=>{
-    b.classList.toggle('active', b.dataset.level===level);
-  });
-  /* Always start/restart that game immediately */
-  selectGame(game);
-}
-
-/* ─────────────────────────────────────────────────
-   PROFANITY FILTER
-───────────────────────────────────────────────── */
-const BAD=['fuck','fucking','shit','ass','bitch','crap','damn','cunt','dick','cock',
-  'piss','bastard','whore','slut','nigger','nigga','faggot','fag','retard',
-  'sex','porn','boobs','tit','tits','penis','vagina','naked','nude',
-  'drugs','weed','cocaine','heroin','gun','shoot','bomb','kill','murder','hate','racist','abuse'];
-const BR=new RegExp('\\b('+BAD.map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\\b','gi');
-function hasBad(t){BR.lastIndex=0;return BR.test(t);}
-function safe(t){if(!t||!t.trim())return '';BR.lastIndex=0;if(hasBad(t))return '😊';return t.replace(/[^a-zA-Z0-9 \'\-]/g,'').trim();}
-
-/* ─────────────────────────────────────────────────
-   SPEECH SYNTHESIS
-───────────────────────────────────────────────── */
-function ttsSpeak(text,onEnd){
-  if(!window.speechSynthesis){if(onEnd)onEnd();return;}
-  window.speechSynthesis.cancel();
-  speechLock=true;
-  const u=new SpeechSynthesisUtterance(text);
-  u.rate=.88;u.pitch=1.15;u.lang='en-US';
-  u.onend=()=>{speechLock=false;if(onEnd)onEnd();};
-  u.onerror=()=>{speechLock=false;if(onEnd)onEnd();};
-  window.speechSynthesis.ttsSpeak(u);
-}
-
-/* ─────────────────────────────────────────────────
-   WORD → NUMBER
-───────────────────────────────────────────────── */
-const WM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
-  eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,
-  eighteen:18,nineteen:19,twenty:20,'twenty-one':21,'twenty-two':22,'twenty-three':23,
-  'twenty-four':24,'twenty-five':25,'twenty-six':26,'twenty-seven':27,'twenty-eight':28,
-  'twenty-nine':29,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,
-  hundred:100,to:2,too:2,'for':4,won:1,ate:8,tree:3,free:3,nein:9,oh:0,'a':1};
-function parseNum(t){
-  const r=t.trim().toLowerCase();
-  const m=r.match(/\b(\d{1,4})\b/);if(m)return parseInt(m[1]);
-  if(WM[r]!==undefined)return WM[r];
-  const p=r.split(/[\s\-]+/);
-  if(p.length===2){const d=WM[p[0]],u=WM[p[1]];if(d!==undefined&&u!==undefined&&d>=20&&u<10)return d+u;}
-  for(const w of p){if(WM[w]!==undefined)return WM[w];}
-  return null;
-}
-
-/* ─────────────────────────────────────────────────
-   VOICE COMMAND DETECTION
-───────────────────────────────────────────────── */
-const GT={
-  addition:   ['addition','add','adding','plus','water','dolphin'],
-  subtraction:['subtraction','subtract','minus','take away','lava','fox'],
-  multiply:   ['multiply','times','times tables','multiplication','storm','butterfly'],
-  division:   ['division','divide','rainbow','frog'],
-};
-const AGAIN_T=['play again','again','another','yes','yep','yeah','restart','go'];
-const DIFF_T =['different','another game','switch','change','new game'];
-
-function detectGame(t){const s=t.toLowerCase();for(const[g,arr]of Object.entries(GT)){for(const x of arr){if(s.includes(x))return g;}}return null;}
-function detectAgain(t){return AGAIN_T.some(x=>t.toLowerCase().includes(x));}
-function detectDiff(t){return DIFF_T.some(x=>t.toLowerCase().includes(x));}
-
-/* ─────────────────────────────────────────────────
-   MICROPHONE — ONE-TIME PERMISSION
-───────────────────────────────────────────────── */
-
-
-
-async function grantPermission(){
-  try{
-    const s=await navigator.mediaDevices.getUserMedia({audio:true});
-    s.getTracks().forEach(t=>t.stop());
-    try{localStorage.setItem(MIC_KEY,'1');}catch(e){}
-    hidePerm();
-    initRecog();
-  }catch(e){
-    document.querySelector('#perm-screen p').textContent=
-      '⚠️ Microphone blocked. Please check your browser settings and try again.';
-  }
-}
-
-
-
-    if(perm.state==='granted'){
-      try{localStorage.setItem(MIC_KEY,'1');}catch(e){}
-      hidePerm();initRecog();return;
+  onSpeech(raw){
+    if(speechLock) return;
+    const lo=raw.toLowerCase();
+    // end screen nav
+    if(this.qNum>=this.TOTAL_Q||!this.currentGame){
+      if(/\b(play again|again|another|yes)\b/.test(lo)){ if(this.currentGame) this.selectGame(this.currentGame); return; }
+      if(/\b(different|switch|change|new game)\b/.test(lo)){ this.pickDiff(); return; }
     }
-  }catch(e){}
-
-  /* 3. Otherwise show the one-time permission screen */
-});
-
-function initRecog(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){mzSetVoiceBox('Use Chrome or Edge for voice!','bad','🚫','No mic');return;}
-  recog=new SR();
-  recog.lang='en-US';recog.continuous=true;recog.interimResults=true;recog.maxAlternatives=3;
-  recog.onstart=()=>{micOn=true;setMicOn(true);mzSetVoiceBox('Listening… say your answer!','interim','🎙️','Ready');};
-  recog.onresult=(e)=>{
-    let interim='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const r=e.results[i];
-      if(!r.isFinal){
-        interim=r[0].transcript.trim();
-        /* Show live interim text + pre-highlight matching card */
-        if(interim){
-          const s=safe(interim);
-          if(s) mzSetVoiceBox(s,'interim','🎙️','Hearing…');
-          /* Pre-highlight card if a number is already detectable */
-          if(currentGame&&!answered&&currentAnswer!==null){
-            const preVal=parseNum(interim);
-            document.querySelectorAll('.ans-card').forEach(b=>{
-              b.classList.remove('voice-hi');
-              if(preVal!==null&&parseInt(b.dataset.val)===preVal)b.classList.add('voice-hi');
-            });
-          }
-        }
-        continue;
-      }
-      mzProcessTranscript(r[0].transcript.trim());
+    // game switch
+    for(const[g,arr] of Object.entries(this.GT)){ if(arr.some(x=>lo.includes(x))){ this.animCard(g); setTimeout(()=>this.selectGame(g),420); return; } }
+    // answer
+    if(this.currentGame&&!this.answered&&this.currentAnswer!==null){
+      const val=this.parseNum(raw);
+      if(val!==null&&this.currentOpts.includes(val)) this.voiceAns(val);
     }
-    /* Update header heard text too */
-    if(interim){const s=safe(interim);const el=document.getElementById('heard-txt');if(el&&s)el.textContent=s;}
-  };
-  recog.onerror=(e)=>{
-    if(e.error==='no-speech'||e.error==='aborted')return;
-    micOn=false;
-    mzSetVoiceBox('Reconnecting mic…','interim','🔄','Wait…');
-    setTimeout(startMic,1500);
-  };
-  recog.onend=()=>{
-    micOn=false;setMicOn(false);
-    mzSetVoiceBox('Restarting mic…','interim','🔄','…');
-    setTimeout(startMic,300);
-  };
-  startMic();
-  setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say a game name to start — try addition, subtraction, times tables, or division!'),700);
-}
+  },
 
+  animCard(g){
+    document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-vsel'));
+    const b=document.getElementById('mz-btn-'+g); if(b) b.classList.add('mz-vsel');
+    setTimeout(()=>document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-vsel')),480);
+  },
+  pickDiff(){ const gs=['addition','subtraction','multiply','division']; this.selectGame(gs.find(g=>g!==this.currentGame)||'addition'); },
 
+  selectGame(game){
+    clearInterval(this.timIv);
+    document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-sel'));
+    const gb=document.getElementById('mz-btn-'+game); if(gb) gb.classList.add('mz-sel');
+    this.currentGame=game; this.qNum=0; this.score=0; this.streak=0;
+    const pool=this.MASCOTS[game]||['🐬'];
+    this.mascot=pool[Math.floor(Math.random()*pool.length)];
+    this.renderQ();
+  },
 
+  rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; },
+  sh(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; },
+  makeOpts(correct,cnt,minV,maxV,step){
+    const s=new Set([correct]); let t=0;
+    while(s.size<cnt&&t<300){ t++; const d=this.rnd(1,step)*(Math.random()>.5?1:-1); const c=correct+d; if(c>=minV&&c<=maxV&&!s.has(c)) s.add(c); }
+    let c=correct+1; while(s.size<cnt){ if(!s.has(c)&&c>=minV) s.add(c); c++; }
+    return this.sh([...s]);
+  },
+  parseNum(t){
+    const r=t.trim().toLowerCase(); const m=r.match(/\b(\d{1,4})\b/); if(m) return parseInt(m[1]);
+    if(this.WM[r]!==undefined) return this.WM[r];
+    const p=r.split(/[\s\-]+/);
+    if(p.length===2){ const d=this.WM[p[0]],u=this.WM[p[1]]; if(d!==undefined&&u!==undefined&&d>=20&&u<10) return d+u; }
+    for(const w of p){ if(this.WM[w]!==undefined) return this.WM[w]; }
+    return null;
+  },
 
+  renderQ(){
+    if(this.qNum>=this.TOTAL_Q){ this.endScreen(); return; }
+    this.answered=false; this.currentAnswer=null;
+    let a,b,ans,sym,word;
+    if(this.currentGame==='addition')     { a=this.rnd(10,499);b=this.rnd(10,499);ans=a+b;sym='➕';word='plus'; }
+    else if(this.currentGame==='subtraction'){ b=this.rnd(10,499);a=b+this.rnd(10,499);ans=a-b;sym='➖';word='minus'; }
+    else if(this.currentGame==='multiply')   { a=this.rnd(2,12);b=this.rnd(2,12);ans=a*b;sym='✖️';word='times'; }
+    else { b=this.rnd(2,12);ans=this.rnd(2,12);a=b*ans;sym='➗';word='divided by'; }
+    this.currentAnswer=ans;
+    const minD=this.currentGame==='division'?Math.max(1,ans-6):this.currentGame==='multiply'?Math.max(4,ans-12):Math.max(0,ans-25);
+    const maxD=this.currentGame==='division'?ans+6:this.currentGame==='multiply'?ans+12:ans+25;
+    const opts=this.makeOpts(ans,4,minD,maxD,this.currentGame==='division'?5:this.currentGame==='multiply'?10:18);
+    this.currentOpts=opts;
+    const dots=Array.from({length:this.TOTAL_Q},(_,i)=>`<div class="mz-dot ${i<this.qNum?'done':i===this.qNum?'cur':''}"></div>`).join('');
+    document.getElementById('mz-panel').innerHTML=`
+      <div class="mz-celeb" id="mz-celeb"><div class="mz-celeb-msg" id="mz-celeb-msg"></div></div>
+      <div class="mz-mascot-row"><div class="mz-mascot" id="mz-mascot">${this.mascot}</div><div class="mz-speech" id="mz-speech">What is the answer? 🤔</div></div>
+      <div class="mz-q-box"><div class="mz-q-text"><span class="mz-n1">${a}</span><span class="mz-op">${sym}</span><span class="mz-n2">${b}</span><span class="mz-op">=</span><span class="mz-qmark">?</span></div><div class="mz-timer-wrap"><div class="mz-timer-bar" id="mz-timer-bar" style="width:100%"></div></div></div>
+      <div class="mz-answers">${opts.map(o=>`<button class="mz-ans" data-val="${o}" onclick="MZ.voiceAns(${o})">${o}</button>`).join('')}</div>
+      <div class="mz-wrong-msg" id="mz-wrong-msg"></div>
+      <div class="mz-v-hint">🗣️ Say your answer — or say "addition", "subtraction", "times tables", "division"</div>
+      <div class="mz-dots">${dots}</div>`;
+    this.startTimer();
+    setTimeout(()=>ttsSpeak(`What is ${a} ${word} ${b}?`,null,{rate:.88,pitch:1.15}),250);
+  },
 
-/* Update the big in-game voice feedback box */
-function mzSetVoiceBox(text,style,icon,status){
-  const box=document.getElementById('voice-feedback');
-  const word=document.getElementById('vf-word');
-  const mic=document.getElementById('vf-mic');
-  const stat=document.getElementById('vf-status');
-  if(!box||!word)return;
-  /* update header too */
-  const el=document.getElementById('heard-txt');
-  BR.lastIndex=0;
-  const clean=hasBad(text)?'😊':text;
-  if(el)el.textContent=clean;
-  /* update feedback box */
-  word.textContent=clean;
-  word.className='vf-word '+(style||'interim');
-  if(mic)mic.textContent=icon||'🎙️';
-  if(stat)stat.innerHTML=status||'';
-  box.className='voice-feedback '+(style==='final'?'heard-active':style==='bad'?'bad':'listening');
-}
+  voiceAns(val){
+    if(this.answered) return;
+    document.querySelectorAll('.mz-ans').forEach(b=>{b.classList.remove('mz-vhi');if(parseInt(b.dataset.val)===val)b.classList.add('mz-vhi');});
+    setTimeout(()=>{ const btn=Array.from(document.querySelectorAll('.mz-ans')).find(b=>parseInt(b.dataset.val)===val); if(btn) this.checkAns(val,btn); },300);
+  },
 
-
-  el.textContent=t||'…';
-}
-
-/* ─────────────────────────────────────────────────
-   TRANSCRIPT PROCESSING
-───────────────────────────────────────────────── */
-function mzProcessTranscript(raw){
-  if(speechLock)return;
-  const s=safe(raw);
-  const low=raw.toLowerCase().trim();
-
-
-  /* ── Difficulty voice commands ── */
-  /* Detects game + level in any order, e.g:
-     "addition easy", "easy addition", "add it up hard",
-     "medium times tables", "division hard level", "easy level subtraction" */
-  const GAME_WORDS={
-    addition:   ['addition','add it up','add','adding','plus','water','dolphin'],
-    subtraction:['subtraction','take away','subtract','minus','lava','fox'],
-    multiply:   ['times tables','times table','multiply','multiplication','storm','butterfly'],
-    division:   ['division','divide','rainbow','frog'],
-  };
-  const LEVEL_WORDS={
-    easy:  ['easy','simple','beginner','level 1','level one'],
-    medium:['medium','middle','normal','level 2','level two'],
-    hard:  ['hard','difficult','tricky','advanced','level 3','level three'],
-  };
-  let foundGame=null, foundLevel=null;
-  for(const[g,words] of Object.entries(GAME_WORDS)){
-    if(words.some(w=>low.includes(w))){foundGame=g;break;}
-  }
-  for(const[l,words] of Object.entries(LEVEL_WORDS)){
-    if(words.some(w=>low.includes(w))){foundLevel=l;break;}
-  }
-  if(foundGame&&foundLevel){
-    setDiff(foundGame,foundLevel);
-    const gName={addition:'Add It Up',subtraction:'Take Away',multiply:'Times Tables',division:'Divide It'}[foundGame];
-    const lEmoji={easy:'🟢',medium:'🟡',hard:'🔴'}[foundLevel];
-    mzSetVoiceBox(`${gName}: ${foundLevel}`,'final',lEmoji,`${lEmoji} ${foundLevel.charAt(0).toUpperCase()+foundLevel.slice(1)}`);
-    return;
-  }
-  /* Saying just a level while a game is active changes that game's difficulty */
-  if(foundLevel&&currentGame&&!foundGame){
-    setDiff(currentGame,foundLevel);
-    const lEmoji={easy:'🟢',medium:'🟡',hard:'🔴'}[foundLevel];
-    mzSetVoiceBox(`Level: ${foundLevel}`,'final',lEmoji,`${lEmoji} ${foundLevel.charAt(0).toUpperCase()+foundLevel.slice(1)}`);
-    return;
-  }
-
-  /* ── Column box voice — addition/subtraction only ── */
-  if(currentGame==='addition'||currentGame==='subtraction'){
-
-    /* Explicit column name: "hundreds 3", "tens 5", "units 7", "ones 2" */
-    const colMatch=low.match(/\b(hundreds?|tens?|units?|ones?)\s+(\w+)/);
-    if(colMatch){
-      const colWord=colMatch[1].replace(/s$/,'');
-      const colKey=colWord==='hundred'?'h':colWord==='ten'?'t':'u';
-      const digit=parseNum(colMatch[2]);
-      if(digit!==null&&digit>=0&&digit<=9){
-        activeAnsBox=colKey;
-        pickDigit(digit);
-        mzSetVoiceBox(BOX_NAMES[colKey]+': '+digit,'final','✏️',BOX_NAMES[colKey]+'<br><strong>'+digit+'</strong>');
-        return;
-      }
-    }
-
-    /* Bare number — goes into whichever box is currently active */
-    if(activeAnsBox&&!answered){
-      const digit=parseNum(low);
-      if(digit!==null&&digit>=0&&digit<=9){
-        const colName=BOX_NAMES[activeAnsBox];
-        mzSetVoiceBox(colName+': '+digit,'final','✏️',colName+'<br><strong>'+digit+'</strong>');
-        pickDigit(digit);
-        return;
-      }
-    }
-  }
-
-  /* End screen commands */
-  if(!currentGame||qNum>=TOTAL_Q){
-    if(detectDiff(raw)){mzSetVoiceBox('Switching game!','final','🔀','OK!');pickDiff();return;}
-    if(detectAgain(raw)){mzSetVoiceBox('Here we go again!','final','🔁','OK!');selectGame(currentGame||'addition');return;}
-  }
-
-  /* Game switch — works any time */
-  const gc=detectGame(raw);
-  if(gc){
-    const gcNames={addition:'Addition!',subtraction:'Subtraction!',multiply:'Times Tables!',division:'Division!'};
-    mzSetVoiceBox(gcNames[gc],'final','🎮','Switching!');
-    document.querySelectorAll('.game-card').forEach(b=>b.classList.remove('voice-sel'));
-    const tb=document.getElementById('btn-'+gc);
-    if(tb)tb.classList.add('voice-sel');
-    setTimeout(()=>{document.querySelectorAll('.game-card').forEach(b=>b.classList.remove('voice-sel'));selectGame(gc);},480);
-    return;
-  }
-
-  /* Answer (multiply / division, or addition/subtraction after all boxes filled) */
-  if(currentGame&&!answered&&currentAnswer!==null){
-    const val=parseNum(raw);
-    if(val!==null&&currentOpts.includes(val)){
-      mzSetVoiceBox(String(val),'final','✅',`I heard<br><strong>${val}</strong>`);
-      voiceAnswer(val,raw);
-    } else if(val!==null){
-      mzSetVoiceBox(`${s||val}?`,'interim','🤔','Try one of\nthe cards!');
-      setHeard(`${s||val} — not an option!`);
+  checkAns(val,btn){
+    if(this.answered) return;
+    this.answered=true; clearInterval(this.timIv);
+    document.querySelectorAll('.mz-ans').forEach(b=>{b.classList.remove('mz-vhi');b.onclick=null;});
+    const mascot=document.getElementById('mz-mascot'), speech=document.getElementById('mz-speech');
+    if(val===this.currentAnswer){
+      btn.classList.add('mz-correct'); this.streak++;
+      this.score+=this.streak>=5?20:this.streak>=3?15:10;
+      const msg=this.STREAK[Math.min(this.streak,5)]||this.CORRECT[Math.floor(Math.random()*this.CORRECT.length)];
+      if(speech) speech.textContent=msg;
+      if(mascot){ mascot.classList.remove('sad'); void mascot.offsetWidth; mascot.classList.add('cheer'); }
+      const cel=document.getElementById('mz-celeb'),cm=document.getElementById('mz-celeb-msg');
+      if(cel&&cm){ cm.textContent=msg; cel.classList.add('show'); setTimeout(()=>cel.classList.remove('show'),1100); }
+      confetti();
+      ttsSpeak(msg.replace(/[^\w\s!]/g,''),()=>{ this.qNum++; this.renderQ(); },{rate:.88,pitch:1.15});
     } else {
-      mzSetVoiceBox(s||'…','interim','🎙️','Say a\nnumber!');
-      setHeard(s||'…');
+      btn.classList.add('mz-wrong');
+      document.querySelectorAll('.mz-ans').forEach(b=>{ if(parseInt(b.dataset.val)===this.currentAnswer) b.classList.add('mz-correct'); });
+      this.streak=0;
+      const wm=this.WRONG[Math.floor(Math.random()*this.WRONG.length)];
+      if(speech) speech.textContent='The answer was '+this.currentAnswer+'! '+wm;
+      if(mascot){ mascot.classList.remove('cheer'); void mascot.offsetWidth; mascot.classList.add('sad'); }
+      const wmEl=document.getElementById('mz-wrong-msg'); if(wmEl) wmEl.textContent='The answer was '+this.currentAnswer+' 💪';
+      ttsSpeak('Not quite! The answer was '+this.currentAnswer+'. '+wm.replace(/[^\w\s!]/g,''),()=>{ this.qNum++; this.renderQ(); },{rate:.88});
     }
-  } else {
-    mzSetVoiceBox(s||'…','interim','🎙️','Listening…');
-    setHeard(s||'…');
-  }
-}
-
-function voiceAnswer(val,rawText){
-  if(answered)return;
-  /* Highlight matching card strongly */
-  document.querySelectorAll('.ans-card').forEach(b=>{
-    b.classList.remove('voice-hi');
-    if(parseInt(b.dataset.val)===val)b.classList.add('voice-hi');
-  });
-  setTimeout(()=>{
-    const btn=Array.from(document.querySelectorAll('.ans-card')).find(b=>parseInt(b.dataset.val)===val);
-    if(btn)checkAnswer(val,btn);
-  },380);
-}
-
-/* ─────────────────────────────────────────────────
-   BACKGROUND SHAPES
-───────────────────────────────────────────────── */
-function buildBgShapes(){
-  const c=document.getElementById('bg-shapes');c.innerHTML='';
-  const colors=['#ffb8d4','#b8e4ff','#d4b8ff','#b8ffd4','#ffe8b8'];
-  for(let i=0;i<12;i++){
-    const el=document.createElement('div');el.className='shape';
-    const sz=30+Math.random()*80;
-    el.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;background:${colors[i%colors.length]};animation-duration:${12+Math.random()*20}s;animation-delay:${Math.random()*15}s;`;
-    c.appendChild(el);
-  }
-}
-
-/* ─────────────────────────────────────────────────
-   HUD
-───────────────────────────────────────────────── */
-function updateHUD(){
-  document.getElementById('score-val').textContent=score;
-  const sp=document.getElementById('streak-pill');
-  const sv=document.getElementById('streak-val');
-  if(streak>=2){sp.style.display='flex';sv.textContent=streak;sp.style.animation='none';void sp.offsetWidth;sp.style.animation='';}
-  else{sp.style.display='none';}
-}
-
-/* ─────────────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────────────── */
-function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
-function makeOpts(correct,count,minV,maxV,step){
-  const s=new Set([correct]);let t=0;
-  while(s.size<count&&t<300){t++;const d=rnd(1,step)*(Math.random()>.5?1:-1);const c=correct+d;if(c>=minV&&c<=maxV&&!s.has(c))s.add(c);}
-  let c=correct+1;while(s.size<count){if(!s.has(c)&&c>=minV)s.add(c);c++;}
-  return shuffle([...s]);
-}
-function mascotReact(correct){
-  const el=document.getElementById('mascot-spr');if(!el)return;
-  el.classList.remove('cheer','sad');
-  void el.offsetWidth;
-  el.classList.add(correct?'cheer':'sad');
-  setTimeout(()=>el.classList.remove('cheer','sad'),700);
-}
-function setWrongMsg(txt){
-  const el=document.getElementById('wrong-msg');if(el)el.textContent=txt;
-}
-
-/* ─────────────────────────────────────────────────
-   GAME SELECT
-───────────────────────────────────────────────── */
-function selectGame(game){
-  document.querySelectorAll('.game-card').forEach(b=>b.classList.remove('active'));
-  const gb=document.getElementById('btn-'+game);if(gb)gb.classList.add('active');
-  currentGame=game;
-  qNum=0;score=0;streak=0;
-  updateHUD();
-
-  /* Zone visual */
-  /* hub manages body class */
-
-  /* Pick a random mascot for this zone */
-  const pool=MASCOTS[game];
-  currentMascot=pool[Math.floor(Math.random()*pool.length)];
-
-  renderQuestion();
-}
-
-/* ─────────────────────────────────────────────────
-   RENDER QUESTION
-───────────────────────────────────────────────── */
-function renderQuestion(){
-  if(qNum>=TOTAL_Q){showEndScreen();return;}
-  answered=false;currentAnswer=null;
-
-  let a,b,ans,opSym,opWord;
-  const d=DIFF[currentGame][difficulty[currentGame]];
-
-  if(currentGame==='addition'){
-    a=rnd(d.aMin,d.aMax);b=rnd(d.bMin,d.bMax);
-    ans=a+b;opSym='➕';opWord='plus';
-  }else if(currentGame==='subtraction'){
-    b=rnd(d.bMin,d.bMax);
-    a=b+rnd(d.aMin,d.aMax); // ensure a>b always
-    ans=a-b;opSym='➖';opWord='minus';
-  }else if(currentGame==='multiply'){
-    a=rnd(d.aMin,d.aMax);b=rnd(d.bMin,d.bMax);
-    ans=a*b;opSym='✖️';opWord='times';
-  }else{
-    b=rnd(d.bMin,d.bMax);ans=rnd(d.aMin,d.aMax);
-    a=b*ans;opSym='➗';opWord='divided by';
-  }
-  currentAnswer=ans;
-  currentA=a; currentB=b;
-
-  const minD=currentGame==='division'?Math.max(1,ans-6):currentGame==='multiply'?Math.max(4,ans-12):Math.max(0,ans-25);
-  const maxD=currentGame==='division'?ans+6:currentGame==='multiply'?ans+12:ans+25;
-  const step=currentGame==='division'?5:currentGame==='multiply'?10:18;
-  const opts=makeOpts(ans,4,minD,maxD,step);
-  currentOpts=opts;
-
-  const dotsHTML=Array.from({length:TOTAL_Q},(_,i)=>`<div class="dot ${i<qNum?'done':i===qNum?'cur':''}"></div>`).join('');
-
-  document.getElementById('game-panel').innerHTML=`
-    <div id="celeb-overlay"><div class="celeb-msg" id="celeb-msg"></div></div>
-
-    <div class="panel-cols">
-
-      <!-- ── LEFT: Work area ── -->
-      <div class="work-col" id="work-col">
-        <div class="work-col-title">✏️ Work it out!
-          <span style="margin-left:auto;font-size:.7rem;padding:.15rem .5rem;border-radius:6px;font-family:'Nunito',sans-serif;font-weight:900;${
-            difficulty[currentGame]==='easy'  ?'background:#d4ffd4;color:#007020':
-            difficulty[currentGame]==='medium'?'background:#fff8c0;color:#886000':
-                                               'background:#ffd4d4;color:#c00000'
-          }">${
-            difficulty[currentGame]==='easy'?'🟢 Easy':
-            difficulty[currentGame]==='medium'?'🟡 Medium':'🔴 Hard'
-          }</span>
-        </div>
-        ${buildWorkArea(a,b,opSym)}
-      </div>
-
-      <!-- ── RIGHT: Question + answers ── -->
-      <div class="question-col">
-
-        <div class="mascot-row">
-          <div class="mascot" id="mascot-spr">${currentMascot}</div>
-          <div class="speech-bubble" id="speech-bub">What is the answer? 🤔</div>
-        </div>
-
-        <div class="q-box">
-          <div class="q-text">
-            <span class="n1">${a}</span>
-            <span class="op">${opSym}</span>
-            <span class="n2">${b}</span>
-            <span class="op">=</span>
-            <span class="qmark">?</span>
-          </div>
-        </div>
-
-        <div class="answers">
-          ${opts.map(o=>`<button class="ans-card" data-val="${o}" onclick="voiceAnswer(${o},'${o}')">${o}</button>`).join('')}
-        </div>
-
-        <div class="wrong-msg" id="wrong-msg"></div>
-
-        <div class="voice-feedback listening" id="voice-feedback">
-          <div class="vf-mic" id="vf-mic">🎙️</div>
-          <div class="vf-word interim" id="vf-word">Listening… say your answer!</div>
-          <div class="vf-status" id="vf-status">🗣️ Say a<br>number</div>
-        </div>
-
-        <div class="dots">${dotsHTML}</div>
-        <div class="v-hint">💡 Or say "addition" · "subtraction" · "times tables" · "division"</div>
-
-      </div><!-- /question-col -->
-    </div><!-- /panel-cols -->
-  `;
-
-  setTimeout(()=>ttsSpeak(`What is ${a} ${opWord} ${b}?`),250);
-  if(currentGame==='addition'||currentGame==='subtraction') initBoxesAfterRender();
-}
-
-/* ─────────────────────────────────────────────────
-   BUILD WORK AREA (left panel content)
-───────────────────────────────────────────────── */
-function buildWorkArea(a,b,opSym){
-  if(currentGame==='addition'||currentGame==='subtraction'){
-    return buildColumnMath(a,b,opSym);
-  } else if(currentGame==='multiply'){
-    return buildTimesVisual(a,b);
-  } else {
-    return buildDivVisual(a,b,currentAnswer);
-  }
-}
-
-/* Pad number into H/T/U digit array, max 3 digits */
-function digits(n){
-  const s=String(n).padStart(3,'0');
-  return [s[0],s[1],s[2]];
-}
-
-function buildColumnMath(a,b,sym){
-  const da=digits(a), db=digits(b);
-  const symChar=currentGame==='addition'?'+':'−';
-  const cols=['H','T','U'];
-
-  // ── Compute carries for addition ──
-  let carries={h:0,t:0,u:0};
-  if(currentGame==='addition'){
-    const uSum=(a%10)+(b%10);
-    const uCarry=Math.floor(uSum/10);
-    const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry;
-    const tCarry=Math.floor(tSum/10);
-    carries={h:tCarry,t:uCarry,u:0};
-  }
-
-  // ── Compute borrows for subtraction ──
-  let borrows={h:{},t:{},u:{}};
-  if(currentGame==='subtraction'){
-    const uA=a%10, uB=b%10;
-    const tA=Math.floor((a%100)/10), tB=Math.floor((b%100)/10);
-    const hA=Math.floor(a/100);
-    const needUBorrow=uA<uB;
-    const needTBorrow=(tA-(needUBorrow?1:0))<tB;
-    if(needUBorrow){
-      // tens column lent 1 — show crossed-out original and new reduced digit
-      borrows.t.lent=true;
-      borrows.t.originalDigit=tA;
-      borrows.t.newDigit=tA-1;
-      // units column received — show crossed-out original and new boosted digit
-      borrows.u.received=true;
-      borrows.u.originalDigit=uA;
-      borrows.u.newDigit=uA+10;
-    }
-    if(needTBorrow){
-      // hundreds column lent 1
-      borrows.h.lent=true;
-      borrows.h.originalDigit=hA;
-      borrows.h.newDigit=hA-1;
-      // tens column received — its effective digit after borrow & possible lending
-      const tEffective=(needUBorrow?tA-1:tA)+10;
-      borrows.t.received=true;
-      borrows.t.originalDigit=borrows.t.originalDigit!==undefined?borrows.t.originalDigit:tA;
-      borrows.t.newDigit=tEffective;
-    }
-  }
-
-  // ── Header: H T U labels ──
-  const headerRow=`<div class="col-row" style="margin-bottom:.1rem">
-    <div class="col-label" style="width:28px"></div>
-    ${cols.map(c=>`<div class="col-label">${c}</div>`).join('')}
-  </div>`;
-
-  // ── Carry/borrow row above top number ──
-  let carryRowHtml;
-  if(currentGame==='addition'){
-    carryRowHtml=`<div class="carry-row">
-      <div class="carry-bubble empty-carry"></div>
-      ${['h','t','u'].map(col=>{
-        const v=carries[col];
-        if(v===1) return `<div class="carry-bubble"><div class="carry-val">+1</div></div>`;
-        return `<div class="carry-bubble"></div>`;
-      }).join('')}
-    </div>`;
-  } else {
-    // Subtraction: show crossed-out + new digit above both lender AND receiver columns
-    carryRowHtml=`<div class="carry-row">
-      <div class="carry-bubble empty-carry"></div>
-      ${['h','t','u'].map(col=>{
-        const borrow=borrows[col];
-        if(borrow.lent){
-          // Lender: crossed-out original, new reduced digit
-          return `<div class="carry-bubble">
-            <div class="carry-lent">
-              <span class="carry-cross">${borrow.originalDigit}</span>
-              <span class="carry-new">${borrow.newDigit}</span>
-            </div>
-          </div>`;
-        }
-        if(borrow.received){
-          // Receiver: crossed-out original, new boosted digit (e.g. 3 → 13)
-          return `<div class="carry-bubble">
-            <div class="carry-lent">
-              <span class="carry-cross">${borrow.originalDigit}</span>
-              <span class="carry-new carry-new-received">${borrow.newDigit}</span>
-            </div>
-          </div>`;
-        }
-        return `<div class="carry-bubble"></div>`;
-      }).join('')}
-    </div>`;
-  }
-
-  // ── Helper: digit with leading-zero suppression ──
-  function digitSpan(digArr,val){
-    return digArr.map((d,i)=>{
-      const leading=val<Math.pow(10,2-i);
-      const cls=['h','t','u'][i];
-      return `<div class="col-digit ${cls}${leading?' empty':''}">${leading?'':d}</div>`;
-    }).join('');
-  }
-
-  const topRow=`<div class="col-row">
-    <div style="width:28px"></div>
-    ${digitSpan(da,a)}
-  </div>`;
-
-  const botRow=`<div class="col-row col-op-row">
-    <div class="col-op-sym">${symChar}</div>
-    ${digitSpan(db,b)}
-  </div>`;
-
-  // ── Answer row: blank dashed boxes ──
-  const ansRow=`<div class="col-row" style="margin-top:.3rem" id="ans-row">
-    <div style="width:28px"></div>
-    ${['h','t','u'].map((cls,i)=>`
-      <div class="col-digit ${cls} ans-blank" id="ans-box-${cls}"
-           onclick="fillAnsBox('${cls}')"
-           title="${['Hundreds','Tens','Units'][i]}">
-        <span class="blank-line">?</span>
-      </div>`).join('')}
-  </div>`;
-
-  // ── Digit strip (shown below, updates which column is active) ──
-  const digitStrip=`
-    <div class="digit-strip-row" id="digit-strip">
-      <span class="ds-label">👉 Say or tap for <span id="ds-col-name" style="color:var(--blue2)">Units</span>:</span>
-      ${[0,1,2,3,4,5,6,7,8,9].map(d=>`
-        <button class="ds-btn" onclick="pickDigit(${d})">${d}</button>
-      `).join('')}
-    </div>`;
-
-  return `
-    <div class="col-math">
-      <div class="col-math-title">Column method — tap a digit for each box!</div>
-      <div class="col-math-grid">
-        ${headerRow}
-        ${carryRowHtml}
-        ${topRow}
-        ${botRow}
-        <div style="border-top:3px solid var(--purple2);margin:.2rem 0"></div>
-        ${ansRow}
-        ${digitStrip}
-      </div>
-      <div style="font-size:.7rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.35rem">
-        🗣️ Just say the digit — or say <em>"hundreds 3"</em> · <em>"tens 5"</em> · <em>"units 7"</em>
-      </div>
-    </div>
-    ${buildScratch()}
-  `;
-}
-
-function buildTimesVisual(a,b){
-  // Show a×b as b groups of a dots (cap display at 12×12=144, use smaller dots if big)
-  const total=a*b;
-  const dotSize=total>60?8:12;
-  let html='';
-  for(let g=0;g<b;g++){
-    if(g>0) html+=`<div class="times-group-sep"></div>`;
-    for(let d=0;d<a;d++){
-      html+=`<div class="tdot" style="width:${dotSize}px;height:${dotSize}px;animation-delay:${(g*a+d)*20}ms"></div>`;
-    }
-  }
-  return `
-    <div class="times-grid">
-      <div class="times-grid-title">${b} groups of ${a}</div>
-      <div class="times-dots">${html}</div>
-      <div style="text-align:center;font-size:.8rem;font-weight:900;color:var(--purple2);margin-top:.5rem">${b} × ${a} = ?</div>
-    </div>
-    ${buildScratch()}
-  `;
-}
-
-function buildDivVisual(a,b,ans){
-  // Show a ÷ b as "a" dots split into "b" equal groups
-  const cap=Math.min(a,48); // don't overwhelm with huge numbers
-  const dotSize=a>30?8:11;
-  let groups='';
-  for(let g=0;g<b;g++){
-    let dots='';
-    for(let d=0;d<ans&&d<8;d++) dots+=`<div class="div-dot" style="width:${dotSize}px;height:${dotSize}px"></div>`;
-    if(ans>8) dots+=`<div style="font-size:.6rem;font-weight:900;color:#aaa">+${ans-8}</div>`;
-    groups+=`<div class="div-group">${dots}</div>`;
-  }
-  return `
-    <div class="div-visual">
-      <div class="times-grid-title">${a} shared into ${b} groups</div>
-      <div class="div-groups">${groups}</div>
-      <div style="text-align:center;font-size:.8rem;font-weight:900;color:var(--purple2);margin-top:.5rem">${a} ÷ ${b} = ?</div>
-    </div>
-    ${buildScratch()}
-  `;
-}
-
-function buildScratch(){
-  return '';
-}
-
-function addToScratch(n){
-  const pad=document.getElementById('scratch-pad');
-  if(!pad)return;
-  const el=document.createElement('div');
-  el.className='scratch-num';
-  el.textContent=n;
-  el.onclick=()=>el.remove();
-  pad.appendChild(el);
-}
-
-function clearScratch(){
-  const pad=document.getElementById('scratch-pad');
-  if(!pad)return;
-  const lbl=pad.querySelector('.scratch-pad-label');
-  pad.innerHTML='';
-  if(lbl)pad.appendChild(lbl);
-}
-
-/* ── Column answer box filling ── */
-// Order: Units first, then Tens, then Hundreds
-const BOX_ORDER=['u','t','h'];
-const BOX_NAMES={h:'Hundreds',t:'Tens',u:'Units'};
-let activeAnsBox='u'; // start at units
-
-function initAnsBoxes(){
-  // highlight units first
-  activeAnsBox='u';
-  BOX_ORDER.forEach(col=>{
-    const b=document.getElementById('ans-box-'+col);
-    if(b) b.classList.remove('active-box');
-  });
-  const first=document.getElementById('ans-box-u');
-  if(first) first.classList.add('active-box');
-  updateStripLabel();
-}
-
-function updateStripLabel(){
-  const el=document.getElementById('ds-col-name');
-  if(el) el.textContent=BOX_NAMES[activeAnsBox]||'';
-}
-
-function fillAnsBox(col){
-  // Tapping a box directly sets it as the active one
-  activeAnsBox=col;
-  BOX_ORDER.forEach(c=>{
-    const b=document.getElementById('ans-box-'+c);
-    if(b) b.classList.remove('active-box');
-  });
-  const box=document.getElementById('ans-box-'+col);
-  if(box) box.classList.add('active-box');
-  updateStripLabel();
-}
-
-function pickDigit(d){
-  // Fill the currently active box, then advance to next empty one
-  if(!activeAnsBox) return;
-  setAnsBox(activeAnsBox, d);
-  // Find the next unfilled box in order
-  const nextCol = BOX_ORDER.find(col=>{
-    if(col===activeAnsBox) return false;
-    const b=document.getElementById('ans-box-'+col);
-    return b && !b.classList.contains('filled');
-  });
-  BOX_ORDER.forEach(c=>{
-    const b=document.getElementById('ans-box-'+c);
-    if(b) b.classList.remove('active-box');
-  });
-  if(nextCol){
-    activeAnsBox=nextCol;
-    const nb=document.getElementById('ans-box-'+nextCol);
-    if(nb) nb.classList.add('active-box');
-    updateStripLabel();
-  } else {
-    activeAnsBox=null;
-    const strip=document.getElementById('digit-strip');
-    if(strip){
-      strip.style.opacity='.4';
-      strip.style.pointerEvents='none';
-    }
-  }
-}
-
-function setAnsBox(col,digit){
-  const box=document.getElementById('ans-box-'+col);
-  if(!box)return;
-  box.classList.remove('active-box');
-  box.classList.add('filled');
-  box.innerHTML=`<span class="blank-line">${digit}</span>`;
-  // Re-tapping a filled box re-activates it
-  box.onclick=()=>fillAnsBox(col);
-}
-
-// Called after render to set initial active box
-function initBoxesAfterRender(){
-  requestAnimationFrame(()=>{
-    if(document.getElementById('ans-box-u')) initAnsBoxes();
-  });
-}
-
-
-/* ─────────────────────────────────────────────────
-   CHECK ANSWER
-───────────────────────────────────────────────── */
-function checkAnswer(val,btn){
-  if(answered)return;
-  answered=true;
-  document.querySelectorAll('.ans-card').forEach(b=>{b.classList.remove('voice-hi');b.onclick=null;});
-
-  if(val===currentAnswer){
-    /* CORRECT */
-    btn.classList.add('correct');
-    streak++;
-    score+=10+(streak>1?Math.min((streak-1)*5,20):0);
-    updateHUD();
-    mascotReact(true);
-
-    /* Bubble update */
-    const msg=CORRECT_MSGS[Math.floor(Math.random()*CORRECT_MSGS.length)];
-    const streakMsg=streak>=2&&streak<STREAK_MSGS.length?STREAK_MSGS[streak]:null;
-    const displayMsg=streakMsg||msg;
-    const bub=document.getElementById('speech-bub');
-    if(bub)bub.textContent=displayMsg;
-
-    /* Voice feedback box → show big green tick + number */
-    mzSetVoiceBox('✅  '+val,'final','🎉',`Correct!<br><strong>${val}</strong>`);
-
-    /* Celebration overlay */
-    showCelebration(displayMsg);
-
-    /* Big confetti */
-    confetti();
-
-    ttsSpeak(displayMsg.replace(/[^\w\s!]/g,''),()=>{qNum++;renderQuestion();});
-
-  }else{
-    /* WRONG */
-    btn.classList.add('wrong');
-    document.querySelectorAll('.ans-card').forEach(b=>{if(parseInt(b.dataset.val)===currentAnswer)b.classList.add('correct');});
-    streak=0;updateHUD();
-    mascotReact(false);
-
-    const wmsg=WRONG_MSGS[Math.floor(Math.random()*WRONG_MSGS.length)];
-    const bub=document.getElementById('speech-bub');
-    if(bub)bub.textContent=`The answer was ${currentAnswer}! ${wmsg}`;
-    setWrongMsg(`The answer was ${currentAnswer} 💪`);
-
-    /* Voice feedback box → show the correct answer prominently */
-    mzSetVoiceBox('Answer: '+currentAnswer,'bad','💛',`Was:<br><strong>${currentAnswer}</strong>`);
-
-    /* Inject step-by-step explainer into the work column */
-    const workCol=document.getElementById('work-col');
-    if(workCol){
-      const exp=document.createElement('div');
-      exp.innerHTML=buildExplainer(currentA,currentB,currentAnswer);
-      workCol.appendChild(exp.firstElementChild);
-    }
-
-    ttsSpeak(`Not quite! The answer was ${currentAnswer}. ${wmsg.replace(/[^\w\s!]/g,'')}`,()=>{qNum++;renderQuestion();});
-  }
-}
-
-/* ─────────────────────────────────────────────────
-   STEP-BY-STEP EXPLAINER (injected on wrong answer)
-───────────────────────────────────────────────── */
-function buildExplainer(a,b,ans){
-  let steps='';
-
-  if(currentGame==='addition'){
-    // Break into column method H+T+U with carries
-    const da=digits(a), db=digits(b), dc=digits(ans);
-    const uSum=(a%10)+(b%10);
-    const uCarry=Math.floor(uSum/10);
-    const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry;
-    const tCarry=Math.floor(tSum/10);
-    const hSum=Math.floor(a/100)+Math.floor(b/100)+tCarry;
-
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Write <span class="hi">${a}</span> on top and <span class="hi">${b}</span> below it, lining up the Units, Tens, Hundreds columns.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Units column: <span class="hi">${a%10}</span> + <span class="hi">${b%10}</span> = <span class="hi">${uSum}</span>${uCarry?` → write <span class="hi">${uSum%10}</span>, carry <span class="hi">1</span>`:''}.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text">Tens column: <span class="hi">${Math.floor((a%100)/10)}</span> + <span class="hi">${Math.floor((b%100)/10)}</span>${uCarry?' + 1 carry':''} = <span class="hi">${tSum}</span>${tCarry?` → write <span class="hi">${tSum%10}</span>, carry <span class="hi">1</span>`:''}.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.35s">
-        <div class="exp-num">4</div>
-        <div class="exp-text">Hundreds: <span class="hi">${Math.floor(a/100)||'0'}</span> + <span class="hi">${Math.floor(b/100)||'0'}</span>${tCarry?' + 1 carry':''} = <span class="hi">${hSum}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.45s">
-        <div class="exp-num">5</div>
-        <div class="exp-text">Answer = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-
-  } else if(currentGame==='subtraction'){
-    const da=digits(a), db=digits(b), dc=digits(ans);
-    const uA=a%10, uB=b%10;
-    const tA=Math.floor((a%100)/10), tB=Math.floor((b%100)/10);
-    const hA=Math.floor(a/100), hB=Math.floor(b/100);
-    const needUBorrow=uA<uB;
-    const needTBorrow=(tA-(needUBorrow?1:0))<tB;
-
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Write <span class="hi">${a}</span> on top and <span class="hi">${b}</span> below, columns lined up.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Units: <span class="hi">${uA}</span> − <span class="hi">${uB}</span>${needUBorrow?` → borrow 10 from Tens → <span class="hi">${uA+10}</span> − <span class="hi">${uB}</span>`:''} = <span class="hi">${(uA+(needUBorrow?10:0))-uB}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text">Tens: <span class="hi">${tA}${needUBorrow?' (−1 lent)':''}</span> − <span class="hi">${tB}</span>${needTBorrow?` → borrow → <span class="hi">${tA-(needUBorrow?1:0)+10}</span> − <span class="hi">${tB}</span>`:''} = <span class="hi">${(tA-(needUBorrow?1:0)+(needTBorrow?10:0))-tB}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.35s">
-        <div class="exp-num">4</div>
-        <div class="exp-text">Hundreds: <span class="hi">${hA}${needTBorrow?' (−1 lent)':''}</span> − <span class="hi">${hB}</span> = <span class="hi">${hA-(needTBorrow?1:0)-hB}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.45s">
-        <div class="exp-num">5</div>
-        <div class="exp-text">Answer = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-
-  } else if(currentGame==='multiply'){
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Think of <span class="hi">${a} × ${b}</span> as <span class="hi">${b}</span> groups of <span class="hi">${a}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Count the dots on the left: <span class="hi">${b}</span> rows with <span class="hi">${a}</span> dots each.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text">Or: <span class="hi">${a}</span> + <span class="hi">${a}</span>${b>2?` + … (${b} times)`:''}${b===2?` = <span class="hi">${a*2}</span>`:` = <span class="hi">${ans}</span>`}.</div>
-      </div>
-      ${b<=12?`
-      <div class="exp-step" style="animation-delay:.35s">
-        <div class="exp-num">4</div>
-        <div class="exp-text">Check: ${Array.from({length:b},(_,i)=>`<span class="hi">${a*(i+1)}</span>`).join(' → ')}. The <span class="hi">${b}th</span> one is <span class="ans"> ${ans} ✅</span></div>
-      </div>`:''}
-      <div class="exp-step" style="animation-delay:.45s">
-        <div class="exp-num">${b<=12?5:4}</div>
-        <div class="exp-text">Answer = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-
-  } else { // division
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Share <span class="hi">${a}</span> things equally into <span class="hi">${b}</span> groups (see the groups on the left).</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Ask: what times <span class="hi">${b}</span> gives <span class="hi">${a}</span>? Count up: ${Array.from({length:Math.min(ans,8)},(_,i)=>`<span class="hi">${b*(i+1)}</span>`).join(', ')}${ans>8?'…':''}.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text"><span class="hi">${b} × ${ans}</span> = <span class="hi">${a}</span>, so <span class="hi">${a} ÷ ${b}</span> = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-  }
-
-  return `
-    <div class="explainer">
-      <div class="explainer-title">💡 Here's how to do it!</div>
-      <div class="exp-steps">${steps}</div>
-    </div>`;
-}
-
-function showCelebration(msg){
-  const ov=document.getElementById('celeb-overlay');
-  const cm=document.getElementById('celeb-msg');
-  if(!ov||!cm)return;
-  cm.textContent=msg;
-  ov.classList.add('show');
-  setTimeout(()=>ov.classList.remove('show'),1200);
-}
-
-/* ─────────────────────────────────────────────────
-   END SCREEN
-───────────────────────────────────────────────── */
-function showEndScreen(){
-  const starsN=score>=45?3:score>=25?2:1;
-  const stars='⭐'.repeat(starsN)+'☆'.repeat(3-starsN);
-  const zone=ZONES[currentGame];
-  const title=starsN===3?'Perfect Score! 🏆':starsN===2?'Great Job! 🌟':'Good Try! 💪';
-
-  document.getElementById('game-panel').innerHTML=`
-    <div class="screen">
-      <div style="font-size:4.5rem">${currentMascot}</div>
-      <h2>${title}</h2>
-      <div class="stars-row">${stars}</div>
-      <p>You scored <strong style="color:var(--orange2);font-size:1.35em">${score}</strong> points!</p>
-      <p style="color:var(--purple2);font-weight:900;font-size:1rem">
-        🗣️ Say <strong>"play again"</strong> or <strong>"different game"</strong>
-      </p>
-      <button class="big-btn btn-blue" onclick="selectGame('${currentGame}')">🔁 Play Again!</button>
-      <button class="big-btn btn-purple" onclick="pickDiff()">🌍 Different Game!</button>
-    </div>
-  `;
-
-  confetti();
-  /* hub manages body class */
-  ttsSpeak(`${title} You scored ${score} points! Say play again or pick a different game!`);
-}
-
-function pickDiff(){
-  const gs=['addition','subtraction','multiply','division'];
-  selectGame(gs.find(g=>g!==currentGame)||'addition');
-}
-
-/* ─────────────────────────────────────────────────
-   CONFETTI
-───────────────────────────────────────────────── */
-function confetti(){
-  const c=document.getElementById('confetti');c.innerHTML='';
-  const pieces=['🌟','⭐','🎉','🎊','🌈','💛','💚','💙','💜','❤️','✨','🎈','🎀','🏆'];
-  for(let i=0;i<50;i++){
-    const el=document.createElement('div');el.className='cp';
-    el.textContent=pieces[Math.floor(Math.random()*pieces.length)];
-    el.style.left=Math.random()*100+'vw';
-    el.style.animationDuration=(1.2+Math.random()*2)+'s';
-    el.style.animationDelay=Math.random()*1+'s';
-    el.style.fontSize=(1.3+Math.random()*1.8)+'rem';
-    c.appendChild(el);
-  }
-  setTimeout(()=>c.innerHTML='',5000);
-}
-
-
-/* ── Hub Integration: replace the simple MZ object ── */
-/* Override the hub's MZ with hooks into our standalone engine    */
-const _MZ_orig = typeof MZ !== 'undefined' ? MZ : {};
-const MZ = {
-  onShow(){
-    if(!currentGame)
-      setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say addition, subtraction, times tables, or division!',null,{rate:.88}),300);
   },
-  onHide(){ ttsStop(); },
-  onSpeech(raw){ mzProcessTranscript(raw); },
-  selectGame(g){ selectGame(g); },
-};
 
-/* ══ END MATH FUN ZONE JS ══ */
+  startTimer(){
+    clearInterval(this.timIv); this.timeLeft=this.TIMER_MAX; this.tickTimer();
+    this.timIv=setInterval(()=>{
+      this.timeLeft--; this.tickTimer();
+      if(this.timeLeft<=0){
+        clearInterval(this.timIv);
+        if(!this.answered){ this.answered=true; this.streak=0; const wm=document.getElementById('mz-wrong-msg'); if(wm) wm.textContent='⏰ Time\'s up! The answer was '+this.currentAnswer; setTimeout(()=>{ this.qNum++; this.renderQ(); },1800); }
+      }
+    },1000);
+  },
+  tickTimer(){
+    const bar=document.getElementById('mz-timer-bar'); if(!bar) return;
+    const pct=this.timeLeft/this.TIMER_MAX*100;
+    bar.style.width=pct+'%';
+    bar.style.background=pct>55?'linear-gradient(90deg,#3ddc68,#14b8a6)':pct>25?'linear-gradient(90deg,#ffe135,#ffb800)':'linear-gradient(90deg,#ff4f4f,#dc2626)';
+  },
+
+  endScreen(){
+    clearInterval(this.timIv);
+    const stN=this.score>=45?3:this.score>=25?2:1;
+    const stars='⭐'.repeat(stN)+'☆'.repeat(3-stN);
+    const title=stN===3?'Perfect Score! 🏆':stN===2?'Great Job! 🌟':'Good Try! 💪';
+    document.getElementById('mz-panel').innerHTML=`
+      <div class="mz-screen">
+        <div style="font-size:4.2rem">${this.mascot}</div>
+        <h2>${title}</h2>
+        <div class="mz-stars">${stars}</div>
+        <p>You scored <strong style="color:var(--orange2);font-size:1.25em">${this.score}</strong> points!</p>
+        <p style="color:var(--purple2);font-weight:900;font-size:.86rem">🗣️ Say <strong>"play again"</strong> or <strong>"different game"</strong></p>
+        <button class="mz-big-btn mz-btn-blue" onclick="MZ.selectGame('${this.currentGame}')">🔁 Play Again!</button>
+        <button class="mz-big-btn mz-btn-purple" onclick="MZ.pickDiff()">🌍 Different Game!</button>
+      </div>`;
+    confetti();
+    ttsSpeak(title+' You scored '+this.score+' points! Say play again or pick a different game!',null,{rate:.88});
+  },
+};
 </script>
 </body>
 </html>
