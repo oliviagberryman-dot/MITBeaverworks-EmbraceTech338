@@ -1862,6 +1862,8 @@ const RB={
   },
   processTranscript(transcript){
     if(!this.reading||this.advancedThisLine) return;
+    const nextCheck=document.getElementById('rbc_'+this.cur);
+    if(nextCheck&&!nextCheck.classList.contains('answered')) return;
     // Merge into accumulator
     const newWords=transcript.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);
     const accumWords=this._lineAccum.split(/\s+/).filter(Boolean);
