@@ -1821,12 +1821,7 @@ const RB={
     this.setStatus('🗣️ "'+lo.slice(-50)+'"');
 
     // Check if line is complete — use full accumulated transcript
-    if(!this.advancedThisLine && this.checkLineMatch(this._lineAccum)){
-      this.advancedThisLine=true;
-      this.setStatus('✅ Well read! Moving on…');
-      ttsSpeak('Well done!',null,{rate:.96,pitch:1.2});
-      setTimeout(()=>this.nextLine(),650);
-    }
+    
   },
 
   // ── TEXT MATCHING (from original Reading Buddy) ──
