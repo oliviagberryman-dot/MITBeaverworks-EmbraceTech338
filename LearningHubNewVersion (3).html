@@ -722,6 +722,107 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 let recog = null, micActive = false, speechLock = false, currentZone = null;
 let micStream = null; // kept alive so Chrome never re-prompts for SpeechRecognition
 const VOCAB_KEY = 'hub_vocab_v1';
+const WORD_DEFS = {
+  'enormous':    {word:'enormous',    pos:'adjective', def:'Very very large — much bigger than normal.',                        example:'The enormous dog could barely fit through the door.'},
+  'exhausted':   {word:'exhausted',   pos:'adjective', def:'So tired you can barely move or think.',                            example:'After the long hike, Jack was completely exhausted.'},
+  'fragile':     {word:'fragile',     pos:'adjective', def:'Easy to break or damage if you are not careful.',                   example:'She carried the fragile egg very gently.'},
+  'enormous':    {word:'enormous',    pos:'adjective', def:'Very very large — much bigger than normal.',                        example:'The enormous wave crashed onto the shore.'},
+  'trudged':     {word:'trudged',     pos:'verb',      def:'Walked slowly and heavily, as if very tired.',                     example:'He trudged through the deep mud with heavy boots.'},
+  'whimpered':   {word:'whimpered',   pos:'verb',      def:'Made soft, quiet crying sounds.',                                  example:'The puppy whimpered when it heard thunder.'},
+  'massive':     {word:'massive',     pos:'adjective', def:'Extremely big and heavy.',                                         example:'The massive boulder blocked the path.'},
+  'cozy':        {word:'cozy',        pos:'adjective', def:'Warm, comfortable, and safe feeling.',                             example:'They sat in the cozy living room by the fire.'},
+  'rumbled':     {word:'rumbled',     pos:'verb',      def:'Made a deep, rolling, low sound.',                                 example:'Thunder rumbled across the dark sky.'},
+  'burrow':      {word:'burrow',      pos:'noun',      def:'A hole or tunnel dug by an animal to live in.',                   example:'The rabbit hid in its warm burrow.'},
+  'scarce':      {word:'scarce',      pos:'adjective', def:'Hard to find because there is very little of it.',                 example:'Food was scarce during the long dry season.'},
+  'kelp':        {word:'kelp',        pos:'noun',      def:'A very tall seaweed that grows in the ocean.',                    example:'The otter wrapped itself in kelp so it wouldn\'t drift away.'},
+  'abalone':     {word:'abalone',     pos:'noun',      def:'A type of shellfish that lives on rocks under the sea.',          example:'She pried the abalone off the rock with a stick.'},
+  'canoe':       {word:'canoe',       pos:'noun',      def:'A small narrow boat that you paddle with your hands.',             example:'They paddled the canoe across the calm lake.'},
+  'provisions':  {word:'provisions',  pos:'noun',      def:'Supplies of food and drink stored for a journey.',                example:'The sailors loaded provisions onto the ship.'},
+  'ravine':      {word:'ravine',      pos:'noun',      def:'A deep, narrow valley with steep sides.',                         example:'The river ran through a rocky ravine.'},
+  'mesa':        {word:'mesa',        pos:'noun',      def:'A hill with a flat top and steep sides, common in dry areas.',    example:'They climbed to the top of the mesa to see for miles.'},
+  'desolate':    {word:'desolate',    pos:'adjective', def:'Empty, lonely, and without any people or life.',                  example:'The desolate island had no trees or animals.'},
+  'vowed':       {word:'vowed',       pos:'verb',      def:'Made a very serious promise.',                                    example:'She vowed she would never leave the island.'},
+  'foraged':     {word:'foraged',     pos:'verb',      def:'Searched for food in the wild.',                                  example:'The children foraged for berries in the forest.'},
+  'fluke':       {word:'fluke',       pos:'noun',      def:'The wide flat tail of a whale.',                                  example:'The whale slapped its fluke on the water.'},
+  'glisten':     {word:'glisten',     pos:'verb',      def:'Shine with a soft sparkling light, often when wet.',              example:'The wet rocks glistened in the morning sun.'},
+  'clambered':   {word:'clambered',   pos:'verb',      def:'Climbed awkwardly using your hands and feet.',                   example:'She clambered up the steep rocky cliff.'},
+  'sprawled':    {word:'sprawled',    pos:'verb',      def:'Spread out loosely in an untidy way.',                            example:'The big dog sprawled across the entire couch.'},
+  'cunning':     {word:'cunning',     pos:'adjective', def:'Clever in a sneaky or tricky way.',                               example:'The cunning fox found a way into the henhouse.'},
+  'gruff':       {word:'gruff',       pos:'adjective', def:'Speaking in a rough, low, unfriendly voice.',                    example:'The gruff old man had a kind heart underneath.'},
+  'lumbered':    {word:'lumbered',    pos:'verb',      def:'Moved in a slow heavy clumsy way.',                              example:'The bear lumbered through the forest.'},
+  'bewildered':  {word:'bewildered',  pos:'adjective', def:'Very confused and not sure what is happening.',                  example:'She was bewildered by the strange map.'},
+  'mournful':    {word:'mournful',    pos:'adjective', def:'Feeling or showing deep sadness.',                               example:'The dog let out a mournful howl when left alone.'},
+  'suspicion':   {word:'suspicion',   pos:'noun',      def:'A feeling that something is wrong or that someone did something bad.', example:'He had a suspicion that the money was missing.'},
+  'clue':        {word:'clue',        pos:'noun',      def:'A piece of information that helps you solve a mystery.',          example:'The muddy footprint was an important clue.'},
+  'evidence':    {word:'evidence',    pos:'noun',      def:'Information or objects that prove something is true.',            example:'The detective gathered evidence at the scene.'},
+  'suspect':     {word:'suspect',     pos:'noun',      def:'A person who might have done something wrong.',                   example:'The detective had three suspects in the case.'},
+  'alibi':       {word:'alibi',       pos:'noun',      def:'Proof that you were somewhere else when something bad happened.', example:'His alibi was that he was at school all day.'},
+  'investigate': {word:'investigate', pos:'verb',      def:'To look carefully at something to find out the truth.',          example:'She decided to investigate the strange noise.'},
+  'baffled':     {word:'baffled',     pos:'adjective', def:'Completely confused and unable to understand something.',        example:'The detective was baffled by the missing clue.'},
+  'anxious':     {word:'anxious',     pos:'adjective', def:'Worried and nervous about what might happen.',                   example:'He was anxious waiting for the test results.'},
+  'pursuit':     {word:'pursuit',     pos:'noun',      def:'The act of chasing someone or something.',                       example:'The police were in hot pursuit of the thief.'},
+  'precious':    {word:'precious',    pos:'adjective', def:'Worth a lot — either in money or in feelings.',                  example:'The locket was precious because her grandmother gave it to her.'},
+  'scarlet':     {word:'scarlet',     pos:'adjective', def:'A bright red color.',                                            example:'She wore a scarlet ribbon in her hair.'},
+  'vigor':       {word:'vigor',       pos:'noun',      def:'Great energy and strength.',                                     example:'The young miners worked with great vigor.'},
+  'swindle':     {word:'swindle',     pos:'verb',      def:'To cheat someone out of their money.',                           example:'The dishonest man tried to swindle the miners.'},
+  'rugged':      {word:'rugged',      pos:'adjective', def:'Rough and uneven, often describing land or a tough person.',    example:'The rugged mountains were hard to climb.'},
+  'grizzled':    {word:'grizzled',    pos:'adjective', def:'Having hair that is gray or streaked with gray.',               example:'The grizzled old prospector had seen many adventures.'},
+  'prospector':  {word:'prospector',  pos:'noun',      def:'A person who searches for gold or other valuable minerals.',    example:'The prospector panned for gold in the cold river.'},
+  'nugget':      {word:'nugget',      pos:'noun',      def:'A small lump of gold found in the ground or river.',            example:'He found a gold nugget the size of his thumb.'},
+  'stampede':    {word:'stampede',    pos:'noun',      def:'A sudden rush of many people or animals in one direction.',     example:'The gold rush caused a stampede of people heading west.'},
+  'stowaway':    {word:'stowaway',    pos:'noun',      def:'A person who hides on a ship or vehicle to travel without paying.', example:'The boy was discovered as a stowaway on the ship.'},
+  'vessel':      {word:'vessel',      pos:'noun',      def:'A large boat or ship.',                                          example:'The vessel sailed through the rough waters.'},
+  'cargo':       {word:'cargo',       pos:'noun',      def:'Goods carried by a ship, plane, or truck.',                    example:'The ship was loaded with cargo bound for California.'},
+  'disguise':    {word:'disguise',    pos:'noun',      def:'Clothes or changes to your appearance to hide who you are.',   example:'He wore a disguise so nobody would recognize him.'},
+  'cunning':     {word:'cunning',     pos:'adjective', def:'Clever in a sneaky or tricky way.',                             example:'The cunning plan worked perfectly.'},
+  'treacherous': {word:'treacherous', pos:'adjective', def:'Very dangerous and not to be trusted.',                        example:'The treacherous mountain path was covered in ice.'},
+  'landlubber':  {word:'landlubber',  pos:'noun',      def:'A person who is not used to being at sea.',                    example:'The landlubber felt seasick on his first voyage.'},
+  'scoundrel':   {word:'scoundrel',   pos:'noun',      def:'A dishonest person who does bad things.',                      example:'The scoundrel tried to steal the gold.'},
+  'famished':    {word:'famished',    pos:'adjective', def:'Extremely hungry.',                                            example:'After missing lunch, she was absolutely famished.'},
+  'parched':     {word:'parched',     pos:'adjective', def:'Very dry and thirsty.',                                        example:'The parched traveler desperately needed water.'},
+  'weary':       {word:'weary',       pos:'adjective', def:'Very tired, especially after working hard for a long time.',   example:'The weary miners rested after a long day.'},
+  'dusk':        {word:'dusk',        pos:'noun',      def:'The time just after sunset when it starts to get dark.',       example:'They made camp at dusk before it got too dark to see.'},
+  'dawn':        {word:'dawn',        pos:'noun',      def:'The time when the sun first appears in the morning.',          example:'They set off at dawn to get an early start.'},
+  'soot':        {word:'soot',        pos:'noun',      def:'Black powder left behind after something burns.',              example:'His face was covered in soot from the campfire.'},
+  'singed':      {word:'singed',      pos:'verb',      def:'Slightly burned on the surface.',                              example:'He singed his eyebrows leaning too close to the fire.'},
+  'frantic':     {word:'frantic',     pos:'adjective', def:'Wild with worry, fear, or excitement.',                       example:'She made a frantic search for her missing dog.'},
+  'glum':        {word:'glum',        pos:'adjective', def:'Quiet and unhappy.',                                           example:'Henry looked glum when Mudge had to go to the vet.'},
+  'nuzzled':     {word:'nuzzled',     pos:'verb',      def:'Gently rubbed or pressed with the nose.',                     example:'Mudge nuzzled Henry\'s hand with his big wet nose.'},
+  'padded':      {word:'padded',      pos:'verb',      def:'Walked softly and quietly.',                                   example:'The big dog padded across the kitchen floor.'},
+  'gleamed':     {word:'gleamed',     pos:'verb',      def:'Shone with a soft bright light.',                              example:'Mudge\'s eyes gleamed in the dark.'},
+  'timid':       {word:'timid',       pos:'adjective', def:'Shy and easily frightened.',                                   example:'The timid kitten hid under the bed.'},
+  'grumble':     {word:'grumble',     pos:'verb',      def:'To complain in a low quiet voice.',                            example:'He began to grumble about the long walk home.'},
+  'drowsy':      {word:'drowsy',      pos:'adjective', def:'Feeling like you are about to fall asleep.',                  example:'The warm fire made her feel drowsy.'},
+  'snuggled':    {word:'snuggled',    pos:'verb',      def:'Settled into a warm comfortable position close to someone.',  example:'Henry snuggled next to Mudge on the big chair.'},
+  'lumbering':   {word:'lumbering',   pos:'adjective', def:'Moving in a slow heavy awkward way.',                         example:'The lumbering dog knocked over the trash can.'},
+  'startled':    {word:'startled',    pos:'verb',      def:'Suddenly surprised or frightened.',                           example:'The loud thunder startled the sleeping dog.'},
+  'bounded':     {word:'bounded',     pos:'verb',      def:'Leaped or jumped with energy.',                               example:'Mudge bounded across the yard toward Henry.'},
+  'fetch':       {word:'fetch',       pos:'verb',      def:'To go and get something and bring it back.',                  example:'Mudge loved to fetch the ball from the pond.'},
+  'loyal':       {word:'loyal',       pos:'adjective', def:'Always supporting and staying true to someone you care about.', example:'Mudge was a loyal friend who never left Henry\'s side.'},
+  'trudge':      {word:'trudge',      pos:'verb',      def:'To walk slowly as if something heavy is pulling you down.',   example:'Jack trudged home in the pouring rain.'},
+  'mysterious':  {word:'mysterious',  pos:'adjective', def:'Strange and hard to explain or understand.',                  example:'A mysterious note appeared under the door.'},
+  'lurking':     {word:'lurking',     pos:'verb',      def:'Waiting or hiding somewhere in a sneaky way.',               example:'Someone was lurking in the shadows.'},
+  'detected':    {word:'detected',    pos:'verb',      def:'Noticed or discovered something hidden.',                    example:'She detected a strange smell coming from the cellar.'},
+  'peered':      {word:'peered',      pos:'verb',      def:'Looked carefully at something hard to see.',                  example:'He peered through the foggy window.'},
+  'rummaged':    {word:'rummaged',    pos:'verb',      def:'Searched through things in a messy way.',                    example:'She rummaged through the drawer looking for clues.'},
+  'outskirts':   {word:'outskirts',   pos:'noun',      def:'The edges of a town or city, away from the center.',         example:'The old cabin sat on the outskirts of town.'},
+  'notorious':   {word:'notorious',   pos:'adjective', def:'Famous for doing something bad.',                            example:'The notorious thief had stolen from many towns.'},
+  'yelped':      {word:'yelped',      pos:'verb',      def:'Let out a sudden sharp cry, usually from pain or surprise.', example:'The dog yelped when it stepped on a thorn.'},
+  'muttered':    {word:'muttered',    pos:'verb',      def:'Spoke quietly in a way that is hard to hear.',               example:'He muttered something under his breath and walked away.'},
+  'flinched':    {word:'flinched',    pos:'verb',      def:'Made a quick movement away from something painful or scary.', example:'She flinched when the door slammed.'},
+  'sprawling':   {word:'sprawling',   pos:'adjective', def:'Spread out over a large area.',                              example:'The sprawling ranch covered many acres of land.'},
+  'perched':     {word:'perched',     pos:'verb',      def:'Sat or balanced on the edge of something.',                  example:'The bird perched on the very top of the mast.'},
+  'abandoned':   {word:'abandoned',   pos:'adjective', def:'Left behind and no longer used or cared for.',               example:'The abandoned shack had broken windows and no roof.'},
+  'tattered':    {word:'tattered',    pos:'adjective', def:'Old and torn into rags.',                                    example:'He wore a tattered coat that was full of holes.'},
+  'reluctant':   {word:'reluctant',   pos:'adjective', def:'Not wanting to do something.',                               example:'She was reluctant to leave the warm fire.'},
+  'gloomy':      {word:'gloomy',      pos:'adjective', def:'Dark and making you feel sad.',                              example:'The gloomy sky made it feel like night at noon.'},
+  'venture':     {word:'venture',     pos:'verb',      def:'To go somewhere that might be dangerous or unknown.',        example:'He decided to venture into the dark cave.'},
+  'harsh':       {word:'harsh',       pos:'adjective', def:'Very rough, difficult, or unkind.',                          example:'The harsh winter made survival very difficult.'},
+  'shelter':     {word:'shelter',     pos:'noun',      def:'A place that protects you from bad weather or danger.',      example:'They built a shelter out of branches and leaves.'},
+  'horizon':     {word:'horizon',     pos:'noun',      def:'The line far away where the sky meets the land or sea.',    example:'She watched the ship disappear over the horizon.'},
+  'voyage':      {word:'voyage',      pos:'noun',      def:'A long journey by sea.',                                     example:'The voyage to California took many months.'},
+  'wearisome':   {word:'wearisome',   pos:'adjective', def:'Making you feel tired and bored.',                          example:'The wearisome journey seemed like it would never end.'},
+};
 
 /* ── PROFANITY ── */
 const BAD_RX = /\b(fuck|shit|bitch|damn|cunt|dick|cock|piss|bastard|whore|slut|nigger|faggot|retard)\b/gi;
@@ -2057,31 +2158,14 @@ const RB={
     </div>`;
     ov.style.display='flex';
 
-    try{
-      const r=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:200,
-          messages:[{role:'user',content:`Define the word "${word}" simply for a child aged 8-12. Return ONLY a valid JSON object with no markdown, no code blocks, no extra text — just the raw JSON:\n{"word":"${word}","pos":"noun","def":"a clear simple definition under 20 words","example":"a short example sentence using the word"}`}]
-        })
-      });
-           toast('✅ fetch worked');
-
-      const d=await r.json();
-      let txt=d.content?.map(b=>b.text||'').join('').trim()||'';
-      txt=txt.replace(/^```json?\s*/,'').replace(/\s*```$/,'').trim();
-      const info=JSON.parse(txt);
-      this.showVocab(info);
-           toast('✅ fetch worked');
-    }catch(e){
-      ov.style.display='none'; ov.innerHTML='';
-      this.setStatus('❌ Couldn\'t look up "'+word+'" — try again');
-      toast('❌ Definition failed — check your connection');
-    }
-  },
-
+   const info = WORD_DEFS[word.toLowerCase()];
+if(info){
+  this.showVocab(info);
+} else {
+  ov.style.display='none'; ov.innerHTML='';
+  this.setStatus('❌ No definition found for "'+word+'"');
+  toast('❌ "'+word+'" not in dictionary yet!');
+}
   saveVocabWord(info){
     let saved=[];
     try{ saved=JSON.parse(localStorage.getItem(VOCAB_KEY)||'[]'); }catch(e){}
