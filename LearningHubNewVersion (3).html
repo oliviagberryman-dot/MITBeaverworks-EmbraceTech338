@@ -2159,13 +2159,15 @@ const RB={
     ov.style.display='flex';
 
    const info = WORD_DEFS[word.toLowerCase()];
-if(info){
-  this.showVocab(info);
-} else {
-  ov.style.display='none'; ov.innerHTML='';
-  this.setStatus('❌ No definition found for "'+word+'"');
-  toast('❌ "'+word+'" not in dictionary yet!');
-}
+    if(info){
+      this.showVocab(info);
+    } else {
+      ov.style.display='none'; ov.innerHTML='';
+      this.setStatus('❌ No definition found for "'+word+'"');
+      toast('❌ "'+word+'" not in dictionary yet!');
+    }
+  },
+
   saveVocabWord(info){
     let saved=[];
     try{ saved=JSON.parse(localStorage.getItem(VOCAB_KEY)||'[]'); }catch(e){}
