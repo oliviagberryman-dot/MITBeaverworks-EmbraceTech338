@@ -1334,7 +1334,6 @@ copyTranscript(id){    // <-- paste it RIGHT HERE
     }).catch(()=>toast('❌ Copy failed — try selecting text manually'));
   },
 
-  delSess(id){    // <-- this already exists, just showing you the landmark
   delSess(id){
     this.sessions=this.sessions.filter(s=>s.id!==id);
     try{ localStorage.removeItem('vb_s_'+id); this.dbIdx(); }catch(e){}
