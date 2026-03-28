@@ -1221,7 +1221,7 @@ const VB={
     const txt=this.rawAccum.trim(); this.rawAccum=''; this.updateLive();
     if(!txt){ this.setS('idle'); return; }
     this.setS('thinking');
-    const cleaned=await this.callClaude(this.preClean(txt));
+    const cleaned=await this.cleanText(this.preClean(txt));
     this.addMsg(txt,cleaned);
     this.setS('idle');
     // if detail view is open for current session, re-render it
@@ -1404,21 +1404,20 @@ const VB={
     return t.replace(/\s{2,}/g,' ').trim();
   },
 
-async callClaude(text){
-  text = this.preClean(text);           // remove fillers/stutters (already exists)
-  text = this.fixContractions(text);    // wont → won't etc
-  text = this.fixWordErrors(text);      // gonna → going to etc
-  text = this.fixCapitalization(text);  // I, days, months, sentence starts
-  text = this.fixSentenceBoundaries(text); // detect and insert periods
-  text = this.fixPunctuation(text);     // spacing, commas, cleanup
-  text = this.fixSubjectVerb(text);     // they was → they were etc
-  text = this.finalPolish(text);        // last pass cleanup
+async cleanText(text){
+  text = this.preClean(text);
+  text = this.fixContractions(text);
+  text = this.fixWordErrors(text);
+  text = this.fixCapitalization(text);
+  text = this.fixSentenceBoundaries(text);
+  text = this.fixPunctuation(text);
+  text = this.fixSubjectVerb(text);
+  text = this.finalPolish(text);
   return text.trim();
 },
 
 fixContractions(text){
   const map = [
-    // Missing apostrophes in contractions
     [/\bwont\b/g,"won't"],
     [/\bdont\b/g,"don't"],
     [/\bcant\b/g,"can't"],
@@ -1435,16 +1434,12 @@ fixContractions(text){
     [/\bhavent\b/g,"haven't"],
     [/\bhadnt\b/g,"hadn't"],
     [/\bneednt\b/g,"needn't"],
-    [/\bmustn't\b/g,"mustn't"],
-    [/\boughtnt\b/g,"oughtn't"],
-    [/\bdaren't\b/g,"daren't"],
     [/\bshouldve\b/g,"should've"],
     [/\bcouldve\b/g,"could've"],
     [/\bwouldve\b/g,"would've"],
     [/\bmightve\b/g,"might've"],
     [/\bmustve\b/g,"must've"],
     [/\bim\b/g,"I'm"],
-    [/\bid\b(?=\s+(like|love|hate|say|rather|probably|definitely|never|always|just|really|go|be|have|make|get|do|try|think|know|say|want|need|prefer|suggest|recommend))/gi,"I'd"],
     [/\bill\b(?=\s)/g,"I'll"],
     [/\bive\b/g,"I've"],
     [/\bthats\b/gi,"that's"],
@@ -1460,13 +1455,13 @@ fixContractions(text){
     [/\btheyre\b/gi,"they're"],
     [/\btheyd\b/gi,"they'd"],
     [/\btheyll\b/gi,"they'll"],
-    [/\bwed\b(?=\s+(like|love|rather|probably|never|always|go|be|have))/gi,"we'd"],
-    [/\bwell\b(?=\s+(go|be|have|make|get|do|try|see|find|need|want|take|give|come|tell|show|help|use|keep|let|start|end|finish|continue|stop|try|work|play|run|walk|talk|say|think|know))/gi,"we'll"],
     [/\byoure\b/gi,"you're"],
     [/\byoud\b/gi,"you'd"],
     [/\byoull\b/gi,"you'll"],
     [/\byouve\b/gi,"you've"],
     [/\bitsnt\b/gi,"it's not"],
+    [/\bain't\b/gi,"isn't"],
+    [/\baint\b/gi,"isn't"],
   ];
   map.forEach(([rx,rep])=>{ text=text.replace(rx,rep); });
   return text;
@@ -1474,7 +1469,6 @@ fixContractions(text){
 
 fixWordErrors(text){
   const map = [
-    // Informal → formal
     [/\bgonna\b/gi,'going to'],
     [/\bwanna\b/gi,'want to'],
     [/\bgotta\b/gi,'have to'],
@@ -1488,9 +1482,6 @@ fixWordErrors(text){
     [/\bnope\b/gi,'no'],
     [/\byep\b/gi,'yes'],
     [/\byup\b/gi,'yes'],
-    [/\bain't\b/gi,"isn't"],
-    [/\baint\b/gi,"isn't"],
-    // Text speak
     [/\bur\b/g,'your'],
     [/\bu\b(?=\s)/g,'you'],
     [/\br\b(?=\s)/g,'are'],
@@ -1507,7 +1498,6 @@ fixWordErrors(text){
     [/\buhh*\b/gi,''],
     [/\berr*\b/gi,''],
     [/\bahh*\b/gi,''],
-    // Common misspellings from speech
     [/\balot\b/gi,'a lot'],
     [/\banyways\b/gi,'anyway'],
     [/\birregardless\b/gi,'regardless'],
@@ -1518,83 +1508,100 @@ fixWordErrors(text){
     [/\bmust of\b/gi,'must have'],
     [/\bdefinately\b/gi,'definitely'],
     [/\bseperate\b/gi,'separate'],
-    [/\boccured\b/gi,'occurred'],
-    [/\buntil\b/gi,'until'],
-    [/\btill\b(?=\s)/gi,'until'],
     [/\bthru\b/gi,'through'],
     [/\bnite\b/gi,'night'],
-    [/\blite\b/gi,'light'],
-    [/\brite\b/gi,'right'],
     [/\bcuz\b/gi,'because'],
     [/\bcoz\b/gi,'because'],
     [/\b'cause\b/gi,'because'],
     [/\bcause\b(?=\s+(i|he|she|they|we|it|the|a|an|my|your|his|her|our|their))/gi,'because'],
   ];
   map.forEach(([rx,rep])=>{ text=text.replace(rx,rep); });
-  // Clean up double spaces after removals
   text=text.replace(/\s{2,}/g,' ');
   return text;
 },
 
 fixCapitalization(text){
-  // Fix I and contractions
   text=text.replace(/\bi\b/g,'I');
   text=text.replace(/\bi'm\b/g,"I'm").replace(/\bi've\b/g,"I've")
            .replace(/\bi'll\b/g,"I'll").replace(/\bi'd\b/g,"I'd");
-  // Days of the week
   ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(d=>{
     text=text.replace(new RegExp('\\b'+d+'\\b','gi'),d.charAt(0).toUpperCase()+d.slice(1));
   });
-  // Months
-  ['january','february','march','april','may','june','july','august','september','october','november','december'].forEach(m=>{
+  ['january','february','march','april','may','june','july','august',
+   'september','october','november','december'].forEach(m=>{
     text=text.replace(new RegExp('\\b'+m+'\\b','gi'),m.charAt(0).toUpperCase()+m.slice(1));
   });
-  // Common proper nouns people say
-  const proper=['america','american','english','spanish','french','german','chinese','japanese','italian','mexican','canadian','british','african','european','asian','christian','muslim','jewish','christmas','thanksgiving','halloween','easter','god'];
+  const proper=['america','american','english','spanish','french','german',
+    'chinese','japanese','italian','mexican','canadian','british','african',
+    'european','asian','christian','muslim','jewish','christmas','thanksgiving',
+    'halloween','easter','god'];
   proper.forEach(p=>{
     text=text.replace(new RegExp('\\b'+p+'\\b','g'),p.charAt(0).toUpperCase()+p.slice(1));
   });
-  // Capitalize after sentence-ending punctuation
   text=text.replace(/(^|[.!?]\s+)([a-z])/g,(m,p1,p2)=>p1+p2.toUpperCase());
-  // Capitalize first letter
   if(text.length) text=text[0].toUpperCase()+text.slice(1);
   return text;
 },
 
 fixSentenceBoundaries(text){
-  // This is the big one — detect where sentences end in spoken text
+  const fragmentStarters=/^(to |if |because |that |which |as |although |unless |until |whether |when |while |after |before |since |so that |in order |for example |for instance |such as |due to |in addition |furthermore |however |therefore |consequently |meanwhile |nevertheless |otherwise )/i;
+
+  let sentences=text.split(/([.!?]+)\s+/);
+  let rebuilt=[];
+  let buffer='';
+  for(let i=0;i<sentences.length;i++){
+    const s=sentences[i].trim();
+    if(!s) continue;
+    if(/^[.!?]+$/.test(s)){ buffer+=s+' '; continue; }
+    if(fragmentStarters.test(s)&&rebuilt.length){
+      const prev=rebuilt[rebuilt.length-1];
+      rebuilt[rebuilt.length-1]=prev.replace(/[.!?]\s*$/,', ')+s.toLowerCase();
+    } else {
+      if(buffer){ rebuilt[rebuilt.length-1]=(rebuilt[rebuilt.length-1]||'').trimEnd()+buffer.trim()+' '; buffer=''; }
+      rebuilt.push(s);
+    }
+  }
+  text=rebuilt.join(' ').replace(/\s{2,}/g,' ').trim();
+
+  // Tag question commas
+  text=text.replace(/(\w)\s+(isn't it|aren't you|don't you|doesn't it|didn't it|wasn't it|weren't they|right|correct|am I right)\b/gi,'$1, $2');
+
   const words=text.split(/\s+/);
   const result=[];
   let count=0;
 
-  // Words that strongly signal a NEW sentence is starting
   const sentenceStarters=new Set([
     'however','therefore','furthermore','nevertheless','consequently','meanwhile',
     'additionally','moreover','subsequently','alternatively','otherwise',
     'suddenly','eventually','finally','fortunately','unfortunately',
-    'interestingly','surprisingly','importantly','basically','honestly',
-    'truthfully','personally','obviously','clearly','apparently'
+    'interestingly','surprisingly','importantly','honestly',
+    'truthfully','personally','obviously','clearly','apparently',
+    'admittedly','naturally','typically','generally','frankly',
+    'seriously','luckily','thankfully','sadly','hopefully'
   ]);
 
-  // Words that signal end of a clause and start of new sentence when count is high
   const hardBreakers=new Set([
-    'but','yet','still','though','although','even though','despite'
+    'but','yet','still','though','although','even'
   ]);
 
-  // Softer connectors — add comma not period
   const softConnectors=new Set([
     'and','so','because','since','while','when','after','before',
     'if','unless','until','as','once','whenever','wherever','whether'
   ]);
 
-  // Words that CANNOT start a new sentence (keep attached)
   const neverBreak=new Set([
     'of','the','a','an','in','on','at','to','for','with','by','from',
-    'into','onto','upon','via','per','as','than','like','such','not',
-    'very','just','also','even','only','both','either','neither','each',
-    'every','any','some','all','no','few','more','most','less','least',
-    'much','many','other','another','same','different','own','next','last',
-    'first','second','third','its','his','her','our','their','my','your'
+    'into','onto','upon','via','per','than','like','not','very','just',
+    'also','only','both','either','neither','each','every','any','some',
+    'all','no','few','more','most','less','much','many','other','another',
+    'same','own','next','last','first','its','his','her','our','their',
+    'my','your','if','that','which','who','where','how','whether'
+  ]);
+
+  const fragmentWords=new Set([
+    'to','if','because','that','which','as','although','unless','until',
+    'whether','since','in','for','on','at','by','with','from',
+    'about','through','during','before','after','above','below','between'
   ]);
 
   for(let i=0;i<words.length;i++){
@@ -1603,35 +1610,34 @@ fixSentenceBoundaries(text){
     const prev=result[result.length-1]||'';
     const alreadyHasPunct=/[.!?]$/.test(prev);
 
-    // If word already has punctuation, just capitalize next word
     if(alreadyHasPunct){
+      if(fragmentWords.has(wl)){
+        result[result.length-1]=prev.replace(/[.!?]$/,',')+' '+wl;
+        count++; continue;
+      }
       result.push(w.charAt(0).toUpperCase()+w.slice(1));
       count=1; continue;
     }
 
-    // Strong sentence starters after a reasonable clause
     if(count>=6&&sentenceStarters.has(wl)&&!neverBreak.has(wl)){
       result[result.length-1]=prev+'.';
       result.push(w.charAt(0).toUpperCase()+w.slice(1));
       count=1; continue;
     }
 
-    // Hard breakers after long clause
     if(count>=14&&hardBreakers.has(wl)&&!neverBreak.has(wl)){
       result[result.length-1]=prev+'.';
       result.push(w.charAt(0).toUpperCase()+w.slice(1));
       count=1; continue;
     }
 
-    // After very long run-on, force break on soft connectors
-    if(count>=25&&softConnectors.has(wl)&&!neverBreak.has(wl)){
+    if(count>=28&&softConnectors.has(wl)&&!neverBreak.has(wl)){
       result[result.length-1]=prev+'.';
       result.push(w.charAt(0).toUpperCase()+w.slice(1));
       count=1; continue;
     }
 
-    // Add comma before soft connectors in medium length clauses
-    if(count>=10&&softConnectors.has(wl)&&!/[,;:.!?]$/.test(prev)){
+    if(count>=10&&softConnectors.has(wl)&&!neverBreak.has(wl)&&!/[,;:.!?]$/.test(prev)){
       result[result.length-1]=prev+',';
       result.push(w); count++; continue;
     }
@@ -1639,44 +1645,73 @@ fixSentenceBoundaries(text){
     result.push(w); count++;
   }
 
-  // Ensure ends with period
   const last=result[result.length-1]||'';
   if(!/[.!?]$/.test(last)) result[result.length-1]=last+'.';
 
-  // Second pass — look for patterns that indicate missed sentence breaks:
-  // "...word. and then..." — "and then" after period should stay but not get its own period
-  // "...verb noun. The..." — already handled by capitalize after period
   let out=result.join(' ');
-
-  // Fix orphaned punctuation starters like ". And" → ". And" (keep — this is correct)
-  // Fix ". and" (lowercase after period — capitalize it)
   out=out.replace(/([.!?])\s+([a-z])/g,(m,p,l)=>p+' '+l.toUpperCase());
+
+  // Fix falsely capitalized mid-sentence words
+  const knownProper=new Set(['Monday','Tuesday','Wednesday','Thursday','Friday',
+    'Saturday','Sunday','January','February','March','April','May','June','July',
+    'August','September','October','November','December','America','American',
+    'English','Spanish','French','German','Chinese','Japanese','Italian',
+    'Christian','Muslim','Jewish','Christmas','Thanksgiving','Halloween','Easter','God','I']);
+  out=out.replace(/([a-z],?\s+)([A-Z][a-z]{3,})/g,(m,p1,p2)=>{
+    if(knownProper.has(p2)) return m;
+    return p1+p2.charAt(0).toLowerCase()+p2.slice(1);
+  });
 
   return out;
 },
 
 fixPunctuation(text){
-  // Remove space before punctuation
   text=text.replace(/\s+([.,!?;:])/g,'$1');
-  // Add space after punctuation if missing
   text=text.replace(/([.,!?;:])([A-Za-z])/g,'$1 $2');
-  // Fix multiple punctuation
   text=text.replace(/[.]{2,}/g,'.');
   text=text.replace(/[!]{2,}/g,'!');
   text=text.replace(/[?]{2,}/g,'?');
-  // Fix comma then period → just period
   text=text.replace(/,\s*\./g,'.');
-  // Fix double commas
   text=text.replace(/,+/g,',');
-  // Oxford comma — add before 'and' in lists "x, y and z" → "x, y, and z"
+  // Oxford comma
   text=text.replace(/(\w+),\s+(\w+)\s+and\s+(\w)/g,'$1, $2, and $3');
-  // Fix spaces
+  // Remove comma before if/whether in indirect questions
+  text=text.replace(/,\s*(if|whether)\b/gi,' $1');
+  // Fix "So in addition" type fragments at start
+  text=text.replace(/^(So|And|But|Or),?\s+(in addition|furthermore|however|therefore|also|then)\b/gi,'$1 $2');
+  // Capitalize after period when followed by do/does/did/can etc
+  text=text.replace(/\.\s+(do|does|did|can|could|will|would|should|is|are|was|were|have|has|had)\s+(you|he|she|they|we|it|I)\b/g,(m)=>{
+    const parts=m.split(/\s+/);
+    return '. '+parts[1].charAt(0).toUpperCase()+parts[1].slice(1)+' '+parts.slice(2).join(' ');
+  });
   text=text.replace(/\s{2,}/g,' ');
   return text;
 },
 
 fixSubjectVerb(text){
   const fixes=[
+    // collective/singular nouns
+    [/\bthe weather are\b/gi,'the weather is'],
+    [/\bthe news are\b/gi,'the news is'],
+    [/\bthe team are\b/gi,'the team is'],
+    [/\bthe class are\b/gi,'the class is'],
+    [/\bthe music are\b/gi,'the music is'],
+    [/\bthe food are\b/gi,'the food is'],
+    [/\bthe water are\b/gi,'the water is'],
+    [/\bthe rain are\b/gi,'the rain is'],
+    [/\bthe sun are\b/gi,'the sun is'],
+    [/\bthe sky are\b/gi,'the sky is'],
+    [/\bthe wind are\b/gi,'the wind is'],
+    [/\beveryone are\b/gi,'everyone is'],
+    [/\beverybody are\b/gi,'everybody is'],
+    [/\bsomebody are\b/gi,'somebody is'],
+    [/\bsomeone are\b/gi,'someone is'],
+    [/\bnothing are\b/gi,'nothing is'],
+    [/\beverything are\b/gi,'everything is'],
+    [/\bsomething are\b/gi,'something is'],
+    [/\banybody are\b/gi,'anybody is'],
+    [/\banyone are\b/gi,'anyone is'],
+    [/\bno one are\b/gi,'no one is'],
     // to be
     [/\bi is\b/gi,'I am'],
     [/\bhe are\b/gi,'he is'],
@@ -1723,87 +1758,69 @@ fixSubjectVerb(text){
     [/\bhe weren't\b/gi,"he wasn't"],
     [/\bshe weren't\b/gi,"she wasn't"],
     [/\bit weren't\b/gi,"it wasn't"],
-    // seen/saw
+    // past tense errors
     [/\bi seen\b/gi,'I saw'],
     [/\bhe seen\b/gi,'he saw'],
     [/\bshe seen\b/gi,'she saw'],
     [/\bwe seen\b/gi,'we saw'],
     [/\bthey seen\b/gi,'they saw'],
-    // done/did
     [/\bi done\b/gi,'I did'],
     [/\bhe done\b/gi,'he did'],
     [/\bshe done\b/gi,'she did'],
     [/\bwe done\b/gi,'we did'],
     [/\bthey done\b/gi,'they did'],
-    // went/gone
+    // perfect tense errors
     [/\bhave went\b/gi,'have gone'],
     [/\bhas went\b/gi,'has gone'],
     [/\bhad went\b/gi,'had gone'],
-    // come/came
     [/\bhave came\b/gi,'have come'],
     [/\bhas came\b/gi,'has come'],
     [/\bhad came\b/gi,'had come'],
-    // ran/run
     [/\bhave ran\b/gi,'have run'],
     [/\bhas ran\b/gi,'has run'],
-    // ate/eaten
     [/\bhave ate\b/gi,'have eaten'],
     [/\bhas ate\b/gi,'has eaten'],
-    // broke/broken
     [/\bhave broke\b/gi,'have broken'],
     [/\bhas broke\b/gi,'has broken'],
-    // chose/chosen
     [/\bhave chose\b/gi,'have chosen'],
     [/\bhas chose\b/gi,'has chosen'],
-    // wrote/written
     [/\bhave wrote\b/gi,'have written'],
     [/\bhas wrote\b/gi,'has written'],
-    // spoke/spoken
     [/\bhave spoke\b/gi,'have spoken'],
     [/\bhas spoke\b/gi,'has spoken'],
-    // took/taken
     [/\bhave took\b/gi,'have taken'],
     [/\bhas took\b/gi,'has taken'],
-    // gave/given
     [/\bhave gave\b/gi,'have given'],
     [/\bhas gave\b/gi,'has given'],
-    // knew/known
     [/\bhave knew\b/gi,'have known'],
     [/\bhas knew\b/gi,'has known'],
-    // grew/grown
     [/\bhave grew\b/gi,'have grown'],
     [/\bhas grew\b/gi,'has grown'],
-    // threw/thrown
     [/\bhave threw\b/gi,'have thrown'],
     [/\bhas threw\b/gi,'has thrown'],
-    // wore/worn
     [/\bhave wore\b/gi,'have worn'],
     [/\bhas wore\b/gi,'has worn'],
-    // drove/driven
     [/\bhave drove\b/gi,'have driven'],
     [/\bhas drove\b/gi,'has driven'],
-    // rode/ridden
     [/\bhave rode\b/gi,'have ridden'],
     [/\bhas rode\b/gi,'has ridden'],
-    // article errors
-    [/\ba ([aeiou])/gi,(m,p)=>'an '+p],
-    [/\ban ([^aeiou\s])/gi,(m,p)=>'a '+p],
+    // a/an
+    [/\ba ([aeiouAEIOU])/g,'an $1'],
+    [/\ban ([^aeiouAEIOU\s])/g,'a $1'],
+    // comma before if in wonder/ask/know
+    [/,\s*if\b/gi,' if'],
+    [/,\s*whether\b/gi,' whether'],
   ];
   fixes.forEach(([rx,rep])=>{ text=text.replace(rx,rep); });
   return text;
 },
 
 finalPolish(text){
-  // Final I capitalization sweep (in case fixSubjectVerb reintroduced lowercase)
   text=text.replace(/\bi\b/g,'I');
-  // Capitalize after all sentence endings one more time
   text=text.replace(/(^|[.!?]\s+)([a-z])/g,(m,p1,p2)=>p1+p2.toUpperCase());
-  // Remove any leading/trailing punctuation artifacts
   text=text.replace(/^[,;:\s]+/,'');
-  text=text.replace(/\s+/g,' ');
-  // Ensure first letter is capitalized
+  text=text.replace(/\s{2,}/g,' ');
   if(text.length) text=text[0].toUpperCase()+text.slice(1);
-  // Ensure ends with punctuation
   if(!/[.!?]$/.test(text.trim())) text=text.trim()+'.';
   return text;
 },
