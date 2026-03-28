@@ -1319,8 +1319,9 @@ const VB={
       ${msgs}`;
   },
 
-copyTranscript(id){    // <-- paste it RIGHT HERE
-    const text=s.messages.map(m=>m.clean&&m.clean!==m.raw?m.clean:m.raw).join(' ');.writeText(text).then(()=>{
+copyTranscript(id){
+    const text=s.messages.map(m=>m.clean&&m.clean!==m.raw?m.clean:m.raw).join(' ');
+    navigator.clipboard.writeText(text).then(()=>{
       const btn=document.getElementById('vb-copy-btn-'+id);
       if(btn){ btn.textContent='✅ Copied!'; btn.style.background='linear-gradient(135deg,#10B981,#06B6D4)'; setTimeout(()=>{ btn.textContent='📋 Copy'; btn.style.background='linear-gradient(135deg,#A855F7,#6366f1)'; },2200); }
       toast('📋 Transcript copied!');
