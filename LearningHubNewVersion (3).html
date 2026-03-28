@@ -1404,13 +1404,409 @@ const VB={
     return t.replace(/\s{2,}/g,' ').trim();
   },
 
-  async callClaude(text){
-    try{
-      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:'You are a speech transcript editor for a child. Clean up raw spoken text: fix grammar, punctuation, capitalization, remove fillers and stutters. Preserve the speaker\'s vocabulary and meaning. Return ONLY the cleaned text, nothing else.',messages:[{role:'user',content:text}]})});
-      const d=await r.json();
-      return d.content?.map(b=>b.text||'').join('').trim()||text;
-    }catch(e){ return text; }
-  },
+async callClaude(text){
+  text = this.preClean(text);           // remove fillers/stutters (already exists)
+  text = this.fixContractions(text);    // wont → won't etc
+  text = this.fixWordErrors(text);      // gonna → going to etc
+  text = this.fixCapitalization(text);  // I, days, months, sentence starts
+  text = this.fixSentenceBoundaries(text); // detect and insert periods
+  text = this.fixPunctuation(text);     // spacing, commas, cleanup
+  text = this.fixSubjectVerb(text);     // they was → they were etc
+  text = this.finalPolish(text);        // last pass cleanup
+  return text.trim();
+},
+
+fixContractions(text){
+  const map = [
+    // Missing apostrophes in contractions
+    [/\bwont\b/g,"won't"],
+    [/\bdont\b/g,"don't"],
+    [/\bcant\b/g,"can't"],
+    [/\bcouldnt\b/g,"couldn't"],
+    [/\bwouldnt\b/g,"wouldn't"],
+    [/\bshouldnt\b/g,"shouldn't"],
+    [/\bdidnt\b/g,"didn't"],
+    [/\bdoesnt\b/g,"doesn't"],
+    [/\bisnt\b/g,"isn't"],
+    [/\barent\b/g,"aren't"],
+    [/\bwasnt\b/g,"wasn't"],
+    [/\bwerent\b/g,"weren't"],
+    [/\bhasnt\b/g,"hasn't"],
+    [/\bhavent\b/g,"haven't"],
+    [/\bhadnt\b/g,"hadn't"],
+    [/\bneednt\b/g,"needn't"],
+    [/\bmustn't\b/g,"mustn't"],
+    [/\boughtnt\b/g,"oughtn't"],
+    [/\bdaren't\b/g,"daren't"],
+    [/\bshouldve\b/g,"should've"],
+    [/\bcouldve\b/g,"could've"],
+    [/\bwouldve\b/g,"would've"],
+    [/\bmightve\b/g,"might've"],
+    [/\bmustve\b/g,"must've"],
+    [/\bim\b/g,"I'm"],
+    [/\bid\b(?=\s+(like|love|hate|say|rather|probably|definitely|never|always|just|really|go|be|have|make|get|do|try|think|know|say|want|need|prefer|suggest|recommend))/gi,"I'd"],
+    [/\bill\b(?=\s)/g,"I'll"],
+    [/\bive\b/g,"I've"],
+    [/\bthats\b/gi,"that's"],
+    [/\bwhats\b/gi,"what's"],
+    [/\bwhos\b/gi,"who's"],
+    [/\bwheres\b/gi,"where's"],
+    [/\bheres\b/gi,"here's"],
+    [/\btheres\b/gi,"there's"],
+    [/\blets\b(?=\s)/gi,"let's"],
+    [/\bshes\b/gi,"she's"],
+    [/\bhes\b(?=\s)/gi,"he's"],
+    [/\bweve\b/gi,"we've"],
+    [/\btheyre\b/gi,"they're"],
+    [/\btheyd\b/gi,"they'd"],
+    [/\btheyll\b/gi,"they'll"],
+    [/\bwed\b(?=\s+(like|love|rather|probably|never|always|go|be|have))/gi,"we'd"],
+    [/\bwell\b(?=\s+(go|be|have|make|get|do|try|see|find|need|want|take|give|come|tell|show|help|use|keep|let|start|end|finish|continue|stop|try|work|play|run|walk|talk|say|think|know))/gi,"we'll"],
+    [/\byoure\b/gi,"you're"],
+    [/\byoud\b/gi,"you'd"],
+    [/\byoull\b/gi,"you'll"],
+    [/\byouve\b/gi,"you've"],
+    [/\bitsnt\b/gi,"it's not"],
+  ];
+  map.forEach(([rx,rep])=>{ text=text.replace(rx,rep); });
+  return text;
+},
+
+fixWordErrors(text){
+  const map = [
+    // Informal → formal
+    [/\bgonna\b/gi,'going to'],
+    [/\bwanna\b/gi,'want to'],
+    [/\bgotta\b/gi,'have to'],
+    [/\bkinda\b/gi,'kind of'],
+    [/\bsorta\b/gi,'sort of'],
+    [/\bdunno\b/gi,"don't know"],
+    [/\blemme\b/gi,'let me'],
+    [/\bgimme\b/gi,'give me'],
+    [/\bcmon\b/gi,'come on'],
+    [/\byeah\b/gi,'yes'],
+    [/\bnope\b/gi,'no'],
+    [/\byep\b/gi,'yes'],
+    [/\byup\b/gi,'yes'],
+    [/\bain't\b/gi,"isn't"],
+    [/\baint\b/gi,"isn't"],
+    // Text speak
+    [/\bur\b/g,'your'],
+    [/\bu\b(?=\s)/g,'you'],
+    [/\br\b(?=\s)/g,'are'],
+    [/\bidk\b/gi,"I don't know"],
+    [/\bomg\b/gi,'oh my goodness'],
+    [/\btbh\b/gi,'to be honest'],
+    [/\bbtw\b/gi,'by the way'],
+    [/\bfyi\b/gi,'for your information'],
+    [/\bngl\b/gi,'not going to lie'],
+    [/\bimo\b/gi,'in my opinion'],
+    [/\blol\b/gi,''],
+    [/\bhaha\b/gi,''],
+    [/\bumm*\b/gi,''],
+    [/\buhh*\b/gi,''],
+    [/\berr*\b/gi,''],
+    [/\bahh*\b/gi,''],
+    // Common misspellings from speech
+    [/\balot\b/gi,'a lot'],
+    [/\banyways\b/gi,'anyway'],
+    [/\birregardless\b/gi,'regardless'],
+    [/\bcould of\b/gi,'could have'],
+    [/\bwould of\b/gi,'would have'],
+    [/\bshould of\b/gi,'should have'],
+    [/\bmight of\b/gi,'might have'],
+    [/\bmust of\b/gi,'must have'],
+    [/\bdefinately\b/gi,'definitely'],
+    [/\bseperate\b/gi,'separate'],
+    [/\boccured\b/gi,'occurred'],
+    [/\buntil\b/gi,'until'],
+    [/\btill\b(?=\s)/gi,'until'],
+    [/\bthru\b/gi,'through'],
+    [/\bnite\b/gi,'night'],
+    [/\blite\b/gi,'light'],
+    [/\brite\b/gi,'right'],
+    [/\bcuz\b/gi,'because'],
+    [/\bcoz\b/gi,'because'],
+    [/\b'cause\b/gi,'because'],
+    [/\bcause\b(?=\s+(i|he|she|they|we|it|the|a|an|my|your|his|her|our|their))/gi,'because'],
+  ];
+  map.forEach(([rx,rep])=>{ text=text.replace(rx,rep); });
+  // Clean up double spaces after removals
+  text=text.replace(/\s{2,}/g,' ');
+  return text;
+},
+
+fixCapitalization(text){
+  // Fix I and contractions
+  text=text.replace(/\bi\b/g,'I');
+  text=text.replace(/\bi'm\b/g,"I'm").replace(/\bi've\b/g,"I've")
+           .replace(/\bi'll\b/g,"I'll").replace(/\bi'd\b/g,"I'd");
+  // Days of the week
+  ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(d=>{
+    text=text.replace(new RegExp('\\b'+d+'\\b','gi'),d.charAt(0).toUpperCase()+d.slice(1));
+  });
+  // Months
+  ['january','february','march','april','may','june','july','august','september','october','november','december'].forEach(m=>{
+    text=text.replace(new RegExp('\\b'+m+'\\b','gi'),m.charAt(0).toUpperCase()+m.slice(1));
+  });
+  // Common proper nouns people say
+  const proper=['america','american','english','spanish','french','german','chinese','japanese','italian','mexican','canadian','british','african','european','asian','christian','muslim','jewish','christmas','thanksgiving','halloween','easter','god'];
+  proper.forEach(p=>{
+    text=text.replace(new RegExp('\\b'+p+'\\b','g'),p.charAt(0).toUpperCase()+p.slice(1));
+  });
+  // Capitalize after sentence-ending punctuation
+  text=text.replace(/(^|[.!?]\s+)([a-z])/g,(m,p1,p2)=>p1+p2.toUpperCase());
+  // Capitalize first letter
+  if(text.length) text=text[0].toUpperCase()+text.slice(1);
+  return text;
+},
+
+fixSentenceBoundaries(text){
+  // This is the big one — detect where sentences end in spoken text
+  const words=text.split(/\s+/);
+  const result=[];
+  let count=0;
+
+  // Words that strongly signal a NEW sentence is starting
+  const sentenceStarters=new Set([
+    'however','therefore','furthermore','nevertheless','consequently','meanwhile',
+    'additionally','moreover','subsequently','alternatively','otherwise',
+    'suddenly','eventually','finally','fortunately','unfortunately',
+    'interestingly','surprisingly','importantly','basically','honestly',
+    'truthfully','personally','obviously','clearly','apparently'
+  ]);
+
+  // Words that signal end of a clause and start of new sentence when count is high
+  const hardBreakers=new Set([
+    'but','yet','still','though','although','even though','despite'
+  ]);
+
+  // Softer connectors — add comma not period
+  const softConnectors=new Set([
+    'and','so','because','since','while','when','after','before',
+    'if','unless','until','as','once','whenever','wherever','whether'
+  ]);
+
+  // Words that CANNOT start a new sentence (keep attached)
+  const neverBreak=new Set([
+    'of','the','a','an','in','on','at','to','for','with','by','from',
+    'into','onto','upon','via','per','as','than','like','such','not',
+    'very','just','also','even','only','both','either','neither','each',
+    'every','any','some','all','no','few','more','most','less','least',
+    'much','many','other','another','same','different','own','next','last',
+    'first','second','third','its','his','her','our','their','my','your'
+  ]);
+
+  for(let i=0;i<words.length;i++){
+    const w=words[i];
+    const wl=w.toLowerCase().replace(/[^a-z']/g,'');
+    const prev=result[result.length-1]||'';
+    const alreadyHasPunct=/[.!?]$/.test(prev);
+
+    // If word already has punctuation, just capitalize next word
+    if(alreadyHasPunct){
+      result.push(w.charAt(0).toUpperCase()+w.slice(1));
+      count=1; continue;
+    }
+
+    // Strong sentence starters after a reasonable clause
+    if(count>=6&&sentenceStarters.has(wl)&&!neverBreak.has(wl)){
+      result[result.length-1]=prev+'.';
+      result.push(w.charAt(0).toUpperCase()+w.slice(1));
+      count=1; continue;
+    }
+
+    // Hard breakers after long clause
+    if(count>=14&&hardBreakers.has(wl)&&!neverBreak.has(wl)){
+      result[result.length-1]=prev+'.';
+      result.push(w.charAt(0).toUpperCase()+w.slice(1));
+      count=1; continue;
+    }
+
+    // After very long run-on, force break on soft connectors
+    if(count>=25&&softConnectors.has(wl)&&!neverBreak.has(wl)){
+      result[result.length-1]=prev+'.';
+      result.push(w.charAt(0).toUpperCase()+w.slice(1));
+      count=1; continue;
+    }
+
+    // Add comma before soft connectors in medium length clauses
+    if(count>=10&&softConnectors.has(wl)&&!/[,;:.!?]$/.test(prev)){
+      result[result.length-1]=prev+',';
+      result.push(w); count++; continue;
+    }
+
+    result.push(w); count++;
+  }
+
+  // Ensure ends with period
+  const last=result[result.length-1]||'';
+  if(!/[.!?]$/.test(last)) result[result.length-1]=last+'.';
+
+  // Second pass — look for patterns that indicate missed sentence breaks:
+  // "...word. and then..." — "and then" after period should stay but not get its own period
+  // "...verb noun. The..." — already handled by capitalize after period
+  let out=result.join(' ');
+
+  // Fix orphaned punctuation starters like ". And" → ". And" (keep — this is correct)
+  // Fix ". and" (lowercase after period — capitalize it)
+  out=out.replace(/([.!?])\s+([a-z])/g,(m,p,l)=>p+' '+l.toUpperCase());
+
+  return out;
+},
+
+fixPunctuation(text){
+  // Remove space before punctuation
+  text=text.replace(/\s+([.,!?;:])/g,'$1');
+  // Add space after punctuation if missing
+  text=text.replace(/([.,!?;:])([A-Za-z])/g,'$1 $2');
+  // Fix multiple punctuation
+  text=text.replace(/[.]{2,}/g,'.');
+  text=text.replace(/[!]{2,}/g,'!');
+  text=text.replace(/[?]{2,}/g,'?');
+  // Fix comma then period → just period
+  text=text.replace(/,\s*\./g,'.');
+  // Fix double commas
+  text=text.replace(/,+/g,',');
+  // Oxford comma — add before 'and' in lists "x, y and z" → "x, y, and z"
+  text=text.replace(/(\w+),\s+(\w+)\s+and\s+(\w)/g,'$1, $2, and $3');
+  // Fix spaces
+  text=text.replace(/\s{2,}/g,' ');
+  return text;
+},
+
+fixSubjectVerb(text){
+  const fixes=[
+    // to be
+    [/\bi is\b/gi,'I am'],
+    [/\bhe are\b/gi,'he is'],
+    [/\bshe are\b/gi,'she is'],
+    [/\bit are\b/gi,'it is'],
+    [/\bthey is\b/gi,'they are'],
+    [/\bwe is\b/gi,'we are'],
+    [/\byou is\b/gi,'you are'],
+    [/\bi are\b/gi,'I am'],
+    // was/were
+    [/\bthey was\b/gi,'they were'],
+    [/\bwe was\b/gi,'we were'],
+    [/\byou was\b/gi,'you were'],
+    [/\bi were\b/gi,'I was'],
+    [/\bhe were\b/gi,'he was'],
+    [/\bshe were\b/gi,'she was'],
+    [/\bit were\b/gi,'it was'],
+    // has/have
+    [/\bthey has\b/gi,'they have'],
+    [/\bwe has\b/gi,'we have'],
+    [/\byou has\b/gi,'you have'],
+    [/\bi has\b/gi,'I have'],
+    [/\bhe have\b/gi,'he has'],
+    [/\bshe have\b/gi,'she has'],
+    [/\bit have\b/gi,'it has'],
+    // do/does
+    [/\bhe do\b/gi,'he does'],
+    [/\bshe do\b/gi,'she does'],
+    [/\bit do\b/gi,'it does'],
+    [/\bthey does\b/gi,'they do'],
+    [/\bwe does\b/gi,'we do'],
+    [/\byou does\b/gi,'you do'],
+    // doesn't/don't
+    [/\bhe don't\b/gi,"he doesn't"],
+    [/\bshe don't\b/gi,"she doesn't"],
+    [/\bit don't\b/gi,"it doesn't"],
+    [/\bthey doesn't\b/gi,"they don't"],
+    [/\bwe doesn't\b/gi,"we don't"],
+    [/\byou doesn't\b/gi,"you don't"],
+    // wasn't/weren't
+    [/\bthey wasn't\b/gi,"they weren't"],
+    [/\bwe wasn't\b/gi,"we weren't"],
+    [/\byou wasn't\b/gi,"you weren't"],
+    [/\bhe weren't\b/gi,"he wasn't"],
+    [/\bshe weren't\b/gi,"she wasn't"],
+    [/\bit weren't\b/gi,"it wasn't"],
+    // seen/saw
+    [/\bi seen\b/gi,'I saw'],
+    [/\bhe seen\b/gi,'he saw'],
+    [/\bshe seen\b/gi,'she saw'],
+    [/\bwe seen\b/gi,'we saw'],
+    [/\bthey seen\b/gi,'they saw'],
+    // done/did
+    [/\bi done\b/gi,'I did'],
+    [/\bhe done\b/gi,'he did'],
+    [/\bshe done\b/gi,'she did'],
+    [/\bwe done\b/gi,'we did'],
+    [/\bthey done\b/gi,'they did'],
+    // went/gone
+    [/\bhave went\b/gi,'have gone'],
+    [/\bhas went\b/gi,'has gone'],
+    [/\bhad went\b/gi,'had gone'],
+    // come/came
+    [/\bhave came\b/gi,'have come'],
+    [/\bhas came\b/gi,'has come'],
+    [/\bhad came\b/gi,'had come'],
+    // ran/run
+    [/\bhave ran\b/gi,'have run'],
+    [/\bhas ran\b/gi,'has run'],
+    // ate/eaten
+    [/\bhave ate\b/gi,'have eaten'],
+    [/\bhas ate\b/gi,'has eaten'],
+    // broke/broken
+    [/\bhave broke\b/gi,'have broken'],
+    [/\bhas broke\b/gi,'has broken'],
+    // chose/chosen
+    [/\bhave chose\b/gi,'have chosen'],
+    [/\bhas chose\b/gi,'has chosen'],
+    // wrote/written
+    [/\bhave wrote\b/gi,'have written'],
+    [/\bhas wrote\b/gi,'has written'],
+    // spoke/spoken
+    [/\bhave spoke\b/gi,'have spoken'],
+    [/\bhas spoke\b/gi,'has spoken'],
+    // took/taken
+    [/\bhave took\b/gi,'have taken'],
+    [/\bhas took\b/gi,'has taken'],
+    // gave/given
+    [/\bhave gave\b/gi,'have given'],
+    [/\bhas gave\b/gi,'has given'],
+    // knew/known
+    [/\bhave knew\b/gi,'have known'],
+    [/\bhas knew\b/gi,'has known'],
+    // grew/grown
+    [/\bhave grew\b/gi,'have grown'],
+    [/\bhas grew\b/gi,'has grown'],
+    // threw/thrown
+    [/\bhave threw\b/gi,'have thrown'],
+    [/\bhas threw\b/gi,'has thrown'],
+    // wore/worn
+    [/\bhave wore\b/gi,'have worn'],
+    [/\bhas wore\b/gi,'has worn'],
+    // drove/driven
+    [/\bhave drove\b/gi,'have driven'],
+    [/\bhas drove\b/gi,'has driven'],
+    // rode/ridden
+    [/\bhave rode\b/gi,'have ridden'],
+    [/\bhas rode\b/gi,'has ridden'],
+    // article errors
+    [/\ba ([aeiou])/gi,(m,p)=>'an '+p],
+    [/\ban ([^aeiou\s])/gi,(m,p)=>'a '+p],
+  ];
+  fixes.forEach(([rx,rep])=>{ text=text.replace(rx,rep); });
+  return text;
+},
+
+finalPolish(text){
+  // Final I capitalization sweep (in case fixSubjectVerb reintroduced lowercase)
+  text=text.replace(/\bi\b/g,'I');
+  // Capitalize after all sentence endings one more time
+  text=text.replace(/(^|[.!?]\s+)([a-z])/g,(m,p1,p2)=>p1+p2.toUpperCase());
+  // Remove any leading/trailing punctuation artifacts
+  text=text.replace(/^[,;:\s]+/,'');
+  text=text.replace(/\s+/g,' ');
+  // Ensure first letter is capitalized
+  if(text.length) text=text[0].toUpperCase()+text.slice(1);
+  // Ensure ends with punctuation
+  if(!/[.!?]$/.test(text.trim())) text=text.trim()+'.';
+  return text;
+},
 };
 
 /* ════════════════════════════════════
