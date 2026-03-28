@@ -1318,9 +1318,6 @@ const VB={
       </div>
       ${msgs}`;
   },
-renderDetail(wrap,s){
-    // ... all the existing code ...
-  },       // <-- you're here, add AFTER this closing brace
 
 copyTranscript(id){    // <-- paste it RIGHT HERE
     const s=this.sessions.find(x=>x.id===id); if(!s||!s.messages.length){ toast('Nothing to copy!'); return; }
