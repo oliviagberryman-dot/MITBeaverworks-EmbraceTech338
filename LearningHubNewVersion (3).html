@@ -1319,13 +1319,31 @@ const VB={
       ${msgs}`;
   },
 
-copyTranscript(id){
+  copyTranscript(id){
+    const s=this.sessions.find(x=>x.id===id); if(!s||!s.messages.length){ toast('Nothing to copy!'); return; }
     const text=s.messages.map(m=>m.clean&&m.clean!==m.raw?m.clean:m.raw).join(' ');
-    navigator.clipboard.writeText(text).then(()=>{
-      const btn=document.getElementById('vb-copy-btn-'+id);
-      if(btn){ btn.textContent='✅ Copied!'; btn.style.background='linear-gradient(135deg,#10B981,#06B6D4)'; setTimeout(()=>{ btn.textContent='📋 Copy'; btn.style.background='linear-gradient(135deg,#A855F7,#6366f1)'; },2200); }
-      toast('📋 Transcript copied!');
-    }).catch(()=>toast('❌ Copy failed — try selecting text manually'));
+    // Try modern clipboard API first, fall back to execCommand
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(text).then(()=>{
+        this.flashCopyBtn(id); toast('📋 Copied!');
+      }).catch(()=>this.fallbackCopy(text,id));
+    } else {
+      this.fallbackCopy(text,id);
+    }
+  },
+
+  fallbackCopy(text,id){
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand('copy'); this.flashCopyBtn(id); toast('📋 Copied!'); }
+    catch(e){ toast('❌ Copy failed'); }
+    document.body.removeChild(ta);
+  },
+
+  flashCopyBtn(id){
+    const btn=document.getElementById('vb-copy-btn-'+id);
+    if(btn){ btn.textContent='✅ Copied!'; btn.style.background='linear-gradient(135deg,#10B981,#06B6D4)'; setTimeout(()=>{ btn.textContent='📋 Copy'; btn.style.background='linear-gradient(135deg,#A855F7,#6366f1)'; },2200); }
   },
 
   delSess(id){
