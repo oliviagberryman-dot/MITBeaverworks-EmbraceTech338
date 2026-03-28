@@ -1307,8 +1307,9 @@ const VB={
       : '<div style="text-align:center;padding:1.5rem;color:#ccc;font-weight:800">Nothing recorded yet.</div>';
 
     wrap.innerHTML=`
-      <div style="margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem">
+      <div style="margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
         <button onclick="VB.viewSession=null;VB.renderSessions()" style="background:linear-gradient(135deg,#FF6B6B,#FF9F43);border:none;border-radius:12px;padding:.45rem .9rem;color:#fff;font-family:'Fredoka One',sans-serif;font-size:.9rem;cursor:pointer">← Back</button>
+        <button onclick="VB.copyTranscript('${s.id}')" id="vb-copy-btn-${s.id}" style="background:linear-gradient(135deg,#A855F7,#6366f1);border:none;border-radius:12px;padding:.45rem .9rem;color:#fff;font-family:'Fredoka One',sans-serif;font-size:.9rem;cursor:pointer;box-shadow:0 3px 0 #3730a3">📋 Copy</button>
         <div style="font-family:'Fredoka One',sans-serif;font-size:1.05rem;color:#2a1a4a;flex:1">${esc(s.title)}</div>
       </div>
       <div style="font-size:.7rem;font-weight:800;color:#A855F7;margin-bottom:.8rem;text-transform:uppercase;letter-spacing:.08em">
