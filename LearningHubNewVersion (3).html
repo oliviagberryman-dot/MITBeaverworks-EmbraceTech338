@@ -2203,13 +2203,27 @@ const RB={
     </div>`;
     ov.style.display='flex';
 
-   const info = WORD_DEFS[word.toLowerCase()];
-    if(info){
+    const local = WORD_DEFS[word.toLowerCase()];
+    if(local){ this.showVocab(local); return; }
+
+    try{
+      const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+      if(!r.ok) throw new Error('not found');
+      const d = await r.json();
+      const entry = d[0];
+      const meaning = entry.meanings[0];
+      const defObj = meaning.definitions[0];
+      const info = {
+        word: entry.word,
+        pos:  meaning.partOfSpeech||'',
+        def:  defObj.definition||'',
+        example: defObj.example||''
+      };
       this.showVocab(info);
-    } else {
+    } catch(e){
       ov.style.display='none'; ov.innerHTML='';
       this.setStatus('❌ No definition found for "'+word+'"');
-      toast('❌ "'+word+'" not in dictionary yet!');
+      toast('❌ No definition found for "'+word+'"');
     }
   },
 
