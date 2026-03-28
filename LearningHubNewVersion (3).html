@@ -1384,7 +1384,7 @@ const VB={
   silReset(){ this.silStop(); if(this.state==='listening'&&this.rawAccum.trim()) this.silStart(); },
   silStart(){
     this.silStop();
-    const MS=2800, step=100/(MS/80);
+    const MS=8000, step=100/(MS/80);
     const fill=document.getElementById('vb-sr-fill');
     this.silIv=setInterval(()=>{
       this.silProg=Math.min(100,this.silProg+step);
