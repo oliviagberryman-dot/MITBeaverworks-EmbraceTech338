@@ -1318,7 +1318,26 @@ const VB={
       </div>
       ${msgs}`;
   },
+renderDetail(wrap,s){
+    // ... all the existing code ...
+  },       // <-- you're here, add AFTER this closing brace
 
+copyTranscript(id){    // <-- paste it RIGHT HERE
+    const s=this.sessions.find(x=>x.id===id); if(!s||!s.messages.length){ toast('Nothing to copy!'); return; }
+    const text=s.messages.map((m,i)=>{
+      let out='--- Recording '+(i+1)+' ---\n';
+      if(m.clean&&m.clean!==m.raw) out+=m.clean;
+      else out+=m.raw;
+      return out;
+    }).join('\n\n');
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn=document.getElementById('vb-copy-btn-'+id);
+      if(btn){ btn.textContent='✅ Copied!'; btn.style.background='linear-gradient(135deg,#10B981,#06B6D4)'; setTimeout(()=>{ btn.textContent='📋 Copy'; btn.style.background='linear-gradient(135deg,#A855F7,#6366f1)'; },2200); }
+      toast('📋 Transcript copied!');
+    }).catch(()=>toast('❌ Copy failed — try selecting text manually'));
+  },
+
+  delSess(id){    // <-- this already exists, just showing you the landmark
   delSess(id){
     this.sessions=this.sessions.filter(s=>s.id!==id);
     try{ localStorage.removeItem('vb_s_'+id); this.dbIdx(); }catch(e){}
