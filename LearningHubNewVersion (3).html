@@ -1583,25 +1583,83 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
     </div>
   </div>
 
-  <!-- MATH FUN ZONE -->
+ <!-- MATH FUN ZONE -->
   <div class="zone-panel" id="panel-math">
     <div class="mz-container">
-      <div class="mz-game-grid">
-        <button class="mz-game-card" onclick="MZ.selectGame('addition')"    id="mz-btn-addition">   <span class="mz-gc-icon">🌊</span><span class="mz-gc-name">Add It Up!</span>    <span class="mz-gc-type">Addition</span>       <span class="mz-gc-hint">say "addition"</span></button>
-        <button class="mz-game-card" onclick="MZ.selectGame('subtraction')" id="mz-btn-subtraction"><span class="mz-gc-icon">🌋</span><span class="mz-gc-name">Take Away!</span>   <span class="mz-gc-type">Subtraction</span>    <span class="mz-gc-hint">say "subtraction"</span></button>
-        <button class="mz-game-card" onclick="MZ.selectGame('multiply')"    id="mz-btn-multiply">   <span class="mz-gc-icon">⚡</span><span class="mz-gc-name">Times Tables!</span><span class="mz-gc-type">Multiplication</span><span class="mz-gc-hint">say "times tables"</span></button>
-        <button class="mz-game-card" onclick="MZ.selectGame('division')"    id="mz-btn-division">   <span class="mz-gc-icon">🌈</span><span class="mz-gc-name">Divide It!</span>   <span class="mz-gc-type">Division</span>       <span class="mz-gc-hint">say "division"</span></button>
-      </div>
-      <div id="mz-panel">
-        <div class="mz-celeb" id="mz-celeb"><div class="mz-celeb-msg" id="mz-celeb-msg"></div></div>
-        <div class="mz-screen" id="mz-welcome">
-          <div style="font-size:4.5rem">🎮</div>
-          <h2>Pick a Game!</h2>
-          <p>Choose above — or say its name!</p>
-          <p style="color:var(--purple2);font-weight:900;font-size:.88rem">🗣️ "Addition" · "Subtraction" · "Times Tables" · "Division"</p>
-        </div>
-      </div>
+
+  <!-- Game selector -->
+  <div class="game-grid">
+    <button class="game-card" onclick="selectGame('addition')" id="btn-addition">
+      <span class="gc-icon">🌊</span>
+      <span class="gc-name">Add It Up!</span>
+      <span class="gc-type">Addition</span>
+      <span class="gc-hint">say "addition"</span>
+    </button>
+    <button class="game-card" onclick="selectGame('subtraction')" id="btn-subtraction">
+      <span class="gc-icon">🌋</span>
+      <span class="gc-name">Take Away!</span>
+      <span class="gc-type">Subtraction</span>
+      <span class="gc-hint">say "subtraction"</span>
+    </button>
+    <button class="game-card" onclick="selectGame('multiply')" id="btn-multiply">
+      <span class="gc-icon">⚡</span>
+      <span class="gc-name">Times Tables!</span>
+      <span class="gc-type">Multiplication</span>
+      <span class="gc-hint">say "times tables"</span>
+    </button>
+    <button class="game-card" onclick="selectGame('division')" id="btn-division">
+      <span class="gc-icon">🌈</span>
+      <span class="gc-name">Divide It!</span>
+      <span class="gc-type">Division</span>
+      <span class="gc-hint">say "division"</span>
+    </button>
+  </div>
+
+  <!-- Difficulty selectors — one row per game -->
+  <div class="diff-grid" id="diff-grid">
+    <div class="diff-row" data-game="addition">
+      <span class="diff-label">🌊 Add It Up:</span>
+      <button class="diff-btn active" data-game="addition" data-level="easy"   onclick="setDiff('addition','easy')">🟢 Easy</button>
+      <button class="diff-btn"        data-game="addition" data-level="medium" onclick="setDiff('addition','medium')">🟡 Medium</button>
+      <button class="diff-btn"        data-game="addition" data-level="hard"   onclick="setDiff('addition','hard')">🔴 Hard</button>
     </div>
+    <div class="diff-row" data-game="subtraction">
+      <span class="diff-label">🌋 Take Away:</span>
+      <button class="diff-btn active" data-game="subtraction" data-level="easy"   onclick="setDiff('subtraction','easy')">🟢 Easy</button>
+      <button class="diff-btn"        data-game="subtraction" data-level="medium" onclick="setDiff('subtraction','medium')">🟡 Medium</button>
+      <button class="diff-btn"        data-game="subtraction" data-level="hard"   onclick="setDiff('subtraction','hard')">🔴 Hard</button>
+    </div>
+    <div class="diff-row" data-game="multiply">
+      <span class="diff-label">⚡ Times Tables:</span>
+      <button class="diff-btn active" data-game="multiply" data-level="easy"   onclick="setDiff('multiply','easy')">🟢 Easy</button>
+      <button class="diff-btn"        data-game="multiply" data-level="medium" onclick="setDiff('multiply','medium')">🟡 Medium</button>
+      <button class="diff-btn"        data-game="multiply" data-level="hard"   onclick="setDiff('multiply','hard')">🔴 Hard</button>
+    </div>
+    <div class="diff-row" data-game="division">
+      <span class="diff-label">🌈 Divide It:</span>
+      <button class="diff-btn active" data-game="division" data-level="easy"   onclick="setDiff('division','easy')">🟢 Easy</button>
+      <button class="diff-btn"        data-game="division" data-level="medium" onclick="setDiff('division','medium')">🟡 Medium</button>
+      <button class="diff-btn"        data-game="division" data-level="hard"   onclick="setDiff('division','hard')">🔴 Hard</button>
+    </div>
+  </div>
+
+  <!-- Game panel -->
+  <div id="game-panel">
+    <!-- Celebration overlay (inside panel) -->
+    <div id="celeb-overlay">
+      <div class="celeb-msg" id="celeb-msg">Amazing! 🌟</div>
+    </div>
+
+    <!-- Welcome screen -->
+    <div class="screen" id="welcome-screen">
+      <div style="font-size:5rem">🎮</div>
+      <h2>Pick a Game!</h2>
+      <p>Choose a game above or say its name to start!</p>
+      <p class="sub">🗣️ "Addition" · "Subtraction" · "Times Tables" · "Division"</p>
+    </div>
+  </div>
+
+</div>
   </div>
 
 </div><!-- /content -->
