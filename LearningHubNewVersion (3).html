@@ -1588,32 +1588,35 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
     <div class="mz-container">
 
   <!-- Game selector -->
-  <div class="game-grid">
-    <button class="game-card" onclick="selectGame('addition')" id="btn-addition">
-      <span class="gc-icon">🌊</span>
-      <span class="gc-name">Add It Up!</span>
-      <span class="gc-type">Addition</span>
-      <span class="gc-hint">say "addition"</span>
-    </button>
-    <button class="game-card" onclick="selectGame('subtraction')" id="btn-subtraction">
-      <span class="gc-icon">🌋</span>
-      <span class="gc-name">Take Away!</span>
-      <span class="gc-type">Subtraction</span>
-      <span class="gc-hint">say "subtraction"</span>
-    </button>
-    <button class="game-card" onclick="selectGame('multiply')" id="btn-multiply">
-      <span class="gc-icon">⚡</span>
-      <span class="gc-name">Times Tables!</span>
-      <span class="gc-type">Multiplication</span>
-      <span class="gc-hint">say "times tables"</span>
-    </button>
-    <button class="game-card" onclick="selectGame('division')" id="btn-division">
-      <span class="gc-icon">🌈</span>
-      <span class="gc-name">Divide It!</span>
-      <span class="gc-type">Division</span>
-      <span class="gc-hint">say "division"</span>
-    </button>
-  </div>
+<div class="mz-game-grid">
+  <button class="mz-game-card" onclick="selectGame('addition')" id="btn-addition">
+    <span class="gc-icon">🌊</span>
+    <span class="gc-name">Add It Up!</span>
+    <span class="gc-type">Addition</span>
+    <span class="gc-hint">say "addition"</span>
+  </button>
+
+  <button class="mz-game-card" onclick="selectGame('subtraction')" id="btn-subtraction">
+    <span class="gc-icon">🌋</span>
+    <span class="gc-name">Take Away!</span>
+    <span class="gc-type">Subtraction</span>
+    <span class="gc-hint">say "subtraction"</span>
+  </button>
+
+  <button class="mz-game-card" onclick="selectGame('multiply')" id="btn-multiply">
+    <span class="gc-icon">⚡</span>
+    <span class="gc-name">Times Tables!</span>
+    <span class="gc-type">Multiplication</span>
+    <span class="gc-hint">say "times tables"</span>
+  </button>
+
+  <button class="mz-game-card" onclick="selectGame('division')" id="btn-division">
+    <span class="gc-icon">🌈</span>
+    <span class="gc-name">Divide It!</span>
+    <span class="gc-type">Division</span>
+    <span class="gc-hint">say "division"</span>
+  </button>
+</div>
 
   <!-- Difficulty selectors — one row per game -->
   <div class="diff-grid" id="diff-grid">
