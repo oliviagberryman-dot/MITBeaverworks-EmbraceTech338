@@ -4033,8 +4033,11 @@ function selectGame(game){
    RENDER QUESTION
 ───────────────────────────────────────────────── */
 function renderQuestion(){
+  if(!currentGame) return;
   if(qNum>=TOTAL_Q){showEndScreen();return;}
-  answered=false;currentAnswer=null;
+
+  answered=false;
+  currentAnswer=null;
 
   let a,b,ans,opSym,opWord;
   const d=DIFF[currentGame][difficulty[currentGame]];
@@ -4053,16 +4056,37 @@ function renderQuestion(){
     b=rnd(d.bMin,d.bMax);ans=rnd(d.aMin,d.aMax);
     a=b*ans;opSym='➗';opWord='divided by';
   }
-  currentAnswer=ans;
-  currentA=a; currentB=b;
+  
+  currentAnswer = ans;
+  currentA = a;
+  currentB = b;
 
-  const minD=currentGame==='division'?Math.max(1,ans-6):currentGame==='multiply'?Math.max(4,ans-12):Math.max(0,ans-25);
-  const maxD=currentGame==='division'?ans+6:currentGame==='multiply'?ans+12:ans+25;
-  const step=currentGame==='division'?5:currentGame==='multiply'?10:18;
-  const opts=makeOpts(ans,4,minD,maxD,step);
-  currentOpts=opts;
+  /* ✅ Better distractor range */
+  const minD = currentGame === 'division'
+    ? Math.max(1, ans - 6)
+    : currentGame === 'multiply'
+    ? Math.max(4, ans - 12)
+    : Math.max(0, ans - 25);
 
-  const dotsHTML=Array.from({length:TOTAL_Q},(_,i)=>`<div class="dot ${i<qNum?'done':i===qNum?'cur':''}"></div>`).join('');
+  const maxD = currentGame === 'division'
+    ? ans + 6
+    : currentGame === 'multiply'
+    ? ans + 12
+    : ans + 25;
+
+  const step = currentGame === 'division'
+    ? 5
+    : currentGame === 'multiply'
+    ? 10
+    : 18;
+
+  const opts = makeOpts(ans, 4, minD, maxD, step);
+  currentOpts = opts;
+
+  /* ✅ Progress dots */
+  const dotsHTML = Array.from({ length: TOTAL_Q }, (_, i) =>
+    `<div class="dot ${i < qNum ? 'done' : i === qNum ? 'cur' : ''}"></div>`
+  ).join('');
 
   document.getElementById('game-panel').innerHTML=`
     <div id="celeb-overlay"><div class="celeb-msg" id="celeb-msg"></div></div>
