@@ -1384,7 +1384,17 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 </head>
 <body>
 <!-- Show perm screen instantly if not yet granted, so there's no layout flash -->
-<script>if(localStorage.getItem('hub_mic_ok')!=='1'){document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('perm-screen');if(s)s.style.display='flex';});}</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var s = document.getElementById('perm-screen');
+
+  if (localStorage.getItem('hub_mic_ok') === '1') {
+    if (s) s.style.display = 'none'; // ✅ hide if already allowed
+  } else {
+    if (s) s.style.display = 'flex'; // show only if needed
+  }
+});
+</script>
 
 <div class="bg-shapes" id="bg-shapes"></div>
 <div class="deco" style="top:82px;left:3%;animation-duration:6s;">🌈</div>
