@@ -46,17 +46,17 @@ body.zone-math   {background:linear-gradient(160deg,#b8eaff,#d4f7c5);}
 /* ── HEADER ── */
 header{position:fixed;top:0;left:0;right:0;z-index:500;height:var(--hh);background:linear-gradient(90deg,var(--purple2),var(--blue),var(--green));padding:.5rem .7rem;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 16px rgba(0,0,0,.18);}
 .h-brand{font-family:'Fredoka One',sans-serif;font-size:1.05rem;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.2);flex-shrink:0;white-space:nowrap;}
-.nav-tabs{display:flex;gap:.3rem;flex:1;min-width:0;}
+.nav-tabs{display:flex;gap:.3rem;flex:1;min-width:0;overflow:hidden;}
 .nav-tab{flex:1;min-width:0;height:50px;border:2px solid rgba(255,255,255,.35);border-radius:14px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);color:#fff;font-family:'Fredoka One',sans-serif;font-size:clamp(.6rem,1.7vw,.82rem);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.56,.64,1);text-shadow:0 1px 3px rgba(0,0,0,.2);}
 .nav-tab:hover{background:rgba(255,255,255,.3);transform:translateY(-2px);}
 .nav-tab.active{background:rgba(255,255,255,.92);color:var(--dark);text-shadow:none;transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.22);}
 .nav-tab-ico{font-size:1.15rem;line-height:1;}
 .nav-tab-lbl{font-size:.6rem;letter-spacing:.2px;}
-.h-mic{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:50px;padding:.3rem .7rem;flex-shrink:0;cursor:pointer;}
+.h-mic{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:50px;padding:.3rem .55rem;flex-shrink:0;cursor:pointer;}
 .h-mic-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transition:all .3s;flex-shrink:0;}
 .h-mic-dot.on{background:#ff4f4f;box-shadow:0 0 8px #ff4f4f;animation:micPulse 1s ease infinite;}
 @keyframes micPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.h-heard{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.9);width:80px; min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.h-heard{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.9);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ── CONTENT ── */
 #content{margin-top:var(--hh);min-height:calc(100vh - var(--hh));position:relative;z-index:10;}
@@ -1088,7 +1088,8 @@ function initRecog(){
   // We just restart the SAME instance — no new object, no new permission check.
   recog.onend=()=>{ micActive=false; setMicVis(false); setTimeout(micRestart, 300); };
 
-  micRestart();
+  // NOTE: caller is responsible for calling micRestart() — we do NOT call it here
+  // to avoid a double-start when invoked from grantPermission().
   if(window.speechSynthesis) window.speechSynthesis.getVoices();
 }
 
@@ -1105,69 +1106,67 @@ function micRestart(){
 /* ════════════════════════════════════
    BOOT — smart permission check
 ════════════════════════════════════ */
-/* ─────────────────────────────────────────────────────────────
-   openMic() — opens getUserMedia and KEEPS THE STREAM ALIVE.
-   This is the secret: while micStream is open Chrome treats the
-   mic as already in use, so SpeechRecognition.start() never
-   shows its own extra popup.  We call this exactly once.
-───────────────────────────────────────────────────────────── */
-async function openMic(){
-  if(micStream) return true;
-  try{
-    micStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-    // Pipe through AudioContext so Chrome sees mic as "actively in use".
-    // This prevents SpeechRecognition from triggering its own separate popup.
-    try{
-      const ctx=new(window.AudioContext||window.webkitAudioContext)();
-      const src=ctx.createMediaStreamSource(micStream);
-      const gain=ctx.createGain(); gain.gain.value=0;
-      src.connect(gain); gain.connect(ctx.destination);
-    }catch(e){}
-    return true;
-  }catch(e){ return false; }
-}
-
-(async function boot(){
-  buildBg();
-  if(window.speechSynthesis) window.speechSynthesis.getVoices();
-
-  // If we saved the flag before, open the stream silently (no popup — browser remembers)
-  // then go straight to the hub.
-  if(localStorage.getItem('hub_mic_ok')==='1'){
-    const ok = await openMic();
-    if(ok){
-      document.getElementById('perm-screen').style.display='none';
-      initRecog();
-    } else {
-      // Permission was revoked in browser settings — clear flag, show screen
-      localStorage.removeItem('hub_mic_ok');
-      document.getElementById('perm-screen').style.display='flex';
-    }
-  } else {
-    // First time — show our friendly screen, user taps once
-    document.getElementById('perm-screen').style.display='flex';
-  }
-
-  VB.init();
-  WB.buildHome();
-  await RB.init();
-})();
-
+/* ════════════════════════════════════════════════════════════
+   MICROPHONE — single prompt, one tap, works forever
+   ────────────────────────────────────────────────────────────
+   The trick: call recog.start() DIRECTLY from the button-click
+   handler (a real user gesture). Chrome shows ONE prompt.
+   After Allow, we keep the same recog instance running forever
+   by restarting it in onend. We never call getUserMedia or
+   create a second SpeechRecognition — that's what caused the
+   double-prompt. localStorage remembers so on next load we
+   skip the screen and start silently.
+════════════════════════════════════════════════════════════ */
 async function grantPermission(){
-  const btn=document.querySelector('.perm-btn');
-  const st=document.getElementById('perm-status');
-  btn.disabled=true; btn.textContent='⏳ Waiting…';
-  st.textContent='Tap Allow when your browser asks ☝️';
-  const ok = await openMic();
-  if(ok){
-    localStorage.setItem('hub_mic_ok','1');  // remember forever
-    st.textContent='✅ Got it! Opening Hub…';
-    btn.textContent='🎉 Let\'s Go!';
-    setTimeout(()=>{ document.getElementById('perm-screen').style.display='none'; initRecog(); }, 500);
-  } else {
-    btn.disabled=false; btn.textContent='🎤 Try Again';
-    st.textContent='❌ Microphone blocked. In your browser bar, click the 🔒 lock icon → Site settings → Microphone → Allow, then refresh.';
-  }
+  const btn = document.querySelector('.perm-btn');
+  const st  = document.getElementById('perm-status');
+
+  // Disable button immediately — never let it be tapped twice
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Starting…'; }
+  if(st)  st.textContent='When Chrome asks — tap Allow ☝️';
+
+  // Create recognition object inside the user gesture (this tap)
+  // so Chrome links this request to the button click
+  initRecog();
+
+  // Attach ONE-TIME handlers BEFORE calling start()
+  // These fire exactly once and tell us if it worked
+  const origOnStart = recog.onstart;
+  const origOnError = recog.onerror;
+
+  recog.onstart = function(e){
+    // SUCCESS — mic is live
+    recog.onstart = origOnStart; // restore normal handler
+    recog.onerror = origOnError;
+    micActive = true;
+    setMicVis(true); // turn on red dot immediately
+    try{ localStorage.setItem('hub_mic_ok','1'); }catch(ex){}
+    if(st)  st.textContent = '✅ Microphone on! Opening hub…';
+    if(btn) btn.textContent = "🎉 Done!";
+    // Hide perm screen smoothly
+    setTimeout(()=>{
+      const ps = document.getElementById('perm-screen');
+      if(ps){ ps.style.transition='opacity .5s'; ps.style.opacity='0';
+              setTimeout(()=>{ ps.style.display='none'; },500); }
+    }, 600);
+  };
+
+  recog.onerror = function(e){
+    recog.onstart = origOnStart;
+    recog.onerror = origOnError;
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      // User tapped Deny
+      if(btn){ btn.disabled=false; btn.textContent='🎤 Try Again'; }
+      if(st)  st.textContent='❌ Tap Allow when Chrome asks! Click 🔒 in browser bar → Microphone → Allow, then refresh.';
+    } else {
+      // Any other error (aborted, network) — just try to restart normally
+      origOnError && origOnError.call(recog, e);
+    }
+  };
+
+  // This ONE call triggers the Chrome permission popup.
+  // initRecog() no longer calls micRestart() itself, so this is the only start call.
+  micRestart();
 }
 
 /* ════════════════════════════════════
@@ -3129,6 +3128,29 @@ const MZ={
     ttsSpeak(title+' You scored '+this.score+' points! Say play again or pick a different game!',null,{rate:.88});
   },
 };
+
+(async function boot(){
+  buildBg();
+  if(window.speechSynthesis) window.speechSynthesis.getVoices();
+
+  // If we saved the flag before, open the stream silently (no popup — browser remembers)
+  // then go straight to the hub.
+  if(localStorage.getItem('hub_mic_ok')==='1'){
+    // Previously granted — start silently, no prompt needed
+    const ps = document.getElementById('perm-screen');
+    if(ps) ps.style.display='none';
+    initRecog();
+    micRestart();
+  } else {
+    // First time — show the friendly permission screen
+    const ps = document.getElementById('perm-screen');
+    if(ps) ps.style.display='flex';
+  }
+
+  VB.init();
+  WB.buildHome();
+  await RB.init();
+})()
 </script>
 </body>
 </html>
