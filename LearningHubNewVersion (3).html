@@ -315,41 +315,125 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 
 /* ══ MATH FUN ZONE ══ */
 #panel-math{}
-.mz-container{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:1.1rem .9rem 4rem;}
-.mz-game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.9rem;margin-bottom:1.2rem;}
+.mz-container{position:relative;z-index:10;max-width:920px;margin:0 auto;padding:1.1rem .9rem 4rem;}
+.mz-game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.9rem;margin-bottom:1rem;}
 .mz-game-card{background:#fff;border:5px solid transparent;border-radius:var(--r);padding:1rem .75rem;cursor:pointer;font-weight:900;color:var(--dark);text-align:center;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:.3rem;user-select:none;}
 .mz-game-card:hover{transform:translateY(-4px);box-shadow:0 10px 0 rgba(0,0,0,.1);}
 .mz-game-card:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.1);}
 .mz-game-card.mz-sel{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.1);}
 .mz-game-card.mz-vsel{animation:mzVsel .35s ease infinite alternate;}
 @keyframes mzVsel{from{transform:scale(1);}to{transform:scale(1.05);}}
-.mz-game-card:nth-child(1){border-color:var(--blue);}
-.mz-game-card:nth-child(2){border-color:var(--orange);}
-.mz-game-card:nth-child(3){border-color:var(--purple);}
-.mz-game-card:nth-child(4){border-color:var(--green);}
+.mz-game-card:nth-child(1){border-color:var(--blue);--gc:var(--blue);}
+.mz-game-card:nth-child(2){border-color:var(--orange);--gc:var(--orange);}
+.mz-game-card:nth-child(3){border-color:var(--purple);--gc:var(--purple);}
+.mz-game-card:nth-child(4){border-color:var(--green);--gc:var(--green);}
+.mz-game-card.mz-sel,.mz-game-card:hover{box-shadow:0 6px 0 rgba(0,0,0,.1),0 0 0 3px var(--gc,#aaa);}
 .mz-gc-icon{font-size:2.4rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));}
 .mz-gc-name{font-size:.95rem;font-weight:900;}
 .mz-gc-type{font-size:.67rem;color:#aaa;font-weight:700;}
 .mz-gc-hint{font-size:.6rem;color:#bbb;font-weight:700;}
-#mz-panel{background:#fff;border-radius:28px;padding:1.6rem 1.2rem;box-shadow:0 7px 0 rgba(0,0,0,.1);position:relative;overflow:hidden;min-height:320px;}
-#mz-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,var(--pink),var(--yellow),var(--green),var(--blue),var(--purple));border-radius:28px 28px 0 0;}
-.mz-mascot-row{display:flex;align-items:center;justify-content:center;gap:1.2rem;margin-bottom:.7rem;flex-wrap:wrap;}
+
+/* Difficulty row */
+.mz-diff-grid{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem;background:#fff;border-radius:18px;padding:.75rem 1rem;box-shadow:0 4px 0 rgba(0,0,0,.07);border:2px solid #f0e8ff;}
+.mz-diff-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
+.mz-diff-label{font-family:'Fredoka One',sans-serif;font-size:.78rem;color:var(--dark);min-width:128px;flex-shrink:0;}
+.mz-diff-btn{padding:.28rem .75rem;border-radius:30px;border:2.5px solid #e0d4ff;background:#f8f4ff;font-family:'Nunito',sans-serif;font-weight:900;font-size:.76rem;color:#9a6fd4;cursor:pointer;transition:all .15s;box-shadow:0 3px 0 #e0d4ff;}
+.mz-diff-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #d4b8ff;border-color:var(--purple);color:var(--purple2);}
+.mz-diff-btn.active{box-shadow:0 3px 0 rgba(0,0,0,.12);transform:translateY(1px);}
+.mz-diff-btn[data-level="easy"].active{background:#d4ffd4;border-color:#1fad44;color:#007020;box-shadow:0 3px 0 #1fad44;}
+.mz-diff-btn[data-level="medium"].active{background:#fff8c0;border-color:#ffb800;color:#886000;box-shadow:0 3px 0 #ffb800;}
+.mz-diff-btn[data-level="hard"].active{background:#ffd4d4;border-color:#ff4f4f;color:#c00000;box-shadow:0 3px 0 #ff4f4f;}
+
+/* Panel two-column layout */
+#mz-panel{background:#fff;border-radius:28px;box-shadow:0 7px 0 rgba(0,0,0,.1);position:relative;overflow:hidden;min-height:360px;}
+#mz-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,var(--pink),var(--yellow),var(--green),var(--blue),var(--purple));border-radius:28px 28px 0 0;z-index:2;}
+.mz-panel-cols{display:grid;grid-template-columns:1fr 1.5fr;gap:0;padding-top:8px;min-height:460px;}
+@media(max-width:680px){.mz-panel-cols{grid-template-columns:1fr;min-height:auto;}}
+
+/* Work col (left) */
+.mz-work-col{border-right:3px dashed #f0e8ff;padding:1rem .9rem 1rem 1.1rem;display:flex;flex-direction:column;gap:.6rem;background:linear-gradient(180deg,#fafbff 0%,#f5f0ff 100%);}
+.mz-work-col-title{font-family:'Fredoka One',sans-serif;font-size:.92rem;color:var(--purple2);display:flex;align-items:center;gap:.35rem;border-bottom:2px solid #e8dcff;padding-bottom:.35rem;}
+
+/* Column math */
+.mz-col-math{background:#fff;border-radius:14px;padding:.7rem;box-shadow:0 3px 0 #e8e0f8;border:2px solid #e0d4ff;}
+.mz-col-math-title{font-size:.65rem;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:.45rem;}
+.mz-col-math-grid{display:grid;gap:.25rem;}
+.mz-col-row{display:flex;align-items:center;gap:.25rem;justify-content:flex-end;}
+.mz-col-label{font-size:.6rem;font-weight:900;color:#bbb;text-align:center;flex-shrink:0;width:26px;}
+.mz-col-digit{width:34px;height:38px;background:#f5f0ff;border:2px solid #d4b8ff;border-radius:9px;font-family:'Fredoka One',sans-serif;font-size:1.2rem;color:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mz-col-digit.h{background:#fff0e0;border-color:#ffd6a0;color:#c05000;}
+.mz-col-digit.t{background:#e0f0ff;border-color:#a8d8ff;color:#0060a0;}
+.mz-col-digit.u{background:#e0ffe8;border-color:#a0ffb8;color:#007020;}
+.mz-col-digit.empty{background:#f8f8f8;border-color:#eee;color:#ccc;}
+.mz-col-op-row{border-top:3px solid var(--purple2);padding-top:.25rem;margin-top:.1rem;}
+.mz-col-op-sym{font-family:'Fredoka One',sans-serif;font-size:1.1rem;color:var(--purple2);width:26px;text-align:center;}
+
+/* Carry / borrow row */
+.mz-carry-row{display:flex;align-items:center;gap:.25rem;justify-content:flex-end;min-height:20px;margin-bottom:1px;}
+.mz-carry-bubble{width:34px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mz-carry-bubble .mz-carry-val{background:#ff8c3d;color:#fff;border-radius:5px;font-family:'Fredoka One',sans-serif;font-size:.7rem;width:17px;height:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #c05000;animation:mzCarryPop .3s ease;}
+@keyframes mzCarryPop{0%{transform:scale(0) translateY(4px)}70%{transform:scale(1.2) translateY(-2px)}100%{transform:scale(1) translateY(0)}}
+.mz-carry-lent{display:flex;flex-direction:column;align-items:center;line-height:1;gap:1px;}
+.mz-carry-cross{font-family:'Fredoka One',sans-serif;font-size:.6rem;color:#bbb;text-decoration:line-through;text-decoration-color:#f87171;text-decoration-thickness:2px;}
+.mz-carry-new{font-family:'Fredoka One',sans-serif;font-size:.74rem;color:#c05000;font-weight:900;background:#fff0e0;border-radius:4px;padding:0 3px;border:1.5px solid #ffd6a0;animation:mzCarryPop .3s ease;}
+.mz-carry-new-received{background:#dcfce7!important;border-color:#16a34a!important;color:#15803d!important;font-size:.8rem!important;}
+
+/* Answer digit boxes */
+.mz-ans-blank{background:#fffde8;border:3px dashed #ffd600!important;cursor:pointer;position:relative;transition:all .2s;}
+.mz-ans-blank:hover{background:#fff9c0;border-color:var(--yellow2)!important;transform:scale(1.1);}
+.mz-ans-blank .mz-blank-line{font-family:'Fredoka One',sans-serif;font-size:1rem;color:#e0cc00;font-weight:900;}
+.mz-ans-blank.mz-active-box{border:3px solid var(--blue)!important;background:#e8f4ff!important;box-shadow:0 0 0 3px rgba(62,181,255,.35);transform:scale(1.1);}
+.mz-ans-blank.mz-filled{background:#e8ffe8;border:3px solid var(--green2)!important;animation:mzBoxFill .25s ease;cursor:pointer;}
+.mz-ans-blank.mz-filled .mz-blank-line{color:var(--green2);font-size:1.2rem;}
+@keyframes mzBoxFill{0%{transform:scale(.8)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* Digit strip */
+.mz-digit-strip{display:flex;align-items:center;gap:.22rem;justify-content:center;padding:.35rem .15rem;background:#f0f4ff;border-radius:9px;margin-top:.3rem;border:2px solid #c8d8ff;flex-wrap:wrap;}
+.mz-digit-strip .mz-ds-label{font-size:.6rem;font-weight:900;color:#7090d0;margin-right:.1rem;white-space:nowrap;}
+.mz-ds-btn{width:28px;height:32px;background:#fff;border:2px solid #c8d8ff;border-radius:7px;font-family:'Fredoka One',sans-serif;font-size:.95rem;color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;box-shadow:0 2px 0 #c8d8ff;}
+.mz-ds-btn:hover,.mz-ds-btn:active{background:var(--blue);color:#fff;border-color:var(--blue2);transform:translateY(-2px);box-shadow:0 4px 0 var(--blue2);}
+
+/* Times grid / div visual */
+.mz-times-grid{background:#fff;border-radius:13px;padding:.6rem;border:2px solid #e0d4ff;box-shadow:0 3px 0 #e8e0f8;}
+.mz-times-grid-title{font-size:.65rem;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:.35rem;text-align:center;}
+.mz-times-dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;}
+.mz-tdot{border-radius:50%;background:var(--purple);opacity:.7;transition:transform .1s;}
+.mz-tdot:hover{transform:scale(1.3);opacity:1;}
+.mz-times-sep{width:100%;height:3px;background:rgba(0,0,0,.06);border-radius:2px;margin:2px 0;}
+.mz-div-visual{background:#fff;border-radius:13px;padding:.6rem .7rem;border:2px solid #e0d4ff;box-shadow:0 3px 0 #e8e0f8;}
+.mz-div-groups{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;margin-top:.35rem;}
+.mz-div-group{background:#f5f0ff;border:2px solid #d4b8ff;border-radius:7px;padding:.25rem .35rem;display:flex;flex-wrap:wrap;gap:2px;min-width:28px;justify-content:center;}
+.mz-div-dot{border-radius:50%;background:var(--purple2);opacity:.7;}
+
+/* Explainer */
+.mz-explainer{background:linear-gradient(135deg,#fff8e0,#fffde8);border:3px solid var(--yellow2);border-radius:16px;padding:.85rem 1rem;margin-top:.5rem;animation:mzExpSlide .4s ease;}
+@keyframes mzExpSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mz-explainer-title{font-family:'Fredoka One',sans-serif;font-size:.92rem;color:var(--orange2);margin-bottom:.5rem;display:flex;align-items:center;gap:.35rem;}
+.mz-exp-steps{display:flex;flex-direction:column;gap:.45rem;}
+.mz-exp-step{display:flex;align-items:flex-start;gap:.5rem;animation:mzStepIn .3s ease both;}
+@keyframes mzStepIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.mz-exp-num{background:var(--yellow);color:var(--dark);border-radius:50%;width:22px;height:22px;flex-shrink:0;font-family:'Fredoka One',sans-serif;font-size:.8rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 var(--yellow2);}
+.mz-exp-text{font-size:.8rem;font-weight:700;color:var(--dark);line-height:1.5;padding-top:.12rem;}
+.mz-exp-text .mz-hi{background:var(--yellow);padding:.04rem .28rem;border-radius:4px;font-size:.95rem;}
+.mz-exp-text .mz-ans{background:var(--green);color:#fff;padding:.04rem .35rem;border-radius:5px;font-size:1rem;display:inline-block;}
+
+/* Right col (question + answers) */
+.mz-question-col{padding:1rem 1.1rem .9rem .9rem;display:flex;flex-direction:column;gap:.45rem;}
+.mz-mascot-row{display:flex;align-items:center;justify-content:center;gap:1.1rem;margin-bottom:.6rem;flex-wrap:wrap;}
 .mz-mascot{font-size:clamp(2.6rem,7vw,4.5rem);filter:drop-shadow(0 4px 8px rgba(0,0,0,.12));animation:mascotBounce 2.5s ease-in-out infinite;user-select:none;}
 .mz-mascot.cheer{animation:mzCheer .6s ease!important;}
 @keyframes mzCheer{0%{transform:scale(1);}30%{transform:scale(1.3) rotate(-8deg);}60%{transform:scale(1.15) rotate(6deg);}100%{transform:scale(1);}}
 .mz-mascot.sad{animation:mzSad .5s ease!important;}
 @keyframes mzSad{0%,100%{transform:translateX(0);}25%{transform:translateX(-9px);}75%{transform:translateX(9px);}}
-.mz-speech{background:var(--yellow);border-radius:16px;padding:.5rem .9rem;font-family:'Fredoka One',sans-serif;font-size:clamp(.88rem,2.1vw,1.2rem);color:var(--dark);box-shadow:0 4px 0 rgba(0,0,0,.1);position:relative;max-width:260px;text-align:center;}
+.mz-speech{background:var(--yellow);border-radius:16px;padding:.5rem .9rem;font-family:'Fredoka One',sans-serif;font-size:clamp(.88rem,2.1vw,1.2rem);color:var(--dark);box-shadow:0 4px 0 rgba(0,0,0,.1);position:relative;max-width:260px;text-align:center;transition:all .3s;}
 .mz-speech::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:var(--yellow);}
-.mz-q-box{text-align:center;margin:.8rem 0 .6rem;}
+.mz-q-box{text-align:center;margin:.75rem 0 .55rem;}
 .mz-q-text{font-family:'Fredoka One',sans-serif;font-size:clamp(2rem,7vw,4.2rem);color:var(--dark);line-height:1.1;}
 .mz-n1{color:var(--blue2);}
 .mz-op{color:var(--purple2);margin:0 .18em;}
 .mz-n2{color:var(--orange2);}
 .mz-qmark{color:#ccc;}
-.mz-timer-wrap{height:6px;background:#eee;border-radius:4px;margin:.4rem auto;max-width:360px;overflow:hidden;}
-.mz-timer-bar{height:100%;border-radius:4px;transition:width .1s linear,background .3s;}
-.mz-answers{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.7rem 0;}
+.mz-answers{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.65rem 0;}
 .mz-ans{background:#fff;border:5px solid #e5e5e5;border-radius:20px;padding:1rem .6rem;font-family:'Fredoka One',sans-serif;font-size:clamp(1.5rem,4.2vw,2.4rem);color:var(--dark);text-align:center;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s,background .12s;box-shadow:0 5px 0 #e0e0e0;user-select:none;min-height:76px;display:flex;align-items:center;justify-content:center;}
 .mz-ans:hover{transform:translateY(-3px);box-shadow:0 8px 0 #d0d0d0;border-color:#bbb;}
 .mz-ans:active{transform:translateY(2px);box-shadow:0 2px 0 #d0d0d0;}
@@ -362,8 +446,22 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 @keyframes mzCardPop{0%{transform:scale(1);}40%{transform:scale(1.16);}100%{transform:scale(1);}}
 .mz-ans.mz-wrong{border-color:var(--red)!important;background:linear-gradient(135deg,#ffd4d4,#ffb8b8)!important;animation:mzCardShake .4s ease;}
 @keyframes mzCardShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}
-.mz-v-hint{background:#f5f0ff;border:2px solid #d4b8ff;border-radius:11px;padding:.32rem .75rem;font-size:.77rem;font-weight:700;color:#9a6fd4;text-align:center;margin-top:.35rem;}
-.mz-dots{display:flex;justify-content:center;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;}
+
+/* Voice feedback box */
+.mz-voice-feedback{display:flex;align-items:center;justify-content:center;gap:.7rem;background:linear-gradient(135deg,#f5f0ff,#eef5ff);border:3px solid #d4b8ff;border-radius:16px;padding:.6rem 1rem;margin-top:.5rem;min-height:52px;transition:border-color .2s,background .2s;position:relative;overflow:hidden;}
+.mz-voice-feedback.listening{border-color:var(--blue);background:linear-gradient(135deg,#eef8ff,#f0f8ff);animation:mzVfPulse 1.8s ease-in-out infinite;}
+@keyframes mzVfPulse{0%,100%{box-shadow:0 0 0 0 rgba(62,181,255,.3)}50%{box-shadow:0 0 0 8px rgba(62,181,255,0)}}
+.mz-voice-feedback.mz-vf-active{border-color:var(--green2)!important;background:linear-gradient(135deg,#d4ffde,#eaffee)!important;}
+.mz-voice-feedback.mz-vf-bad{border-color:var(--red)!important;background:linear-gradient(135deg,#fff0f0,#ffe0e0)!important;}
+.mz-vf-mic{font-size:1.45rem;flex-shrink:0;}
+.mz-vf-word{font-family:'Fredoka One',sans-serif;font-size:clamp(1rem,2.8vw,1.45rem);color:var(--dark);flex:1;text-align:center;transition:all .15s;letter-spacing:.4px;}
+.mz-vf-word.interim{color:var(--blue2);opacity:.7;}
+.mz-vf-word.final{color:var(--green2);font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;}
+.mz-vf-word.bad{color:var(--red);}
+.mz-vf-status{font-size:.67rem;font-weight:700;color:#9a6fd4;flex-shrink:0;text-align:right;line-height:1.3;}
+
+.mz-v-hint{background:#f5f0ff;border:2px solid #d4b8ff;border-radius:11px;padding:.32rem .75rem;font-size:.74rem;font-weight:700;color:#9a6fd4;text-align:center;margin-top:.3rem;}
+.mz-dots{display:flex;justify-content:center;gap:.5rem;margin-top:.75rem;flex-wrap:wrap;}
 .mz-dot{width:13px;height:13px;border-radius:50%;background:#e8e8e8;border:3px solid #ddd;transition:all .3s;}
 .mz-dot.done{background:var(--green);border-color:var(--green2);box-shadow:0 0 5px var(--green);}
 .mz-dot.cur{background:var(--yellow);border-color:var(--yellow2);box-shadow:0 0 7px var(--yellow);animation:mzDotPulse .5s ease infinite alternate;}
@@ -474,903 +572,7 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 /* ══ TOAST ══ */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:linear-gradient(135deg,var(--purple2),var(--blue));color:#fff;padding:.55rem 1.3rem;border-radius:50px;font-weight:800;font-size:.85rem;z-index:9100;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 5px 20px rgba(0,0,0,.22);}
 #toast.show{transform:translateX(-50%) translateY(0);}
-  
-/* ══ MATH GAME FULL ENGINE CSS ══ */
-/* Difficulty selectors */
-.diff-grid{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem;background:#fff;border-radius:20px;padding:.9rem 1.1rem;box-shadow:0 4px 0 rgba(0,0,0,.07);border:2px solid #f0e8ff;}
-.diff-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
-.diff-label{font-family:'Fredoka One',sans-serif;font-size:.82rem;color:var(--dark);min-width:130px;flex-shrink:0;}
-.diff-btn{padding:.3rem .85rem;border-radius:30px;border:2.5px solid #e0d4ff;background:#f8f4ff;font-family:'Nunito',sans-serif;font-weight:900;font-size:.8rem;color:#9a6fd4;cursor:pointer;transition:all .15s;box-shadow:0 3px 0 #e0d4ff;}
-.diff-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #d4b8ff;border-color:var(--purple);}
-.diff-btn.active{box-shadow:0 3px 0 rgba(0,0,0,.12);transform:translateY(1px);}
-.diff-btn[data-level="easy"].active{background:#d4ffd4;border-color:#1fad44;color:#007020;box-shadow:0 3px 0 #1fad44;}
-.diff-btn[data-level="medium"].active{background:#fff8c0;border-color:#ffb800;color:#886000;box-shadow:0 3px 0 #ffb800;}
-.diff-btn[data-level="hard"].active{background:#ffd4d4;border-color:#ff4f4f;color:#c00000;box-shadow:0 3px 0 #ff4f4f;}
 
-
-/* ─────────────────────────────────────────────
-   VARIABLES
-───────────────────────────────────────────── */
-:root{
-  --pink:#ff6bb5;   --pink2:#ff3d9a;
-  --yellow:#ffe135; --yellow2:#ffb800;
-  --green:#3ddc68;  --green2:#1fad44;
-  --blue:#3eb5ff;   --blue2:#007fd4;
-  --purple:#b36bff; --purple2:#7b2fff;
-  --orange:#ff8c3d; --orange2:#e05c00;
-  --red:#ff4f4f;
-  --white:#fff;
-  --dark:#2a1a4a;
-  --card-bg:#fff;
-  --r:28px;
-}
-
-/* ─────────────────────────────────────────────
-   BODY — animated gradient sky
-───────────────────────────────────────────── */
-
-/* Zone backgrounds */
-
-/* ─────────────────────────────────────────────
-   ANIMATED FLOATING SHAPES IN BG
-───────────────────────────────────────────── */
-
-/* ─────────────────────────────────────────────
-   FLOATING CLOUDS / DECO EMOJIS
-───────────────────────────────────────────── */
-
-/* ─────────────────────────────────────────────
-   PERMISSION SCREEN
-───────────────────────────────────────────── */
-
-/* ─────────────────────────────────────────────
-   HEADER
-───────────────────────────────────────────── */
-/* Score pill */
-
-/* Streak pill */
-@keyframes streakPop{0%{transform:scale(.7)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
-
-/* Mic pill */
-@keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}
-/* ─────────────────────────────────────────────
-   MAIN CONTAINER
-───────────────────────────────────────────── */
-
-/* ─────────────────────────────────────────────
-   GAME SELECTOR CARDS
-───────────────────────────────────────────── */
-.game-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:1rem;
-  margin-bottom:1.5rem;
-}
-.game-card{
-  background:#fff;
-  border:5px solid transparent;
-  border-radius:var(--r);
-  padding:1.2rem .9rem;
-  cursor:pointer;
-  font-family:'Nunito',sans-serif;
-  font-weight:900;
-  color:var(--dark);
-  text-align:center;
-  transition:transform .15s,box-shadow .15s;
-  box-shadow:0 6px 0 rgba(0,0,0,.1);
-  display:flex;flex-direction:column;
-  align-items:center;gap:.4rem;
-  user-select:none;
-}
-.game-card:hover{transform:translateY(-5px);box-shadow:0 11px 0 rgba(0,0,0,.1);}
-.game-card.active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.1);}
-.game-card.voice-sel{animation:vSel .35s ease infinite alternate;}
-@keyframes vSel{from{transform:scale(1)}to{transform:scale(1.06);}}
-.game-card:nth-child(1){border-color:var(--blue);   --gc:var(--blue);}
-.game-card:nth-child(2){border-color:var(--orange);  --gc:var(--orange);}
-.game-card:nth-child(3){border-color:var(--purple);  --gc:var(--purple);}
-.game-card:nth-child(4){border-color:var(--green);   --gc:var(--green);}
-.game-card.active,.game-card:hover{box-shadow:0 6px 0 rgba(0,0,0,.1),0 0 0 3px var(--gc);}
-.gc-icon{font-size:2.8rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));}
-.gc-name{font-size:1.05rem;font-weight:900;color:var(--dark);}
-.gc-type{font-size:.72rem;color:#aaa;font-weight:700;}
-.gc-hint{font-size:.65rem;color:#bbb;font-weight:700;}
-
-/* ─────────────────────────────────────────────
-   DIFFICULTY SELECTORS
-───────────────────────────────────────────── */
-.diff-grid{
-  display:flex;
-  flex-direction:column;
-  gap:.5rem;
-  margin-bottom:1.2rem;
-  background:#fff;
-  border-radius:20px;
-  padding:.9rem 1.1rem;
-  box-shadow:0 4px 0 rgba(0,0,0,.07);
-  border:2px solid #f0e8ff;
-}
-.diff-row{
-  display:flex;
-  align-items:center;
-  gap:.5rem;
-  flex-wrap:wrap;
-}
-.diff-label{
-  font-family:'Fredoka One',sans-serif;
-  font-size:.82rem;
-  color:var(--dark);
-  min-width:130px;
-  flex-shrink:0;
-}
-.diff-btn{
-  padding:.3rem .85rem;
-  border-radius:30px;
-  border:2.5px solid #e0d4ff;
-  background:#f8f4ff;
-  font-family:'Nunito',sans-serif;
-  font-weight:900;
-  font-size:.8rem;
-  color:#9a6fd4;
-  cursor:pointer;
-  transition:all .15s;
-  box-shadow:0 3px 0 #e0d4ff;
-}
-.diff-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 5px 0 #d4b8ff;
-  border-color:var(--purple);
-  color:var(--purple2);
-}
-.diff-btn.active{
-  box-shadow:0 3px 0 rgba(0,0,0,.12);
-  transform:translateY(1px);
-}
-.diff-btn[data-level="easy"].active{
-  background:#d4ffd4;border-color:#1fad44;color:#007020;box-shadow:0 3px 0 #1fad44;
-}
-.diff-btn[data-level="medium"].active{
-  background:#fff8c0;border-color:#ffb800;color:#886000;box-shadow:0 3px 0 #ffb800;
-}
-.diff-btn[data-level="hard"].active{
-  background:#ffd4d4;border-color:#ff4f4f;color:#c00000;box-shadow:0 3px 0 #ff4f4f;
-}
-
-/* ─────────────────────────────────────────────
-   GAME PANEL — two column layout
-───────────────────────────────────────────── */
-#game-panel{
-  background:#fff;
-  border-radius:32px;
-  box-shadow:0 8px 0 rgba(0,0,0,.1);
-  position:relative;
-  overflow:hidden;
-  min-height:360px;
-}
-/* Colourful top stripe */
-#game-panel::before{
-  content:'';
-  position:absolute;top:0;left:0;right:0;height:10px;
-  background:linear-gradient(90deg,var(--pink),var(--yellow),var(--green),var(--blue),var(--purple));
-  border-radius:32px 32px 0 0;
-  z-index:2;
-}
-
-/* Two-column wrapper inside the panel */
-.panel-cols{
-  display:grid;
-  grid-template-columns:1fr 1.5fr;
-  gap:0;
-  padding-top:10px; /* stripe offset */
-  min-height:480px;
-}
-@media(max-width:700px){
-  .panel-cols{grid-template-columns:1fr;min-height:auto;}
-}
-
-/* ── LEFT COL: work area ── */
-.work-col{
-  border-right:3px dashed #f0e8ff;
-  padding:1.2rem 1rem 1.2rem 1.2rem;
-  display:flex;
-  flex-direction:column;
-  gap:.7rem;
-  background:linear-gradient(180deg,#fafbff 0%,#f5f0ff 100%);
-}
-.work-col-title{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1rem;
-  color:var(--purple2);
-  display:flex;align-items:center;gap:.4rem;
-  border-bottom:2px solid #e8dcff;
-  padding-bottom:.4rem;
-}
-
-/* Column math layout (hundreds/tens/units) */
-.col-math{
-  background:#fff;
-  border-radius:16px;
-  padding:.8rem;
-  box-shadow:0 3px 0 #e8e0f8;
-  border:2px solid #e0d4ff;
-}
-.col-math-title{
-  font-size:.7rem;font-weight:900;
-  color:#aaa;
-  text-transform:uppercase;letter-spacing:1px;
-  text-align:center;
-  margin-bottom:.5rem;
-}
-.col-math-grid{
-  display:grid;
-  gap:.3rem;
-}
-.col-row{
-  display:flex;
-  align-items:center;
-  gap:.3rem;
-  justify-content:flex-end;
-}
-.col-label{
-  font-size:.65rem;font-weight:900;
-  color:#bbb;text-align:center;
-  flex-shrink:0;width:28px;
-}
-.col-digit{
-  width:36px;height:40px;
-  background:#f5f0ff;
-  border:2px solid #d4b8ff;
-  border-radius:10px;
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.3rem;
-  color:var(--dark);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.col-digit.h{background:#fff0e0;border-color:#ffd6a0;color:#c05000;}
-.col-digit.t{background:#e0f0ff;border-color:#a8d8ff;color:#0060a0;}
-.col-digit.u{background:#e0ffe8;border-color:#a0ffb8;color:#007020;}
-.col-digit.empty{background:#f8f8f8;border-color:#eee;color:#ccc;}
-
-/* Carry row — small bubbles above the top number */
-.carry-row{
-  display:flex;
-  align-items:center;
-  gap:.3rem;
-  justify-content:flex-end;
-  min-height:22px;
-  margin-bottom:1px;
-}
-.carry-bubble{
-  width:36px;height:22px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.carry-bubble .carry-val{
-  background:#ff8c3d;
-  color:#fff;
-  border-radius:6px;
-  font-family:'Fredoka One',sans-serif;
-  font-size:.75rem;
-  width:18px;height:18px;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 0 #c05000;
-  animation:carryPop .3s ease;
-}
-@keyframes carryPop{0%{transform:scale(0) translateY(4px)}70%{transform:scale(1.2) translateY(-2px)}100%{transform:scale(1) translateY(0)}}
-.carry-bubble.empty-carry{width:36px;}
-
-/* Lender column: crossed-out original + new smaller digit */
-.carry-lent{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  line-height:1;
-  gap:1px;
-}
-.carry-cross{
-  font-family:'Fredoka One',sans-serif;
-  font-size:.65rem;
-  color:#bbb;
-  text-decoration:line-through;
-  text-decoration-color:#f87171;
-  text-decoration-thickness:2px;
-}
-.carry-new{
-  font-family:'Fredoka One',sans-serif;
-  font-size:.8rem;
-  color:#c05000;
-  font-weight:900;
-  background:#fff0e0;
-  border-radius:4px;
-  padding:0 3px;
-  border:1.5px solid #ffd6a0;
-  animation:carryPop .3s ease;
-}
-
-/* Receiver column: boosted digit shown in green */
-.carry-new-received{
-  background:#dcfce7!important;
-  border-color:#16a34a!important;
-  color:#15803d!important;
-  font-size:.85rem!important;
-}
-
-/* Blank answer boxes that Kabir fills in */
-.col-digit.ans-blank{
-  background:#fffde8;
-  border:3px dashed #ffd600;
-  cursor:pointer;
-  position:relative;
-  transition:all .2s;
-}
-.col-digit.ans-blank:hover{
-  background:#fff9c0;
-  border-color:var(--yellow2);
-  transform:scale(1.1);
-}
-.col-digit.ans-blank .blank-line{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.1rem;
-  color:#e0cc00;
-  font-weight:900;
-}
-.col-digit.ans-blank.active-box{
-  border:3px solid var(--blue)!important;
-  background:#e8f4ff!important;
-  box-shadow:0 0 0 3px rgba(62,181,255,.35);
-  transform:scale(1.12);
-}
-.col-digit.ans-blank.filled{
-  background:#e8ffe8;
-  border:3px solid var(--green2);
-  animation:boxFill .25s ease;
-  cursor:pointer;
-}
-.col-digit.ans-blank.filled .blank-line{
-  color:var(--green2);
-  font-size:1.3rem;
-}
-@keyframes boxFill{0%{transform:scale(.8)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
-
-/* Inline digit strip — appears in a row below the answer boxes */
-.digit-strip-row{
-  display:flex;
-  align-items:center;
-  gap:.25rem;
-  justify-content:center;
-  padding:.4rem .2rem;
-  background:#f0f4ff;
-  border-radius:10px;
-  margin-top:.35rem;
-  border:2px solid #c8d8ff;
-  flex-wrap:wrap;
-}
-.digit-strip-row .ds-label{
-  font-size:.65rem;font-weight:900;
-  color:#7090d0;
-  margin-right:.1rem;
-  white-space:nowrap;
-}
-.ds-btn{
-  width:30px;height:34px;
-  background:#fff;
-  border:2px solid #c8d8ff;
-  border-radius:8px;
-  font-family:'Fredoka One',sans-serif;
-  font-size:1rem;
-  color:var(--dark);
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .1s;
-  box-shadow:0 2px 0 #c8d8ff;
-}
-.ds-btn:hover,.ds-btn:active{
-  background:var(--blue);
-  color:#fff;
-  border-color:var(--blue2);
-  transform:translateY(-2px);
-  box-shadow:0 4px 0 var(--blue2);
-}
-
-.col-op-row{
-  border-top:3px solid var(--purple2);
-  padding-top:.3rem;
-  margin-top:.1rem;
-}
-.col-op-sym{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.2rem;
-  color:var(--purple2);
-  width:28px;text-align:center;
-}
-
-/* Scratchpad writing area */
-.scratch-title{
-  font-size:.75rem;font-weight:900;
-  color:var(--purple2);
-  margin-bottom:.3rem;
-}
-.scratch-pad{
-  background:#fffef0;
-  border:2px dashed #ffd6a0;
-  border-radius:12px;
-  padding:.5rem;
-  min-height:64px;
-  display:flex;flex-wrap:wrap;gap:.4rem;
-  align-content:flex-start;
-  position:relative;
-}
-.scratch-pad-label{
-  position:absolute;top:4px;right:6px;
-  font-size:.6rem;font-weight:900;color:#ddd;letter-spacing:1px;text-transform:uppercase;
-}
-.scratch-num{
-  width:34px;height:34px;
-  background:#fff;
-  border:2px solid #ffd6a0;
-  border-radius:8px;
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.1rem;
-  color:var(--orange2);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  animation:placeNum .2s ease;
-  box-shadow:0 2px 0 #ffd6a0;
-}
-@keyframes placeNum{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
-.scratch-num:hover{background:#ffe0a0;border-color:var(--orange);}
-.scratch-clear{
-  font-size:.7rem;font-weight:900;
-  color:#bbb;
-  cursor:pointer;
-  padding:.2rem .5rem;
-  border-radius:6px;
-  border:1.5px solid #eee;
-  background:#fff;
-  align-self:flex-start;
-  margin-top:.2rem;
-  transition:all .12s;
-}
-.scratch-clear:hover{color:var(--red);border-color:var(--red);}
-
-/* Times table visual grid */
-.times-grid{
-  background:#fff;
-  border-radius:14px;
-  padding:.7rem;
-  border:2px solid #e0d4ff;
-  box-shadow:0 3px 0 #e8e0f8;
-}
-.times-grid-title{font-size:.7rem;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem;text-align:center;}
-.times-dots{
-  display:flex;flex-wrap:wrap;gap:3px;
-  justify-content:center;
-}
-.tdot{
-  width:14px;height:14px;border-radius:50%;
-  background:var(--purple);
-  opacity:.7;
-  transition:transform .1s;
-}
-.tdot:hover{transform:scale(1.3);opacity:1;}
-.times-group-sep{width:100%;height:3px;background:rgba(0,0,0,.06);border-radius:2px;margin:2px 0;}
-
-/* Division visual */
-.div-visual{
-  background:#fff;
-  border-radius:14px;
-  padding:.7rem .8rem;
-  border:2px solid #e0d4ff;
-  box-shadow:0 3px 0 #e8e0f8;
-}
-.div-groups{
-  display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;
-  margin-top:.4rem;
-}
-.div-group{
-  background:#f5f0ff;
-  border:2px solid #d4b8ff;
-  border-radius:8px;
-  padding:.3rem .4rem;
-  display:flex;flex-wrap:wrap;gap:2px;
-  min-width:32px;
-  justify-content:center;
-}
-.div-dot{
-  width:10px;height:10px;border-radius:50%;
-  background:var(--purple2);opacity:.7;
-}
-
-/* ── RIGHT COL: question + answers ── */
-.question-col{
-  padding:1.2rem 1.2rem 1rem 1rem;
-  display:flex;
-  flex-direction:column;
-  gap:.5rem;
-}
-
-/* ─────────────────────────────────────────────
-   CHARACTER / MASCOT AREA
-───────────────────────────────────────────── */
-.mascot-row{
-  display:flex;align-items:center;justify-content:center;
-  gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;
-}
-.mascot{
-  font-size:clamp(3rem,8vw,5.5rem);
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.12));
-  animation:mascotBounce 2.5s ease-in-out infinite;
-  user-select:none;
-}
-@keyframes mascotCheer{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-8deg)}60%{transform:scale(1.2) rotate(6deg)}100%{transform:scale(1) rotate(0)}}
-.mascot.sad{animation:mascotSad .5s ease!important;}
-@keyframes mascotSad{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
-
-.speech-bubble{
-  background:var(--yellow);
-  border-radius:20px;
-  padding:.6rem 1.2rem;
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(1rem,2.5vw,1.4rem);
-  color:var(--dark);
-  box-shadow:0 4px 0 rgba(0,0,0,.1);
-  position:relative;
-  max-width:300px;
-  text-align:center;
-  transition:all .3s;
-}
-.speech-bubble::before{
-  content:'';
-  position:absolute;left:-14px;top:50%;transform:translateY(-50%);
-  border:8px solid transparent;
-  border-right-color:var(--yellow);
-}
-
-/* ─────────────────────────────────────────────
-   QUESTION
-───────────────────────────────────────────── */
-.q-box{
-  text-align:center;
-  margin:1rem 0 .8rem;
-}
-.q-text{
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(2.5rem,8vw,5rem);
-  color:var(--dark);
-  line-height:1.1;
-}
-.q-text .n1{color:var(--blue2);}
-.q-text .op{color:var(--purple2);margin:0 .2em;}
-.q-text .n2{color:var(--orange2);}
-.q-text .qmark{color:#ccc;}
-
-/* ─────────────────────────────────────────────
-   ANSWER CARDS
-───────────────────────────────────────────── */
-.answers{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:1rem;
-  margin:1rem 0;
-}
-.ans-card{
-  background:#fff;
-  border:5px solid #e5e5e5;
-  border-radius:22px;
-  padding:1.3rem .8rem;
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(1.8rem,5vw,2.8rem);
-  color:var(--dark);
-  text-align:center;
-  cursor:pointer;
-  transition:transform .12s,box-shadow .12s,border-color .12s,background .12s;
-  box-shadow:0 6px 0 #e0e0e0;
-  user-select:none;
-  min-height:90px;
-  display:flex;align-items:center;justify-content:center;
-  gap:.3rem;flex-direction:column;
-}
-.ans-card:hover{transform:translateY(-4px);box-shadow:0 10px 0 #d0d0d0;border-color:#bbb;}
-.ans-card:active{transform:translateY(2px);box-shadow:0 2px 0 #d0d0d0;}
-
-/* Answer colors — each card gets a fun pastel */
-.ans-card:nth-child(1){border-color:#a8d8ff;background:#f0f8ff;}
-.ans-card:nth-child(2){border-color:#ffd6a8;background:#fff8f0;}
-.ans-card:nth-child(3){border-color:#d4a8ff;background:#f8f0ff;}
-.ans-card:nth-child(4){border-color:#a8ffce;background:#f0fff6;}
-
-.ans-card.voice-hi{
-  border-color:var(--yellow2)!important;
-  background:linear-gradient(135deg,#fff8c0,#fff3a0)!important;
-  transform:scale(1.07)!important;
-  box-shadow:0 0 0 4px var(--yellow2),0 8px 0 #d0c000!important;
-  animation:cardGlow .25s ease;
-}
-@keyframes cardGlow{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1.07)}}
-.ans-card.correct{
-  border-color:var(--green2)!important;
-  background:linear-gradient(135deg,#d4ffde,#b8ffc8)!important;
-  animation:cardPop .4s ease;
-  box-shadow:0 0 0 4px var(--green2),0 6px 0 var(--green2)!important;
-}
-@keyframes cardPop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
-.ans-card.wrong{
-  border-color:var(--red)!important;
-  background:linear-gradient(135deg,#ffd4d4,#ffb8b8)!important;
-  animation:cardShake .4s ease;
-}
-@keyframes cardShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
-
-/* ─────────────────────────────────────────────
-   LIVE VOICE FEEDBACK BOX
-───────────────────────────────────────────── */
-.voice-feedback{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:.8rem;
-  background:linear-gradient(135deg,#f5f0ff,#eef5ff);
-  border:3px solid #d4b8ff;
-  border-radius:18px;
-  padding:.7rem 1.2rem;
-  margin-top:.6rem;
-  min-height:56px;
-  transition:border-color .2s, background .2s;
-  position:relative;
-  overflow:hidden;
-}
-.voice-feedback.listening{
-  border-color:var(--blue);
-  background:linear-gradient(135deg,#eef8ff,#f0f8ff);
-  animation:vfPulse 1.8s ease-in-out infinite;
-}
-@keyframes vfPulse{0%,100%{box-shadow:0 0 0 0 rgba(62,181,255,.3)}50%{box-shadow:0 0 0 8px rgba(62,181,255,0)}}
-.voice-feedback.heard-active{
-  border-color:var(--green2)!important;
-  background:linear-gradient(135deg,#d4ffde,#eaffee)!important;
-  animation:vfCorrect .4s ease;
-}
-@keyframes vfCorrect{0%{transform:scale(.97)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
-.voice-feedback.bad{
-  border-color:var(--red)!important;
-  background:linear-gradient(135deg,#fff0f0,#ffe0e0)!important;
-}
-
-/* Mic ring icon */
-.vf-mic{
-  font-size:1.6rem;
-  flex-shrink:0;
-  position:relative;
-}
-.vf-mic::after{
-  content:'';
-  position:absolute;inset:-4px;
-  border-radius:50%;
-  border:3px solid var(--blue);
-  opacity:0;
-  animation:micRing 1.8s ease-in-out infinite;
-}
-@keyframes micRing{0%{transform:scale(.8);opacity:.8}100%{transform:scale(1.6);opacity:0}}
-
-/* The big "what I heard" word */
-.vf-word{
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(1.1rem,3vw,1.6rem);
-  color:var(--dark);
-  flex:1;
-  text-align:center;
-  transition:all .15s;
-  letter-spacing:.5px;
-}
-.vf-word.interim{color:var(--blue2);opacity:.7;}
-.vf-word.final{color:var(--green2);font-size:clamp(1.4rem,4vw,2rem);font-weight:900;}
-.vf-word.bad{color:var(--red);font-size:clamp(1.2rem,3vw,1.7rem);}
-
-/* Status label */
-.vf-status{
-  font-size:.7rem;font-weight:700;
-  color:#9a6fd4;
-  flex-shrink:0;
-  text-align:right;
-  line-height:1.3;
-}
-
-/* ─────────────────────────────────────────────
-   VOICE HINT + PROGRESS DOTS
-───────────────────────────────────────────── */
-.v-hint{
-  background:#f5f0ff;
-  border:2px solid #d4b8ff;
-  border-radius:12px;
-  padding:.4rem .9rem;
-  font-size:.82rem;font-weight:700;
-  color:#9a6fd4;
-  text-align:center;
-  margin-top:.5rem;
-}
-.dots{display:flex;justify-content:center;gap:.6rem;margin-top:1rem;flex-wrap:wrap;}
-.dot{
-  width:16px;height:16px;border-radius:50%;
-  background:#e8e8e8;border:3px solid #ddd;
-  transition:all .3s;
-}
-.dot.done{background:var(--green);border-color:var(--green2);box-shadow:0 0 6px var(--green);}
-.dot.cur{background:var(--yellow);border-color:var(--yellow2);box-shadow:0 0 8px var(--yellow);animation:dotPulse .5s ease infinite alternate;}
-@keyframes dotPulse{from{transform:scale(1)}to{transform:scale(1.4)}}
-
-/* ─────────────────────────────────────────────
-   STEP-BY-STEP EXPLAINER (shown on wrong)
-───────────────────────────────────────────── */
-.explainer{
-  background:linear-gradient(135deg,#fff8e0,#fffde8);
-  border:3px solid var(--yellow2);
-  border-radius:18px;
-  padding:1rem 1.1rem;
-  margin-top:.6rem;
-  animation:explainerSlide .4s ease;
-}
-@keyframes explainerSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.explainer-title{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1rem;
-  color:var(--orange2);
-  margin-bottom:.6rem;
-  display:flex;align-items:center;gap:.4rem;
-}
-.exp-steps{
-  display:flex;
-  flex-direction:column;
-  gap:.5rem;
-}
-.exp-step{
-  display:flex;
-  align-items:flex-start;
-  gap:.6rem;
-  animation:stepIn .3s ease both;
-}
-@keyframes stepIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-.exp-num{
-  background:var(--yellow);
-  color:var(--dark);
-  border-radius:50%;
-  width:24px;height:24px;
-  flex-shrink:0;
-  font-family:'Fredoka One',sans-serif;
-  font-size:.85rem;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 0 var(--yellow2);
-}
-.exp-text{
-  font-size:.85rem;
-  font-weight:700;
-  color:var(--dark);
-  line-height:1.5;
-  padding-top:.15rem;
-}
-.exp-text .hi{
-  background:var(--yellow);
-  padding:.05rem .3rem;
-  border-radius:4px;
-  font-size:1rem;
-}
-.exp-text .ans{
-  background:var(--green);
-  color:#fff;
-  padding:.05rem .4rem;
-  border-radius:6px;
-  font-size:1.05rem;
-  display:inline-block;
-}
-/* column carry display inside explainer */
-.exp-col{
-  background:#fff;
-  border-radius:10px;
-  padding:.4rem .6rem;
-  display:inline-flex;
-  flex-direction:column;
-  gap:.2rem;
-  border:2px solid #ffd6a0;
-  font-family:'Fredoka One',sans-serif;
-  font-size:.85rem;
-  margin-top:.3rem;
-}
-.exp-col-row{
-  display:flex;
-  gap:.3rem;
-  justify-content:flex-end;
-  align-items:center;
-}
-.exp-col-sym{color:var(--purple2);width:16px;text-align:center;}
-.exp-col-d{
-  width:26px;height:28px;
-  border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.95rem;
-}
-.exp-col-d.h{background:#fff0e0;color:#c05000;}
-.exp-col-d.t{background:#e0f0ff;color:#0060a0;}
-.exp-col-d.u{background:#e0ffe8;color:#007020;}
-.exp-col-line{border-top:2px solid var(--purple2);margin:.1rem 0;}
-.exp-col-d.result{background:var(--green);color:#fff;}
-
-
-#celeb-overlay{
-  position:absolute;inset:0;
-  pointer-events:none;z-index:50;
-  display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:.5rem;
-  opacity:0;transition:opacity .2s;
-}
-#celeb-overlay.show{opacity:1;}
-.celeb-msg{
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(2rem,7vw,4rem);
-  color:#fff;
-  text-shadow:0 4px 0 rgba(0,0,0,.2),0 0 30px rgba(255,230,0,.8);
-  animation:celebBounce .5s ease;
-  text-align:center;
-  padding:0 1rem;
-}
-@keyframes celebBounce{0%{transform:scale(.3) rotate(-10deg)}60%{transform:scale(1.2) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
-
-/* Wrong message */
-.wrong-msg{
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(1.2rem,3.5vw,2rem);
-  color:var(--red);
-  text-align:center;
-  margin-top:.3rem;
-  min-height:2.5rem;
-}
-
-/* ─────────────────────────────────────────────
-   START / END SCREEN
-───────────────────────────────────────────── */
-.screen{text-align:center;padding:2.5rem 1rem;}
-.screen h2{
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(2rem,6vw,3.5rem);
-  color:var(--dark);margin-bottom:.7rem;
-}
-.screen p{font-size:clamp(1rem,2.5vw,1.3rem);color:#666;margin-bottom:.7rem;line-height:1.6;}
-.screen .sub{font-size:clamp(.85rem,2vw,1rem);color:var(--purple);font-weight:900;}
-
-.big-btn{
-  display:inline-block;
-  border:none;border-radius:60px;
-  padding:1.1rem 2.5rem;
-  font-family:'Fredoka One',sans-serif;
-  font-size:clamp(1.1rem,3vw,1.6rem);
-  cursor:pointer;
-  box-shadow:0 6px 0 rgba(0,0,0,.12);
-  transition:transform .15s,box-shadow .15s;
-  margin:.35rem;letter-spacing:.5px;
-  color:#fff;
-}
-.big-btn:hover{transform:translateY(-3px);box-shadow:0 9px 0 rgba(0,0,0,.12);}
-.big-btn:active{transform:translateY(2px);box-shadow:0 3px 0 rgba(0,0,0,.12);}
-.btn-blue{background:linear-gradient(135deg,var(--blue),var(--blue2));}
-.btn-purple{background:linear-gradient(135deg,var(--purple),var(--purple2));}
-.btn-green{background:linear-gradient(135deg,var(--green),var(--green2));}
-.btn-pink{background:linear-gradient(135deg,var(--pink),var(--pink2));}
-
-/* Stars */
-.stars-row{font-size:2.5rem;letter-spacing:.3rem;margin:.5rem 0;}
-
-/* ─────────────────────────────────────────────
-   CONFETTI
-───────────────────────────────────────────── */
-.confetti-shower{position:fixed;inset:0;pointer-events:none;z-index:900;}
-
-/* ─────────────────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────────────── */
-@media(max-width:500px){
-  .game-grid{grid-template-columns:1fr 1fr;}
-  .answers{gap:.7rem;}
-  .ans-card{min-height:76px;padding:1rem .5rem;}
-}
 /* ══ RESPONSIVE ══ */
 @media(max-width:460px){
   .h-brand{display:none;}
@@ -1583,83 +785,51 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
     </div>
   </div>
 
- <!-- MATH FUN ZONE -->
+  <!-- MATH FUN ZONE -->
   <div class="zone-panel" id="panel-math">
     <div class="mz-container">
-
-  <!-- Game selector -->
-  <div class="game-grid">
-    <button class="game-card" onclick="selectGame('addition')" id="btn-addition">
-      <span class="gc-icon">🌊</span>
-      <span class="gc-name">Add It Up!</span>
-      <span class="gc-type">Addition</span>
-      <span class="gc-hint">say "addition"</span>
-    </button>
-    <button class="game-card" onclick="selectGame('subtraction')" id="btn-subtraction">
-      <span class="gc-icon">🌋</span>
-      <span class="gc-name">Take Away!</span>
-      <span class="gc-type">Subtraction</span>
-      <span class="gc-hint">say "subtraction"</span>
-    </button>
-    <button class="game-card" onclick="selectGame('multiply')" id="btn-multiply">
-      <span class="gc-icon">⚡</span>
-      <span class="gc-name">Times Tables!</span>
-      <span class="gc-type">Multiplication</span>
-      <span class="gc-hint">say "times tables"</span>
-    </button>
-    <button class="game-card" onclick="selectGame('division')" id="btn-division">
-      <span class="gc-icon">🌈</span>
-      <span class="gc-name">Divide It!</span>
-      <span class="gc-type">Division</span>
-      <span class="gc-hint">say "division"</span>
-    </button>
-  </div>
-
-  <!-- Difficulty selectors — one row per game -->
-  <div class="diff-grid" id="diff-grid">
-    <div class="diff-row" data-game="addition">
-      <span class="diff-label">🌊 Add It Up:</span>
-      <button class="diff-btn active" data-game="addition" data-level="easy"   onclick="setDiff('addition','easy')">🟢 Easy</button>
-      <button class="diff-btn"        data-game="addition" data-level="medium" onclick="setDiff('addition','medium')">🟡 Medium</button>
-      <button class="diff-btn"        data-game="addition" data-level="hard"   onclick="setDiff('addition','hard')">🔴 Hard</button>
+      <div class="mz-game-grid">
+        <button class="mz-game-card" onclick="MZ.selectGame('addition')"    id="mz-btn-addition">   <span class="mz-gc-icon">🌊</span><span class="mz-gc-name">Add It Up!</span>    <span class="mz-gc-type">Addition</span>       <span class="mz-gc-hint">say "addition"</span></button>
+        <button class="mz-game-card" onclick="MZ.selectGame('subtraction')" id="mz-btn-subtraction"><span class="mz-gc-icon">🌋</span><span class="mz-gc-name">Take Away!</span>   <span class="mz-gc-type">Subtraction</span>    <span class="mz-gc-hint">say "subtraction"</span></button>
+        <button class="mz-game-card" onclick="MZ.selectGame('multiply')"    id="mz-btn-multiply">   <span class="mz-gc-icon">⚡</span><span class="mz-gc-name">Times Tables!</span><span class="mz-gc-type">Multiplication</span><span class="mz-gc-hint">say "times tables"</span></button>
+        <button class="mz-game-card" onclick="MZ.selectGame('division')"    id="mz-btn-division">   <span class="mz-gc-icon">🌈</span><span class="mz-gc-name">Divide It!</span>   <span class="mz-gc-type">Division</span>       <span class="mz-gc-hint">say "division"</span></button>
+      </div>
+      <div class="mz-diff-grid" id="mz-diff-grid">
+        <div class="mz-diff-row" data-game="addition">
+          <span class="mz-diff-label">🌊 Add It Up:</span>
+          <button class="mz-diff-btn active" data-game="addition" data-level="easy"   onclick="MZ.setDiff('addition','easy')">🟢 Easy</button>
+          <button class="mz-diff-btn"        data-game="addition" data-level="medium" onclick="MZ.setDiff('addition','medium')">🟡 Medium</button>
+          <button class="mz-diff-btn"        data-game="addition" data-level="hard"   onclick="MZ.setDiff('addition','hard')">🔴 Hard</button>
+        </div>
+        <div class="mz-diff-row" data-game="subtraction">
+          <span class="mz-diff-label">🌋 Take Away:</span>
+          <button class="mz-diff-btn active" data-game="subtraction" data-level="easy"   onclick="MZ.setDiff('subtraction','easy')">🟢 Easy</button>
+          <button class="mz-diff-btn"        data-game="subtraction" data-level="medium" onclick="MZ.setDiff('subtraction','medium')">🟡 Medium</button>
+          <button class="mz-diff-btn"        data-game="subtraction" data-level="hard"   onclick="MZ.setDiff('subtraction','hard')">🔴 Hard</button>
+        </div>
+        <div class="mz-diff-row" data-game="multiply">
+          <span class="mz-diff-label">⚡ Times Tables:</span>
+          <button class="mz-diff-btn active" data-game="multiply" data-level="easy"   onclick="MZ.setDiff('multiply','easy')">🟢 Easy</button>
+          <button class="mz-diff-btn"        data-game="multiply" data-level="medium" onclick="MZ.setDiff('multiply','medium')">🟡 Medium</button>
+          <button class="mz-diff-btn"        data-game="multiply" data-level="hard"   onclick="MZ.setDiff('multiply','hard')">🔴 Hard</button>
+        </div>
+        <div class="mz-diff-row" data-game="division">
+          <span class="mz-diff-label">🌈 Divide It:</span>
+          <button class="mz-diff-btn active" data-game="division" data-level="easy"   onclick="MZ.setDiff('division','easy')">🟢 Easy</button>
+          <button class="mz-diff-btn"        data-game="division" data-level="medium" onclick="MZ.setDiff('division','medium')">🟡 Medium</button>
+          <button class="mz-diff-btn"        data-game="division" data-level="hard"   onclick="MZ.setDiff('division','hard')">🔴 Hard</button>
+        </div>
+      </div>
+      <div id="mz-panel">
+        <div class="mz-celeb" id="mz-celeb"><div class="mz-celeb-msg" id="mz-celeb-msg"></div></div>
+        <div class="mz-screen" id="mz-welcome">
+          <div style="font-size:4.5rem">🎮</div>
+          <h2>Pick a Game!</h2>
+          <p>Choose above — or say its name!</p>
+          <p style="color:var(--purple2);font-weight:900;font-size:.88rem">🗣️ "Addition" · "Subtraction" · "Times Tables" · "Division"</p>
+        </div>
+      </div>
     </div>
-    <div class="diff-row" data-game="subtraction">
-      <span class="diff-label">🌋 Take Away:</span>
-      <button class="diff-btn active" data-game="subtraction" data-level="easy"   onclick="setDiff('subtraction','easy')">🟢 Easy</button>
-      <button class="diff-btn"        data-game="subtraction" data-level="medium" onclick="setDiff('subtraction','medium')">🟡 Medium</button>
-      <button class="diff-btn"        data-game="subtraction" data-level="hard"   onclick="setDiff('subtraction','hard')">🔴 Hard</button>
-    </div>
-    <div class="diff-row" data-game="multiply">
-      <span class="diff-label">⚡ Times Tables:</span>
-      <button class="diff-btn active" data-game="multiply" data-level="easy"   onclick="setDiff('multiply','easy')">🟢 Easy</button>
-      <button class="diff-btn"        data-game="multiply" data-level="medium" onclick="setDiff('multiply','medium')">🟡 Medium</button>
-      <button class="diff-btn"        data-game="multiply" data-level="hard"   onclick="setDiff('multiply','hard')">🔴 Hard</button>
-    </div>
-    <div class="diff-row" data-game="division">
-      <span class="diff-label">🌈 Divide It:</span>
-      <button class="diff-btn active" data-game="division" data-level="easy"   onclick="setDiff('division','easy')">🟢 Easy</button>
-      <button class="diff-btn"        data-game="division" data-level="medium" onclick="setDiff('division','medium')">🟡 Medium</button>
-      <button class="diff-btn"        data-game="division" data-level="hard"   onclick="setDiff('division','hard')">🔴 Hard</button>
-    </div>
-  </div>
-
-  <!-- Game panel -->
-  <div id="game-panel">
-    <!-- Celebration overlay (inside panel) -->
-    <div id="celeb-overlay">
-      <div class="celeb-msg" id="celeb-msg">Amazing! 🌟</div>
-    </div>
-
-    <!-- Welcome screen -->
-    <div class="screen" id="welcome-screen">
-      <div style="font-size:5rem">🎮</div>
-      <h2>Pick a Game!</h2>
-      <p>Choose a game above or say its name to start!</p>
-      <p class="sub">🗣️ "Addition" · "Subtraction" · "Times Tables" · "Division"</p>
-    </div>
-  </div>
-
-</div>
   </div>
 
 </div><!-- /content -->
@@ -3644,1044 +2814,320 @@ const RB={
   },
 };
 
-/* ─────────────────────────────────────────────────
-   THEME DATA
-───────────────────────────────────────────────── */
-const ZONES={
-  addition:   {bodyClass:'zone-add',  mascot:'🐬', bgColor:'#3eb5ff', shapes:['#b8f0ff','#d4f7c5','#a8e4ff']},
-  subtraction:{bodyClass:'zone-sub',  mascot:'🦊', bgColor:'#ff8c3d', shapes:['#ffd6b8','#ffecb8','#ffc8a8']},
-  multiply:   {bodyClass:'zone-mul',  mascot:'🦋', bgColor:'#b36bff', shapes:['#e8b8ff','#ffb8e8','#d4b8ff']},
-  division:   {bodyClass:'zone-div',  mascot:'🐸', bgColor:'#3ddc68', shapes:['#b8d8ff','#b8fff5','#b8ffc8']},
-};
+/* ════════════════════════════════════
+   MATH FUN ZONE
+════════════════════════════════════ */
+const MZ={
+  currentGame:null, qNum:0, TOTAL_Q:5, currentAnswer:null, answered:false,
+  currentOpts:[], score:0, streak:0, mascot:'🐬', currentA:0, currentB:0,
+  activeAnsBox:'u',
 
-const MASCOTS={
-  addition:   ['🐬','🐳','🦈','🐙'],
-  subtraction:['🦊','🐯','🦁','🐺'],
-  multiply:   ['🦋','🐝','🐞','🦄'],
-  division:   ['🐸','🦜','🐢','🦎'],
-};
-
-const CORRECT_MSGS=['Amazing! 🌟','You got it! 🎉','Super! ⭐','Brilliant! 🌈','Awesome! 💫','Correct! 🏆','Great job! 🎊','Fantastic! ✨'];
-const WRONG_MSGS  =['Not quite! Try again! 💪','Oops! Keep going! 🌟','Almost! You can do it! 🔥','Don\'t give up! 💛'];
-const STREAK_MSGS =[null,null,'Double! 🔥 Keep going!','Triple! 🌟 You\'re on fire!','Incredible! 4 in a row! 🏆','AMAZING! 5 in a row! 👑'];
-
-/* ─────────────────────────────────────────────────
-   STATE
-───────────────────────────────────────────────── */
-let currentGame=null;
-let currentA=0,currentB=0;
-let qNum=0;
-const TOTAL_Q=5;
-let currentAnswer=null;
-let answered=false;
-let currentOpts=[];
-let score=0;
-let streak=0;
-
-let currentMascot='🐬';
-
-/* Per-game difficulty: 'easy' | 'medium' | 'hard' */
-const difficulty={addition:'easy',subtraction:'easy',multiply:'easy',division:'easy'};
-
-/* Difficulty number ranges */
-const DIFF={
-  addition:{
-    easy:  {aMin:1,  aMax:20,  bMin:1,  bMax:20},
-    medium:{aMin:10, aMax:99,  bMin:10, bMax:99},
-    hard:  {aMin:100,aMax:499, bMin:100,bMax:499},
+  DIFF:{
+    addition:{easy:{aMin:1,aMax:20,bMin:1,bMax:20},medium:{aMin:10,aMax:99,bMin:10,bMax:99},hard:{aMin:100,aMax:499,bMin:100,bMax:499}},
+    subtraction:{easy:{aMin:1,aMax:20,bMin:1,bMax:20},medium:{aMin:10,aMax:99,bMin:10,bMax:99},hard:{aMin:100,aMax:499,bMin:10,bMax:499}},
+    multiply:{easy:{aMin:1,aMax:5,bMin:1,bMax:5},medium:{aMin:2,aMax:9,bMin:2,bMax:9},hard:{aMin:2,aMax:12,bMin:2,bMax:12}},
+    division:{easy:{aMin:1,aMax:5,bMin:1,bMax:5},medium:{aMin:2,aMax:9,bMin:2,bMax:9},hard:{aMin:2,aMax:12,bMin:2,bMax:12}},
   },
-  subtraction:{
-    easy:  {aMin:1,  aMax:20,  bMin:1,  bMax:20},
-    medium:{aMin:10, aMax:99,  bMin:10, bMax:99},
-    hard:  {aMin:100,aMax:499, bMin:10, bMax:499},
-  },
-  multiply:{
-    easy:  {aMin:1,aMax:5,  bMin:1,bMax:5},
-    medium:{aMin:2,aMax:9,  bMin:2,bMax:9},
-    hard:  {aMin:2,aMax:12, bMin:2,bMax:12},
-  },
-  division:{
-    easy:  {aMin:1,aMax:5,  bMin:1,bMax:5},
-    medium:{aMin:2,aMax:9,  bMin:2,bMax:9},
-    hard:  {aMin:2,aMax:12, bMin:2,bMax:12},
-  },
-};
-
-function setDiff(game,level){
-  difficulty[game]=level;
-  /* Update button active states for this game */
-  document.querySelectorAll(`.diff-btn[data-game="${game}"]`).forEach(b=>{
-    b.classList.toggle('active', b.dataset.level===level);
-  });
-  /* Always start/restart that game immediately */
-  selectGame(game);
-}
-
-/* ─────────────────────────────────────────────────
-   PROFANITY FILTER
-───────────────────────────────────────────────── */
-const BAD=['fuck','fucking','shit','ass','bitch','crap','damn','cunt','dick','cock',
-  'piss','bastard','whore','slut','nigger','nigga','faggot','fag','retard',
-  'sex','porn','boobs','tit','tits','penis','vagina','naked','nude',
-  'drugs','weed','cocaine','heroin','gun','shoot','bomb','kill','murder','hate','racist','abuse'];
-const BR=new RegExp('\\b('+BAD.map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\\b','gi');
-function hasBad(t){BR.lastIndex=0;return BR.test(t);}
-function safe(t){if(!t||!t.trim())return '';BR.lastIndex=0;if(hasBad(t))return '😊';return t.replace(/[^a-zA-Z0-9 \'\-]/g,'').trim();}
-
-window.speechSynthesis.cancel();
-  speechLock=true;
-  const u=new SpeechSynthesisUtterance(text);
-  u.rate=.88;u.pitch=1.15;u.lang='en-US';
-  u.onend=()=>{speechLock=false;if(onEnd)onEnd();};
-  u.onerror=()=>{speechLock=false;if(onEnd)onEnd();};
-  window.speechSynthesis.ttsSpeak(u);
-
-/* ─────────────────────────────────────────────────
-   WORD → NUMBER
-───────────────────────────────────────────────── */
-const WM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
-  eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,
-  eighteen:18,nineteen:19,twenty:20,'twenty-one':21,'twenty-two':22,'twenty-three':23,
-  'twenty-four':24,'twenty-five':25,'twenty-six':26,'twenty-seven':27,'twenty-eight':28,
-  'twenty-nine':29,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,
-  hundred:100,to:2,too:2,'for':4,won:1,ate:8,tree:3,free:3,nein:9,oh:0,'a':1};
-function parseNum(t){
-  const r=t.trim().toLowerCase();
-  const m=r.match(/\b(\d{1,4})\b/);if(m)return parseInt(m[1]);
-  if(WM[r]!==undefined)return WM[r];
-  const p=r.split(/[\s\-]+/);
-  if(p.length===2){const d=WM[p[0]],u=WM[p[1]];if(d!==undefined&&u!==undefined&&d>=20&&u<10)return d+u;}
-  for(const w of p){if(WM[w]!==undefined)return WM[w];}
-  return null;
-}
-
-/* ─────────────────────────────────────────────────
-   VOICE COMMAND DETECTION
-───────────────────────────────────────────────── */
-const GT={
-  addition:   ['addition','add','adding','plus','water','dolphin'],
-  subtraction:['subtraction','subtract','minus','take away','lava','fox'],
-  multiply:   ['multiply','times','times tables','multiplication','storm','butterfly'],
-  division:   ['division','divide','rainbow','frog'],
-};
-const AGAIN_T=['play again','again','another','yes','yep','yeah','restart','go'];
-const DIFF_T =['different','another game','switch','change','new game'];
-
-function detectGame(t){const s=t.toLowerCase();for(const[g,arr]of Object.entries(GT)){for(const x of arr){if(s.includes(x))return g;}}return null;}
-function detectAgain(t){return AGAIN_T.some(x=>t.toLowerCase().includes(x));}
-function detectDiff(t){return DIFF_T.some(x=>t.toLowerCase().includes(x));}
-
-/* ─────────────────────────────────────────────────
-   MICROPHONE — KEEP STREAM ALIVE (no repeat popups)
-   The secret: keep the getUserMedia stream open the
-   whole time. While it's open Chrome knows the mic
-   is in use and never asks again — even for local files.
-───────────────────────────────────────────────── */
-
-async function openMicStream(){
-  if(micStream) return true;
-  try{
-    micStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    /* Pipe through a silent AudioContext so Chrome sees mic as actively in use */
-    try{
-      const ctx=new(window.AudioContext||window.webkitAudioContext)();
-      const src=ctx.createMediaStreamSource(micStream);
-      const gain=ctx.createGain(); gain.gain.value=0;
-      src.connect(gain); gain.connect(ctx.destination);
-    }catch(e){}
-    return true;
-  }catch(e){ return false; }
-}
-
-function hidePerm(){
-  const ps=document.getElementById('perm-screen');
-  if(!ps)return;
-  ps.style.transition='opacity .5s';ps.style.opacity='0';
-  setTimeout(()=>ps.style.display='none',500);
-}
-
-
-    if(perm.state==='granted'){
-      const ok=await openMicStream();
-      if(ok){
-        try{localStorage.setItem(MIC_KEY,'1');}catch(e){}
-        hidePerm(); return;
-      }
-    }
-  }catch(e){}
-
-  /* 3. Show the one-time permission screen */
-});
-
-
-/* Update the big in-game voice feedback box */
-function mzSetVoiceBox(text,style,icon,status){
-  const box=document.getElementById('voice-feedback');
-  const word=document.getElementById('vf-word');
-  const mic=document.getElementById('vf-mic');
-  const stat=document.getElementById('vf-status');
-  if(!box||!word)return;
-  /* update header too */
-  const el=document.getElementById('heard-txt');
-  BR.lastIndex=0;
-  const clean=hasBad(text)?'😊':text;
-  if(el)el.textContent=clean;
-  /* update feedback box */
-  word.textContent=clean;
-  word.className='vf-word '+(style||'interim');
-  if(mic)mic.textContent=icon||'🎙️';
-  if(stat)stat.innerHTML=status||'';
-  box.className='voice-feedback '+(style==='final'?'heard-active':style==='bad'?'bad':'listening');
-}
-
-
-  el.textContent=t||'…';
-}
-
-/* ─────────────────────────────────────────────────
-   TRANSCRIPT PROCESSING
-───────────────────────────────────────────────── */
-function mzProcessTranscript(raw){
-  if(speechLock)return;
-  const s=safe(raw);
-  const low=raw.toLowerCase().trim();
-
-
-  /* ── Difficulty voice commands ── */
-  /* Detects game + level in any order, e.g:
-     "addition easy", "easy addition", "add it up hard",
-     "medium times tables", "division hard level", "easy level subtraction" */
-  const GAME_WORDS={
-    addition:   ['addition','add it up','add','adding','plus','water','dolphin'],
-    subtraction:['subtraction','take away','subtract','minus','lava','fox'],
-    multiply:   ['times tables','times table','multiply','multiplication','storm','butterfly'],
-    division:   ['division','divide','rainbow','frog'],
-  };
-  const LEVEL_WORDS={
-    easy:  ['easy','simple','beginner','level 1','level one'],
-    medium:['medium','middle','normal','level 2','level two'],
-    hard:  ['hard','difficult','tricky','advanced','level 3','level three'],
-  };
-  let foundGame=null, foundLevel=null;
-  for(const[g,words] of Object.entries(GAME_WORDS)){
-    if(words.some(w=>low.includes(w))){foundGame=g;break;}
-  }
-  for(const[l,words] of Object.entries(LEVEL_WORDS)){
-    if(words.some(w=>low.includes(w))){foundLevel=l;break;}
-  }
-  if(foundGame&&foundLevel){
-    setDiff(foundGame,foundLevel);
-    const gName={addition:'Add It Up',subtraction:'Take Away',multiply:'Times Tables',division:'Divide It'}[foundGame];
-    const lEmoji={easy:'🟢',medium:'🟡',hard:'🔴'}[foundLevel];
-    mzSetVoiceBox(`${gName}: ${foundLevel}`,'final',lEmoji,`${lEmoji} ${foundLevel.charAt(0).toUpperCase()+foundLevel.slice(1)}`);
-    return;
-  }
-  /* Saying just a level while a game is active changes that game's difficulty */
-  if(foundLevel&&currentGame&&!foundGame){
-    setDiff(currentGame,foundLevel);
-    const lEmoji={easy:'🟢',medium:'🟡',hard:'🔴'}[foundLevel];
-    mzSetVoiceBox(`Level: ${foundLevel}`,'final',lEmoji,`${lEmoji} ${foundLevel.charAt(0).toUpperCase()+foundLevel.slice(1)}`);
-    return;
-  }
-
-  /* ── Column box voice — addition/subtraction only ── */
-  if(currentGame==='addition'||currentGame==='subtraction'){
-
-    /* Explicit column name: "hundreds 3", "tens 5", "units 7", "ones 2" */
-    const colMatch=low.match(/\b(hundreds?|tens?|units?|ones?)\s+(\w+)/);
-    if(colMatch){
-      const colWord=colMatch[1].replace(/s$/,'');
-      const colKey=colWord==='hundred'?'h':colWord==='ten'?'t':'u';
-      const digit=parseNum(colMatch[2]);
-      if(digit!==null&&digit>=0&&digit<=9){
-        activeAnsBox=colKey;
-        pickDigit(digit);
-        mzSetVoiceBox(BOX_NAMES[colKey]+': '+digit,'final','✏️',BOX_NAMES[colKey]+'<br><strong>'+digit+'</strong>');
-        return;
-      }
-    }
-
-    /* Bare number — goes into whichever box is currently active */
-    if(activeAnsBox&&!answered){
-      const digit=parseNum(low);
-      if(digit!==null&&digit>=0&&digit<=9){
-        const colName=BOX_NAMES[activeAnsBox];
-        mzSetVoiceBox(colName+': '+digit,'final','✏️',colName+'<br><strong>'+digit+'</strong>');
-        pickDigit(digit);
-        return;
-      }
-    }
-  }
-
-  /* End screen commands */
-  if(!currentGame||qNum>=TOTAL_Q){
-    if(detectDiff(raw)){mzSetVoiceBox('Switching game!','final','🔀','OK!');pickDiff();return;}
-    if(detectAgain(raw)){mzSetVoiceBox('Here we go again!','final','🔁','OK!');selectGame(currentGame||'addition');return;}
-  }
-
-  /* Game switch — works any time */
-  const gc=detectGame(raw);
-  if(gc){
-    const gcNames={addition:'Addition!',subtraction:'Subtraction!',multiply:'Times Tables!',division:'Division!'};
-    mzSetVoiceBox(gcNames[gc],'final','🎮','Switching!');
-    document.querySelectorAll('.game-card').forEach(b=>b.classList.remove('voice-sel'));
-    const tb=document.getElementById('btn-'+gc);
-    if(tb)tb.classList.add('voice-sel');
-    setTimeout(()=>{document.querySelectorAll('.game-card').forEach(b=>b.classList.remove('voice-sel'));selectGame(gc);},480);
-    return;
-  }
-
-  /* Answer (multiply / division, or addition/subtraction after all boxes filled) */
-  if(currentGame&&!answered&&currentAnswer!==null){
-    const val=parseNum(raw);
-    if(val!==null&&currentOpts.includes(val)){
-      mzSetVoiceBox(String(val),'final','✅',`I heard<br><strong>${val}</strong>`);
-      voiceAnswer(val,raw);
-    } else if(val!==null){
-      mzSetVoiceBox(`${s||val}?`,'interim','🤔','Try one of\nthe cards!');
-      setHeard(`${s||val} — not an option!`);
-    } else {
-      mzSetVoiceBox(s||'…','interim','🎙️','Say a\nnumber!');
-      setHeard(s||'…');
-    }
-  } else {
-    mzSetVoiceBox(s||'…','interim','🎙️','Listening…');
-    setHeard(s||'…');
-  }
-}
-
-function voiceAnswer(val,rawText){
-  if(answered)return;
-  /* Highlight matching card strongly */
-  document.querySelectorAll('.ans-card').forEach(b=>{
-    b.classList.remove('voice-hi');
-    if(parseInt(b.dataset.val)===val)b.classList.add('voice-hi');
-  });
-  setTimeout(()=>{
-    const btn=Array.from(document.querySelectorAll('.ans-card')).find(b=>parseInt(b.dataset.val)===val);
-    if(btn)checkAnswer(val,btn);
-  },380);
-}
-
-/* ─────────────────────────────────────────────────
-   BACKGROUND SHAPES
-───────────────────────────────────────────────── */
-function buildBgShapes(){
-  const c=document.getElementById('bg-shapes');c.innerHTML='';
-  const colors=['#ffb8d4','#b8e4ff','#d4b8ff','#b8ffd4','#ffe8b8'];
-  for(let i=0;i<12;i++){
-    const el=document.createElement('div');el.className='shape';
-    const sz=30+Math.random()*80;
-    el.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;background:${colors[i%colors.length]};animation-duration:${12+Math.random()*20}s;animation-delay:${Math.random()*15}s;`;
-    c.appendChild(el);
-  }
-}
-
-/* ─────────────────────────────────────────────────
-   HUD
-───────────────────────────────────────────────── */
-function updateHUD(){ /* score tracked internally */ }
-  else{sp.style.display='none';}
-}
-
-/* ─────────────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────────────── */
-function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
-function makeOpts(correct,count,minV,maxV,step){
-  const s=new Set([correct]);let t=0;
-  while(s.size<count&&t<300){t++;const d=rnd(1,step)*(Math.random()>.5?1:-1);const c=correct+d;if(c>=minV&&c<=maxV&&!s.has(c))s.add(c);}
-  let c=correct+1;while(s.size<count){if(!s.has(c)&&c>=minV)s.add(c);c++;}
-  return shuffle([...s]);
-}
-function mascotReact(correct){
-  const el=document.getElementById('mascot-spr');if(!el)return;
-  el.classList.remove('cheer','sad');
-  void el.offsetWidth;
-  el.classList.add(correct?'cheer':'sad');
-  setTimeout(()=>el.classList.remove('cheer','sad'),700);
-}
-function setWrongMsg(txt){
-  const el=document.getElementById('wrong-msg');if(el)el.textContent=txt;
-}
-
-/* ─────────────────────────────────────────────────
-   GAME SELECT
-───────────────────────────────────────────────── */
-function selectGame(game){
-  document.querySelectorAll('.game-card').forEach(b=>b.classList.remove('active'));
-  const gb=document.getElementById('btn-'+game);if(gb)gb.classList.add('active');
-  currentGame=game;
-  qNum=0;score=0;streak=0;
-  updateHUD();
-
-  /* Zone visual */
-  /* hub manages zone background */
-
-  /* Pick a random mascot for this zone */
-  const pool=MASCOTS[game];
-  currentMascot=pool[Math.floor(Math.random()*pool.length)];
-
-  renderQuestion();
-}
-
-/* ─────────────────────────────────────────────────
-   RENDER QUESTION
-───────────────────────────────────────────────── */
-function renderQuestion(){
-  if(qNum>=TOTAL_Q){showEndScreen();return;}
-  answered=false;currentAnswer=null;
-
-  let a,b,ans,opSym,opWord;
-  const d=DIFF[currentGame][difficulty[currentGame]];
-
-  if(currentGame==='addition'){
-    a=rnd(d.aMin,d.aMax);b=rnd(d.bMin,d.bMax);
-    ans=a+b;opSym='➕';opWord='plus';
-  }else if(currentGame==='subtraction'){
-    b=rnd(d.bMin,d.bMax);
-    a=b+rnd(d.aMin,d.aMax); // ensure a>b always
-    ans=a-b;opSym='➖';opWord='minus';
-  }else if(currentGame==='multiply'){
-    a=rnd(d.aMin,d.aMax);b=rnd(d.bMin,d.bMax);
-    ans=a*b;opSym='✖️';opWord='times';
-  }else{
-    b=rnd(d.bMin,d.bMax);ans=rnd(d.aMin,d.aMax);
-    a=b*ans;opSym='➗';opWord='divided by';
-  }
-  currentAnswer=ans;
-  currentA=a; currentB=b;
-
-  const minD=currentGame==='division'?Math.max(1,ans-6):currentGame==='multiply'?Math.max(4,ans-12):Math.max(0,ans-25);
-  const maxD=currentGame==='division'?ans+6:currentGame==='multiply'?ans+12:ans+25;
-  const step=currentGame==='division'?5:currentGame==='multiply'?10:18;
-  const opts=makeOpts(ans,4,minD,maxD,step);
-  currentOpts=opts;
-
-  const dotsHTML=Array.from({length:TOTAL_Q},(_,i)=>`<div class="dot ${i<qNum?'done':i===qNum?'cur':''}"></div>`).join('');
-
-  document.getElementById('game-panel').innerHTML=`
-    <div id="celeb-overlay"><div class="celeb-msg" id="celeb-msg"></div></div>
-
-    <div class="panel-cols">
-
-      <!-- ── LEFT: Work area ── -->
-      <div class="work-col" id="work-col">
-        <div class="work-col-title">✏️ Work it out!
-          <span style="margin-left:auto;font-size:.7rem;padding:.15rem .5rem;border-radius:6px;font-family:'Nunito',sans-serif;font-weight:900;${
-            difficulty[currentGame]==='easy'  ?'background:#d4ffd4;color:#007020':
-            difficulty[currentGame]==='medium'?'background:#fff8c0;color:#886000':
-                                               'background:#ffd4d4;color:#c00000'
-          }">${
-            difficulty[currentGame]==='easy'?'🟢 Easy':
-            difficulty[currentGame]==='medium'?'🟡 Medium':'🔴 Hard'
-          }</span>
-        </div>
-        ${buildWorkArea(a,b,opSym)}
-      </div>
-
-      <!-- ── RIGHT: Question + answers ── -->
-      <div class="question-col">
-
-        <div class="mascot-row">
-          <div class="mascot" id="mascot-spr">${currentMascot}</div>
-          <div class="speech-bubble" id="speech-bub">What is the answer? 🤔</div>
-        </div>
-
-        <div class="q-box">
-          <div class="q-text">
-            <span class="n1">${a}</span>
-            <span class="op">${opSym}</span>
-            <span class="n2">${b}</span>
-            <span class="op">=</span>
-            <span class="qmark">?</span>
-          </div>
-        </div>
-
-        <div class="answers">
-          ${opts.map(o=>`<button class="ans-card" data-val="${o}" onclick="voiceAnswer(${o},'${o}')">${o}</button>`).join('')}
-        </div>
-
-        <div class="wrong-msg" id="wrong-msg"></div>
-
-        <div class="voice-feedback listening" id="voice-feedback">
-          <div class="vf-mic" id="vf-mic">🎙️</div>
-          <div class="vf-word interim" id="vf-word">Listening… say your answer!</div>
-          <div class="vf-status" id="vf-status">🗣️ Say a<br>number</div>
-        </div>
-
-        <div class="dots">${dotsHTML}</div>
-        <div class="v-hint">💡 Or say "addition" · "subtraction" · "times tables" · "division"</div>
-
-      </div><!-- /question-col -->
-    </div><!-- /panel-cols -->
-  `;
-
-  setTimeout(()=>ttsSpeak(`What is ${a} ${opWord} ${b}?`),250);
-  if(currentGame==='addition'||currentGame==='subtraction') initBoxesAfterRender();
-}
-
-/* ─────────────────────────────────────────────────
-   BUILD WORK AREA (left panel content)
-───────────────────────────────────────────────── */
-function buildWorkArea(a,b,opSym){
-  if(currentGame==='addition'||currentGame==='subtraction'){
-    return buildColumnMath(a,b,opSym);
-  } else if(currentGame==='multiply'){
-    return buildTimesVisual(a,b);
-  } else {
-    return buildDivVisual(a,b,currentAnswer);
-  }
-}
-
-/* Pad number into H/T/U digit array, max 3 digits */
-function digits(n){
-  const s=String(n).padStart(3,'0');
-  return [s[0],s[1],s[2]];
-}
-
-function buildColumnMath(a,b,sym){
-  const da=digits(a), db=digits(b);
-  const symChar=currentGame==='addition'?'+':'−';
-  const cols=['H','T','U'];
-
-  // ── Compute carries for addition ──
-  let carries={h:0,t:0,u:0};
-  if(currentGame==='addition'){
-    const uSum=(a%10)+(b%10);
-    const uCarry=Math.floor(uSum/10);
-    const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry;
-    const tCarry=Math.floor(tSum/10);
-    carries={h:tCarry,t:uCarry,u:0};
-  }
-
-  // ── Compute borrows for subtraction ──
-  let borrows={h:{},t:{},u:{}};
-  if(currentGame==='subtraction'){
-    const uA=a%10, uB=b%10;
-    const tA=Math.floor((a%100)/10), tB=Math.floor((b%100)/10);
-    const hA=Math.floor(a/100);
-    const needUBorrow=uA<uB;
-    const needTBorrow=(tA-(needUBorrow?1:0))<tB;
-    if(needUBorrow){
-      // tens column lent 1 — show crossed-out original and new reduced digit
-      borrows.t.lent=true;
-      borrows.t.originalDigit=tA;
-      borrows.t.newDigit=tA-1;
-      // units column received — show crossed-out original and new boosted digit
-      borrows.u.received=true;
-      borrows.u.originalDigit=uA;
-      borrows.u.newDigit=uA+10;
-    }
-    if(needTBorrow){
-      // hundreds column lent 1
-      borrows.h.lent=true;
-      borrows.h.originalDigit=hA;
-      borrows.h.newDigit=hA-1;
-      // tens column received — its effective digit after borrow & possible lending
-      const tEffective=(needUBorrow?tA-1:tA)+10;
-      borrows.t.received=true;
-      borrows.t.originalDigit=borrows.t.originalDigit!==undefined?borrows.t.originalDigit:tA;
-      borrows.t.newDigit=tEffective;
-    }
-  }
-
-  // ── Header: H T U labels ──
-  const headerRow=`<div class="col-row" style="margin-bottom:.1rem">
-    <div class="col-label" style="width:28px"></div>
-    ${cols.map(c=>`<div class="col-label">${c}</div>`).join('')}
-  </div>`;
-
-  // ── Carry/borrow row above top number ──
-  let carryRowHtml;
-  if(currentGame==='addition'){
-    carryRowHtml=`<div class="carry-row">
-      <div class="carry-bubble empty-carry"></div>
-      ${['h','t','u'].map(col=>{
-        const v=carries[col];
-        if(v===1) return `<div class="carry-bubble"><div class="carry-val">+1</div></div>`;
-        return `<div class="carry-bubble"></div>`;
-      }).join('')}
-    </div>`;
-  } else {
-    // Subtraction: show crossed-out + new digit above both lender AND receiver columns
-    carryRowHtml=`<div class="carry-row">
-      <div class="carry-bubble empty-carry"></div>
-      ${['h','t','u'].map(col=>{
-        const borrow=borrows[col];
-        if(borrow.lent){
-          // Lender: crossed-out original, new reduced digit
-          return `<div class="carry-bubble">
-            <div class="carry-lent">
-              <span class="carry-cross">${borrow.originalDigit}</span>
-              <span class="carry-new">${borrow.newDigit}</span>
-            </div>
-          </div>`;
-        }
-        if(borrow.received){
-          // Receiver: crossed-out original, new boosted digit (e.g. 3 → 13)
-          return `<div class="carry-bubble">
-            <div class="carry-lent">
-              <span class="carry-cross">${borrow.originalDigit}</span>
-              <span class="carry-new carry-new-received">${borrow.newDigit}</span>
-            </div>
-          </div>`;
-        }
-        return `<div class="carry-bubble"></div>`;
-      }).join('')}
-    </div>`;
-  }
-
-  // ── Helper: digit with leading-zero suppression ──
-  function digitSpan(digArr,val){
-    return digArr.map((d,i)=>{
-      const leading=val<Math.pow(10,2-i);
-      const cls=['h','t','u'][i];
-      return `<div class="col-digit ${cls}${leading?' empty':''}">${leading?'':d}</div>`;
-    }).join('');
-  }
-
-  const topRow=`<div class="col-row">
-    <div style="width:28px"></div>
-    ${digitSpan(da,a)}
-  </div>`;
-
-  const botRow=`<div class="col-row col-op-row">
-    <div class="col-op-sym">${symChar}</div>
-    ${digitSpan(db,b)}
-  </div>`;
-
-  // ── Answer row: blank dashed boxes ──
-  const ansRow=`<div class="col-row" style="margin-top:.3rem" id="ans-row">
-    <div style="width:28px"></div>
-    ${['h','t','u'].map((cls,i)=>`
-      <div class="col-digit ${cls} ans-blank" id="ans-box-${cls}"
-           onclick="fillAnsBox('${cls}')"
-           title="${['Hundreds','Tens','Units'][i]}">
-        <span class="blank-line">?</span>
-      </div>`).join('')}
-  </div>`;
-
-  // ── Digit strip (shown below, updates which column is active) ──
-  const digitStrip=`
-    <div class="digit-strip-row" id="digit-strip">
-      <span class="ds-label">👉 Say or tap for <span id="ds-col-name" style="color:var(--blue2)">Units</span>:</span>
-      ${[0,1,2,3,4,5,6,7,8,9].map(d=>`
-        <button class="ds-btn" onclick="pickDigit(${d})">${d}</button>
-      `).join('')}
-    </div>`;
-
-  return `
-    <div class="col-math">
-      <div class="col-math-title">Column method — tap a digit for each box!</div>
-      <div class="col-math-grid">
-        ${headerRow}
-        ${carryRowHtml}
-        ${topRow}
-        ${botRow}
-        <div style="border-top:3px solid var(--purple2);margin:.2rem 0"></div>
-        ${ansRow}
-        ${digitStrip}
-      </div>
-      <div style="font-size:.7rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.35rem">
-        🗣️ Just say the digit — or say <em>"hundreds 3"</em> · <em>"tens 5"</em> · <em>"units 7"</em>
-      </div>
-    </div>
-    ${buildScratch()}
-  `;
-}
-
-function buildTimesVisual(a,b){
-  // Show a×b as b groups of a dots (cap display at 12×12=144, use smaller dots if big)
-  const total=a*b;
-  const dotSize=total>60?8:12;
-  let html='';
-  for(let g=0;g<b;g++){
-    if(g>0) html+=`<div class="times-group-sep"></div>`;
-    for(let d=0;d<a;d++){
-      html+=`<div class="tdot" style="width:${dotSize}px;height:${dotSize}px;animation-delay:${(g*a+d)*20}ms"></div>`;
-    }
-  }
-  return `
-    <div class="times-grid">
-      <div class="times-grid-title">${b} groups of ${a}</div>
-      <div class="times-dots">${html}</div>
-      <div style="text-align:center;font-size:.8rem;font-weight:900;color:var(--purple2);margin-top:.5rem">${b} × ${a} = ?</div>
-    </div>
-    ${buildScratch()}
-  `;
-}
-
-function buildDivVisual(a,b,ans){
-  // Show a ÷ b as "a" dots split into "b" equal groups
-  const cap=Math.min(a,48); // don't overwhelm with huge numbers
-  const dotSize=a>30?8:11;
-  let groups='';
-  for(let g=0;g<b;g++){
-    let dots='';
-    for(let d=0;d<ans&&d<8;d++) dots+=`<div class="div-dot" style="width:${dotSize}px;height:${dotSize}px"></div>`;
-    if(ans>8) dots+=`<div style="font-size:.6rem;font-weight:900;color:#aaa">+${ans-8}</div>`;
-    groups+=`<div class="div-group">${dots}</div>`;
-  }
-  return `
-    <div class="div-visual">
-      <div class="times-grid-title">${a} shared into ${b} groups</div>
-      <div class="div-groups">${groups}</div>
-      <div style="text-align:center;font-size:.8rem;font-weight:900;color:var(--purple2);margin-top:.5rem">${a} ÷ ${b} = ?</div>
-    </div>
-    ${buildScratch()}
-  `;
-}
-
-function buildScratch(){
-  return '';
-}
-
-function addToScratch(n){
-  const pad=document.getElementById('scratch-pad');
-  if(!pad)return;
-  const el=document.createElement('div');
-  el.className='scratch-num';
-  el.textContent=n;
-  el.onclick=()=>el.remove();
-  pad.appendChild(el);
-}
-
-function clearScratch(){
-  const pad=document.getElementById('scratch-pad');
-  if(!pad)return;
-  const lbl=pad.querySelector('.scratch-pad-label');
-  pad.innerHTML='';
-  if(lbl)pad.appendChild(lbl);
-}
-
-/* ── Column answer box filling ── */
-// Order: Units first, then Tens, then Hundreds
-const BOX_ORDER=['u','t','h'];
-const BOX_NAMES={h:'Hundreds',t:'Tens',u:'Units'};
-let activeAnsBox='u'; // start at units
-
-function initAnsBoxes(){
-  // highlight units first
-  activeAnsBox='u';
-  BOX_ORDER.forEach(col=>{
-    const b=document.getElementById('ans-box-'+col);
-    if(b) b.classList.remove('active-box');
-  });
-  const first=document.getElementById('ans-box-u');
-  if(first) first.classList.add('active-box');
-  updateStripLabel();
-}
-
-function updateStripLabel(){
-  const el=document.getElementById('ds-col-name');
-  if(el) el.textContent=BOX_NAMES[activeAnsBox]||'';
-}
-
-function fillAnsBox(col){
-  // Tapping a box directly sets it as the active one
-  activeAnsBox=col;
-  BOX_ORDER.forEach(c=>{
-    const b=document.getElementById('ans-box-'+c);
-    if(b) b.classList.remove('active-box');
-  });
-  const box=document.getElementById('ans-box-'+col);
-  if(box) box.classList.add('active-box');
-  updateStripLabel();
-}
-
-function pickDigit(d){
-  // Fill the currently active box, then advance to next empty one
-  if(!activeAnsBox) return;
-  setAnsBox(activeAnsBox, d);
-  // Find the next unfilled box in order
-  const nextCol = BOX_ORDER.find(col=>{
-    if(col===activeAnsBox) return false;
-    const b=document.getElementById('ans-box-'+col);
-    return b && !b.classList.contains('filled');
-  });
-  BOX_ORDER.forEach(c=>{
-    const b=document.getElementById('ans-box-'+c);
-    if(b) b.classList.remove('active-box');
-  });
-  if(nextCol){
-    activeAnsBox=nextCol;
-    const nb=document.getElementById('ans-box-'+nextCol);
-    if(nb) nb.classList.add('active-box');
-    updateStripLabel();
-  } else {
-    activeAnsBox=null;
-    const strip=document.getElementById('digit-strip');
-    if(strip){
-      strip.style.opacity='.4';
-      strip.style.pointerEvents='none';
-    }
-  }
-}
-
-function setAnsBox(col,digit){
-  const box=document.getElementById('ans-box-'+col);
-  if(!box)return;
-  box.classList.remove('active-box');
-  box.classList.add('filled');
-  box.innerHTML=`<span class="blank-line">${digit}</span>`;
-  // Re-tapping a filled box re-activates it
-  box.onclick=()=>fillAnsBox(col);
-}
-
-// Called after render to set initial active box
-function initBoxesAfterRender(){
-  requestAnimationFrame(()=>{
-    if(document.getElementById('ans-box-u')) initAnsBoxes();
-  });
-}
-
-
-/* ─────────────────────────────────────────────────
-   CHECK ANSWER
-───────────────────────────────────────────────── */
-function checkAnswer(val,btn){
-  if(answered)return;
-  answered=true;
-  document.querySelectorAll('.ans-card').forEach(b=>{b.classList.remove('voice-hi');b.onclick=null;});
-
-  if(val===currentAnswer){
-    /* CORRECT */
-    btn.classList.add('correct');
-    streak++;
-    score+=10+(streak>1?Math.min((streak-1)*5,20):0);
-    updateHUD();
-    mascotReact(true);
-
-    /* Bubble update */
-    const msg=CORRECT_MSGS[Math.floor(Math.random()*CORRECT_MSGS.length)];
-    const streakMsg=streak>=2&&streak<STREAK_MSGS.length?STREAK_MSGS[streak]:null;
-    const displayMsg=streakMsg||msg;
-    const bub=document.getElementById('speech-bub');
-    if(bub)bub.textContent=displayMsg;
-
-    /* Voice feedback box → show big green tick + number */
-    mzSetVoiceBox('✅  '+val,'final','🎉',`Correct!<br><strong>${val}</strong>`);
-
-    /* Celebration overlay */
-    showCelebration(displayMsg);
-
-    /* Big confetti */
-    confetti();
-
-    ttsSpeak(displayMsg.replace(/[^\w\s!]/g,''),()=>{qNum++;renderQuestion();});
-
-  }else{
-    /* WRONG */
-    btn.classList.add('wrong');
-    document.querySelectorAll('.ans-card').forEach(b=>{if(parseInt(b.dataset.val)===currentAnswer)b.classList.add('correct');});
-    streak=0;updateHUD();
-    mascotReact(false);
-
-    const wmsg=WRONG_MSGS[Math.floor(Math.random()*WRONG_MSGS.length)];
-    const bub=document.getElementById('speech-bub');
-    if(bub)bub.textContent=`The answer was ${currentAnswer}! ${wmsg}`;
-    setWrongMsg(`The answer was ${currentAnswer} 💪`);
-
-    /* Voice feedback box → show the correct answer prominently */
-    mzSetVoiceBox('Answer: '+currentAnswer,'bad','💛',`Was:<br><strong>${currentAnswer}</strong>`);
-
-    /* Inject step-by-step explainer into the work column */
-    const workCol=document.getElementById('work-col');
-    if(workCol){
-      const exp=document.createElement('div');
-      exp.innerHTML=buildExplainer(currentA,currentB,currentAnswer);
-      workCol.appendChild(exp.firstElementChild);
-    }
-
-    ttsSpeak(`Not quite! The answer was ${currentAnswer}. ${wmsg.replace(/[^\w\s!]/g,'')}`,()=>{qNum++;renderQuestion();});
-  }
-}
-
-/* ─────────────────────────────────────────────────
-   STEP-BY-STEP EXPLAINER (injected on wrong answer)
-───────────────────────────────────────────────── */
-function buildExplainer(a,b,ans){
-  let steps='';
-
-  if(currentGame==='addition'){
-    // Break into column method H+T+U with carries
-    const da=digits(a), db=digits(b), dc=digits(ans);
-    const uSum=(a%10)+(b%10);
-    const uCarry=Math.floor(uSum/10);
-    const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry;
-    const tCarry=Math.floor(tSum/10);
-    const hSum=Math.floor(a/100)+Math.floor(b/100)+tCarry;
-
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Write <span class="hi">${a}</span> on top and <span class="hi">${b}</span> below it, lining up the Units, Tens, Hundreds columns.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Units column: <span class="hi">${a%10}</span> + <span class="hi">${b%10}</span> = <span class="hi">${uSum}</span>${uCarry?` → write <span class="hi">${uSum%10}</span>, carry <span class="hi">1</span>`:''}.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text">Tens column: <span class="hi">${Math.floor((a%100)/10)}</span> + <span class="hi">${Math.floor((b%100)/10)}</span>${uCarry?' + 1 carry':''} = <span class="hi">${tSum}</span>${tCarry?` → write <span class="hi">${tSum%10}</span>, carry <span class="hi">1</span>`:''}.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.35s">
-        <div class="exp-num">4</div>
-        <div class="exp-text">Hundreds: <span class="hi">${Math.floor(a/100)||'0'}</span> + <span class="hi">${Math.floor(b/100)||'0'}</span>${tCarry?' + 1 carry':''} = <span class="hi">${hSum}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.45s">
-        <div class="exp-num">5</div>
-        <div class="exp-text">Answer = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-
-  } else if(currentGame==='subtraction'){
-    const da=digits(a), db=digits(b), dc=digits(ans);
-    const uA=a%10, uB=b%10;
-    const tA=Math.floor((a%100)/10), tB=Math.floor((b%100)/10);
-    const hA=Math.floor(a/100), hB=Math.floor(b/100);
-    const needUBorrow=uA<uB;
-    const needTBorrow=(tA-(needUBorrow?1:0))<tB;
-
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Write <span class="hi">${a}</span> on top and <span class="hi">${b}</span> below, columns lined up.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Units: <span class="hi">${uA}</span> − <span class="hi">${uB}</span>${needUBorrow?` → borrow 10 from Tens → <span class="hi">${uA+10}</span> − <span class="hi">${uB}</span>`:''} = <span class="hi">${(uA+(needUBorrow?10:0))-uB}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text">Tens: <span class="hi">${tA}${needUBorrow?' (−1 lent)':''}</span> − <span class="hi">${tB}</span>${needTBorrow?` → borrow → <span class="hi">${tA-(needUBorrow?1:0)+10}</span> − <span class="hi">${tB}</span>`:''} = <span class="hi">${(tA-(needUBorrow?1:0)+(needTBorrow?10:0))-tB}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.35s">
-        <div class="exp-num">4</div>
-        <div class="exp-text">Hundreds: <span class="hi">${hA}${needTBorrow?' (−1 lent)':''}</span> − <span class="hi">${hB}</span> = <span class="hi">${hA-(needTBorrow?1:0)-hB}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.45s">
-        <div class="exp-num">5</div>
-        <div class="exp-text">Answer = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-
-  } else if(currentGame==='multiply'){
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Think of <span class="hi">${a} × ${b}</span> as <span class="hi">${b}</span> groups of <span class="hi">${a}</span>.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Count the dots on the left: <span class="hi">${b}</span> rows with <span class="hi">${a}</span> dots each.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text">Or: <span class="hi">${a}</span> + <span class="hi">${a}</span>${b>2?` + … (${b} times)`:''}${b===2?` = <span class="hi">${a*2}</span>`:` = <span class="hi">${ans}</span>`}.</div>
-      </div>
-      ${b<=12?`
-      <div class="exp-step" style="animation-delay:.35s">
-        <div class="exp-num">4</div>
-        <div class="exp-text">Check: ${Array.from({length:b},(_,i)=>`<span class="hi">${a*(i+1)}</span>`).join(' → ')}. The <span class="hi">${b}th</span> one is <span class="ans"> ${ans} ✅</span></div>
-      </div>`:''}
-      <div class="exp-step" style="animation-delay:.45s">
-        <div class="exp-num">${b<=12?5:4}</div>
-        <div class="exp-text">Answer = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-
-  } else { // division
-    steps=`
-      <div class="exp-step" style="animation-delay:.05s">
-        <div class="exp-num">1</div>
-        <div class="exp-text">Share <span class="hi">${a}</span> things equally into <span class="hi">${b}</span> groups (see the groups on the left).</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.15s">
-        <div class="exp-num">2</div>
-        <div class="exp-text">Ask: what times <span class="hi">${b}</span> gives <span class="hi">${a}</span>? Count up: ${Array.from({length:Math.min(ans,8)},(_,i)=>`<span class="hi">${b*(i+1)}</span>`).join(', ')}${ans>8?'…':''}.</div>
-      </div>
-      <div class="exp-step" style="animation-delay:.25s">
-        <div class="exp-num">3</div>
-        <div class="exp-text"><span class="hi">${b} × ${ans}</span> = <span class="hi">${a}</span>, so <span class="hi">${a} ÷ ${b}</span> = <span class="ans"> ${ans} ✅</span></div>
-      </div>`;
-  }
-
-  return `
-    <div class="explainer">
-      <div class="explainer-title">💡 Here's how to do it!</div>
-      <div class="exp-steps">${steps}</div>
-    </div>`;
-}
-
-function showCelebration(msg){
-  const ov=document.getElementById('celeb-overlay');
-  const cm=document.getElementById('celeb-msg');
-  if(!ov||!cm)return;
-  cm.textContent=msg;
-  ov.classList.add('show');
-  setTimeout(()=>ov.classList.remove('show'),1200);
-}
-
-/* ─────────────────────────────────────────────────
-   END SCREEN
-───────────────────────────────────────────────── */
-function showEndScreen(){
-  const starsN=score>=45?3:score>=25?2:1;
-  const stars='⭐'.repeat(starsN)+'☆'.repeat(3-starsN);
-  const zone=ZONES[currentGame];
-  const title=starsN===3?'Perfect Score! 🏆':starsN===2?'Great Job! 🌟':'Good Try! 💪';
-
-  document.getElementById('game-panel').innerHTML=`
-    <div class="screen">
-      <div style="font-size:4.5rem">${currentMascot}</div>
-      <h2>${title}</h2>
-      <div class="stars-row">${stars}</div>
-      <p>You scored <strong style="color:var(--orange2);font-size:1.35em">${score}</strong> points!</p>
-      <p style="color:var(--purple2);font-weight:900;font-size:1rem">
-        🗣️ Say <strong>"play again"</strong> or <strong>"different game"</strong>
-      </p>
-      <button class="big-btn btn-blue" onclick="selectGame('${currentGame}')">🔁 Play Again!</button>
-      <button class="big-btn btn-purple" onclick="pickDiff()">🌍 Different Game!</button>
-    </div>
-  `;
-
-  confetti();
-  /* hub manages zone background */
-  ttsSpeak(`${title} You scored ${score} points! Say play again or pick a different game!`);
-}
-
-function pickDiff(){
-  const gs=['addition','subtraction','multiply','division'];
-  selectGame(gs.find(g=>g!==currentGame)||'addition');
-}
-
-/* ─────────────────────────────────────────────────
-   CONFETTI
-───────────────────────────────────────────────── */
-function confetti(){
-  const c=document.getElementById('confetti');c.innerHTML='';
-  const pieces=['🌟','⭐','🎉','🎊','🌈','💛','💚','💙','💜','❤️','✨','🎈','🎀','🏆'];
-  for(let i=0;i<50;i++){
-    const el=document.createElement('div');el.className='cp';
-    el.textContent=pieces[Math.floor(Math.random()*pieces.length)];
-    el.style.left=Math.random()*100+'vw';
-    el.style.animationDuration=(1.2+Math.random()*2)+'s';
-    el.style.animationDelay=Math.random()*1+'s';
-    el.style.fontSize=(1.3+Math.random()*1.8)+'rem';
-    c.appendChild(el);
-  }
-  setTimeout(()=>c.innerHTML='',5000);
-}
-
-/* ── Hub MZ adapter ── */
-const MZ = {
-  onShow(){
-    if(!currentGame)
-      setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say addition, subtraction, times tables, or division!',null,{rate:.88}),300);
-  },
+  difficulty:{addition:'easy',subtraction:'easy',multiply:'easy',division:'easy'},
+
+  MASCOTS:{addition:['🐬','🐳','🦈','🐙'],subtraction:['🦊','🐯','🦁','🐺'],multiply:['🦋','🐝','🐞','🦄'],division:['🐸','🦜','🐢','🦎']},
+  CORRECT:['Amazing! 🌟','You got it! 🎉','Super! ⭐','Brilliant! 🌈','Awesome! 💫','Correct! 🏆','Great job! 🎊','Fantastic! ✨'],
+  WRONG:["Not quite! Try again! 💪","Oops! Keep going! 🌟","Almost! You can do it! 🔥","Don't give up! 💛"],
+  STREAK:['','','Double! 🔥 Keep going!','Triple! 🌟 You\'re on fire!','Incredible! 4 in a row! 🏆','AMAZING! 5 in a row! 👑'],
+  WM:{zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,'twenty-one':21,'twenty-two':22,'twenty-three':23,'twenty-four':24,'twenty-five':25,'twenty-six':26,'twenty-seven':27,'twenty-eight':28,'twenty-nine':29,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,to:2,too:2,'for':4,won:1,ate:8,tree:3,free:3,nein:9,oh:0,'a':1},
+  GT:{addition:['addition','add','adding','plus','water','dolphin'],subtraction:['subtraction','subtract','minus','take away','lava','fox'],multiply:['multiply','times','times tables','multiplication','storm','butterfly'],division:['division','divide','rainbow','frog']},
+  GAME_WORDS:{addition:['addition','add it up','add','adding','plus','water','dolphin'],subtraction:['subtraction','take away','subtract','minus','lava','fox'],multiply:['times tables','times table','multiply','multiplication','storm','butterfly'],division:['division','divide','rainbow','frog']},
+  LEVEL_WORDS:{easy:['easy','simple','beginner','level 1','level one'],medium:['medium','middle','normal','level 2','level two'],hard:['hard','difficult','tricky','advanced','level 3','level three']},
+  BOX_ORDER:['u','t','h'], BOX_NAMES:{h:'Hundreds',t:'Tens',u:'Units'},
+
+  onShow(){ if(!this.currentGame) setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say addition, subtraction, times tables, or division!',null,{rate:.88}),300); },
   onHide(){ ttsStop(); },
-  onSpeech(raw){ mzProcessTranscript(raw); },
-  selectGame(g){ selectGame(g); },
+
+  setDiff(game,level){
+    this.difficulty[game]=level;
+    document.querySelectorAll(`.mz-diff-btn[data-game="${game}"]`).forEach(b=>{b.classList.toggle('active',b.dataset.level===level);});
+    this.selectGame(game);
+  },
+
+  onSpeech(raw){
+    if(speechLock) return;
+    const lo=raw.toLowerCase().trim();
+    // Difficulty voice commands
+    let foundGame=null,foundLevel=null;
+    for(const[g,words] of Object.entries(this.GAME_WORDS)){ if(words.some(w=>lo.includes(w))){ foundGame=g; break; } }
+    for(const[l,words] of Object.entries(this.LEVEL_WORDS)){ if(words.some(w=>lo.includes(w))){ foundLevel=l; break; } }
+    if(foundGame&&foundLevel){ this.setDiff(foundGame,foundLevel); return; }
+    if(foundLevel&&this.currentGame&&!foundGame){ this.setDiff(this.currentGame,foundLevel); return; }
+    // Column box voice (add/sub)
+    if(this.currentGame==='addition'||this.currentGame==='subtraction'){
+      const colMatch=lo.match(/\b(hundreds?|tens?|units?|ones?)\s+(\w+)/);
+      if(colMatch){
+        const cw=colMatch[1].replace(/s$/,''); const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
+        const dig=this.parseNum(colMatch[2]);
+        if(dig!==null&&dig>=0&&dig<=9){ this.activeAnsBox=ck; this.pickDigit(dig); this.setVoiceBox(this.BOX_NAMES[ck]+': '+dig,'final','✏️'); return; }
+      }
+      if(this.activeAnsBox&&!this.answered){
+        const dig=this.parseNum(lo);
+        if(dig!==null&&dig>=0&&dig<=9){ this.setVoiceBox(this.BOX_NAMES[this.activeAnsBox]+': '+dig,'final','✏️'); this.pickDigit(dig); return; }
+      }
+    }
+    // end screen nav
+    if(this.qNum>=this.TOTAL_Q||!this.currentGame){
+      if(/\b(play again|again|another|yes)\b/.test(lo)){ if(this.currentGame) this.selectGame(this.currentGame); return; }
+      if(/\b(different|switch|change|new game)\b/.test(lo)){ this.pickDiff(); return; }
+    }
+    // game switch
+    for(const[g,arr] of Object.entries(this.GT)){ if(arr.some(x=>lo.includes(x))){ this.animCard(g); setTimeout(()=>this.selectGame(g),420); return; } }
+    // answer
+    if(this.currentGame&&!this.answered&&this.currentAnswer!==null){
+      const val=this.parseNum(raw);
+      if(val!==null&&this.currentOpts.includes(val)){ this.setVoiceBox(String(val),'final','✅'); this.voiceAns(val); }
+    }
+  },
+
+  animCard(g){
+    document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-vsel'));
+    const b=document.getElementById('mz-btn-'+g); if(b) b.classList.add('mz-vsel');
+    setTimeout(()=>document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-vsel')),480);
+  },
+  pickDiff(){ const gs=['addition','subtraction','multiply','division']; this.selectGame(gs.find(g=>g!==this.currentGame)||'addition'); },
+
+  selectGame(game){
+    document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-sel'));
+    const gb=document.getElementById('mz-btn-'+game); if(gb) gb.classList.add('mz-sel');
+    this.currentGame=game; this.qNum=0; this.score=0; this.streak=0;
+    const pool=this.MASCOTS[game]||['🐬'];
+    this.mascot=pool[Math.floor(Math.random()*pool.length)];
+    this.renderQ();
+  },
+
+  rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; },
+  sh(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; },
+  makeOpts(correct,cnt,minV,maxV,step){
+    const s=new Set([correct]); let t=0;
+    while(s.size<cnt&&t<300){ t++; const d=this.rnd(1,step)*(Math.random()>.5?1:-1); const c=correct+d; if(c>=minV&&c<=maxV&&!s.has(c)) s.add(c); }
+    let c=correct+1; while(s.size<cnt){ if(!s.has(c)&&c>=minV) s.add(c); c++; }
+    return this.sh([...s]);
+  },
+  parseNum(t){
+    const r=t.trim().toLowerCase(); const m=r.match(/\b(\d{1,4})\b/); if(m) return parseInt(m[1]);
+    if(this.WM[r]!==undefined) return this.WM[r];
+    const p=r.split(/[\s\-]+/);
+    if(p.length===2){ const d=this.WM[p[0]],u=this.WM[p[1]]; if(d!==undefined&&u!==undefined&&d>=20&&u<10) return d+u; }
+    for(const w of p){ if(this.WM[w]!==undefined) return this.WM[w]; }
+    return null;
+  },
+  digits(n){ const s=String(n).padStart(3,'0'); return [s[0],s[1],s[2]]; },
+
+  renderQ(){
+    if(this.qNum>=this.TOTAL_Q){ this.endScreen(); return; }
+    this.answered=false; this.currentAnswer=null;
+    let a,b,ans,sym,word;
+    const d=this.DIFF[this.currentGame][this.difficulty[this.currentGame]];
+    if(this.currentGame==='addition')     { a=this.rnd(d.aMin,d.aMax);b=this.rnd(d.bMin,d.bMax);ans=a+b;sym='➕';word='plus'; }
+    else if(this.currentGame==='subtraction'){ b=this.rnd(d.bMin,d.bMax);a=b+this.rnd(d.aMin,d.aMax);ans=a-b;sym='➖';word='minus'; }
+    else if(this.currentGame==='multiply')   { a=this.rnd(d.aMin,d.aMax);b=this.rnd(d.bMin,d.bMax);ans=a*b;sym='✖️';word='times'; }
+    else { b=this.rnd(d.bMin,d.bMax);ans=this.rnd(d.aMin,d.aMax);a=b*ans;sym='➗';word='divided by'; }
+    this.currentAnswer=ans; this.currentA=a; this.currentB=b;
+    const minD=this.currentGame==='division'?Math.max(1,ans-6):this.currentGame==='multiply'?Math.max(4,ans-12):Math.max(0,ans-25);
+    const maxD=this.currentGame==='division'?ans+6:this.currentGame==='multiply'?ans+12:ans+25;
+    const opts=this.makeOpts(ans,4,minD,maxD,this.currentGame==='division'?5:this.currentGame==='multiply'?10:18);
+    this.currentOpts=opts;
+    const dots=Array.from({length:this.TOTAL_Q},(_,i)=>`<div class="mz-dot ${i<this.qNum?'done':i===this.qNum?'cur':''}"></div>`).join('');
+    const diffBadge=`<span style="font-size:.68rem;padding:.12rem .45rem;border-radius:5px;font-family:'Nunito',sans-serif;font-weight:900;${this.difficulty[this.currentGame]==='easy'?'background:#d4ffd4;color:#007020':this.difficulty[this.currentGame]==='medium'?'background:#fff8c0;color:#886000':'background:#ffd4d4;color:#c00000'}">${this.difficulty[this.currentGame]==='easy'?'🟢 Easy':this.difficulty[this.currentGame]==='medium'?'🟡 Medium':'🔴 Hard'}</span>`;
+
+    document.getElementById('mz-panel').innerHTML=`
+      <div class="mz-celeb" id="mz-celeb"><div class="mz-celeb-msg" id="mz-celeb-msg"></div></div>
+      <div class="mz-panel-cols">
+        <div class="mz-work-col" id="mz-work-col">
+          <div class="mz-work-col-title">✏️ Work it out! ${diffBadge}</div>
+          ${this.buildWorkArea(a,b,sym)}
+        </div>
+        <div class="mz-question-col">
+          <div class="mz-mascot-row"><div class="mz-mascot" id="mz-mascot">${this.mascot}</div><div class="mz-speech" id="mz-speech">What is the answer? 🤔</div></div>
+          <div class="mz-q-box"><div class="mz-q-text"><span class="mz-n1">${a}</span><span class="mz-op">${sym}</span><span class="mz-n2">${b}</span><span class="mz-op">=</span><span class="mz-qmark">?</span></div></div>
+          <div class="mz-answers">${opts.map(o=>`<button class="mz-ans" data-val="${o}" onclick="MZ.voiceAns(${o})">${o}</button>`).join('')}</div>
+          <div class="mz-wrong-msg" id="mz-wrong-msg"></div>
+          <div class="mz-voice-feedback listening" id="mz-vf">
+            <div class="mz-vf-mic" id="mz-vf-mic">🎙️</div>
+            <div class="mz-vf-word interim" id="mz-vf-word">Listening… say your answer!</div>
+            <div class="mz-vf-status" id="mz-vf-status">🗣️ Say a<br>number</div>
+          </div>
+          <div class="mz-dots">${dots}</div>
+          <div class="mz-v-hint">💡 Or say "addition" · "subtraction" · "times tables" · "division"</div>
+        </div>
+      </div>`;
+    setTimeout(()=>ttsSpeak(`What is ${a} ${word} ${b}?`,null,{rate:.88,pitch:1.15}),250);
+    if(this.currentGame==='addition'||this.currentGame==='subtraction') requestAnimationFrame(()=>this.initAnsBoxes());
+  },
+
+  buildWorkArea(a,b,sym){
+    if(this.currentGame==='addition'||this.currentGame==='subtraction') return this.buildColumnMath(a,b,sym);
+    if(this.currentGame==='multiply') return this.buildTimesVisual(a,b);
+    return this.buildDivVisual(a,b,this.currentAnswer);
+  },
+
+  buildColumnMath(a,b,sym){
+    const da=this.digits(a), db=this.digits(b);
+    const symChar=this.currentGame==='addition'?'+':'−';
+    const cols=['H','T','U'];
+    let carries={h:0,t:0,u:0};
+    if(this.currentGame==='addition'){
+      const uSum=(a%10)+(b%10); const uCarry=Math.floor(uSum/10);
+      const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry; const tCarry=Math.floor(tSum/10);
+      carries={h:tCarry,t:uCarry,u:0};
+    }
+    let borrows={h:{},t:{},u:{}};
+    if(this.currentGame==='subtraction'){
+      const uA=a%10,uB=b%10,tA=Math.floor((a%100)/10),tB=Math.floor((b%100)/10),hA=Math.floor(a/100);
+      const needUBorrow=uA<uB; const needTBorrow=(tA-(needUBorrow?1:0))<tB;
+      if(needUBorrow){ borrows.t.lent=true;borrows.t.originalDigit=tA;borrows.t.newDigit=tA-1;borrows.u.received=true;borrows.u.originalDigit=uA;borrows.u.newDigit=uA+10; }
+      if(needTBorrow){ borrows.h.lent=true;borrows.h.originalDigit=hA;borrows.h.newDigit=hA-1;const tEff=(needUBorrow?tA-1:tA)+10;borrows.t.received=true;borrows.t.originalDigit=borrows.t.originalDigit!==undefined?borrows.t.originalDigit:tA;borrows.t.newDigit=tEff; }
+    }
+    const headerRow=`<div class="mz-col-row" style="margin-bottom:.08rem"><div class="mz-col-label" style="width:26px"></div>${cols.map(c=>`<div class="mz-col-label">${c}</div>`).join('')}</div>`;
+    let carryRowHtml;
+    if(this.currentGame==='addition'){
+      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:26px"></div>${['h','t','u'].map(col=>carries[col]===1?`<div class="mz-carry-bubble"><div class="mz-carry-val">+1</div></div>`:`<div class="mz-carry-bubble"></div>`).join('')}</div>`;
+    } else {
+      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:26px"></div>${['h','t','u'].map(col=>{const bw=borrows[col];if(bw.lent)return`<div class="mz-carry-bubble"><div class="mz-carry-lent"><span class="mz-carry-cross">${bw.originalDigit}</span><span class="mz-carry-new">${bw.newDigit}</span></div></div>`;if(bw.received)return`<div class="mz-carry-bubble"><div class="mz-carry-lent"><span class="mz-carry-cross">${bw.originalDigit}</span><span class="mz-carry-new mz-carry-new-received">${bw.newDigit}</span></div></div>`;return`<div class="mz-carry-bubble"></div>`;}).join('')}</div>`;
+    }
+    const dSpan=(digArr,val)=>digArr.map((d,i)=>{const leading=val<Math.pow(10,2-i);const cls=['h','t','u'][i];return`<div class="mz-col-digit ${cls}${leading?' empty':''}">${leading?'':d}</div>`;}).join('');
+    const topRow=`<div class="mz-col-row"><div style="width:26px"></div>${dSpan(da,a)}</div>`;
+    const botRow=`<div class="mz-col-row mz-col-op-row"><div class="mz-col-op-sym">${symChar}</div>${dSpan(db,b)}</div>`;
+    const ansRow=`<div class="mz-col-row" style="margin-top:.25rem" id="mz-ans-row"><div style="width:26px"></div>${['h','t','u'].map((cls,i)=>`<div class="mz-col-digit ${cls} mz-ans-blank" id="mz-ans-box-${cls}" onclick="MZ.fillAnsBox('${cls}')" title="${['Hundreds','Tens','Units'][i]}"><span class="mz-blank-line">?</span></div>`).join('')}</div>`;
+    const digitStrip=`<div class="mz-digit-strip" id="mz-digit-strip"><span class="mz-ds-label">👉 Tap for <span id="mz-ds-col-name" style="color:var(--blue2)">Units</span>:</span>${[0,1,2,3,4,5,6,7,8,9].map(d=>`<button class="mz-ds-btn" onclick="MZ.pickDigit(${d})">${d}</button>`).join('')}</div>`;
+    return`<div class="mz-col-math"><div class="mz-col-math-title">Column method</div><div class="mz-col-math-grid">${headerRow}${carryRowHtml}${topRow}${botRow}<div style="border-top:3px solid var(--purple2);margin:.18rem 0"></div>${ansRow}${digitStrip}</div><div style="font-size:.62rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.3rem">🗣️ Say the digit — or say "hundreds 3" · "tens 5" · "units 7"</div></div>`;
+  },
+
+  buildTimesVisual(a,b){
+    const total=a*b; const dotSize=total>60?7:11; let html='';
+    for(let g=0;g<b;g++){if(g>0)html+=`<div class="mz-times-sep"></div>`;for(let d=0;d<a;d++)html+=`<div class="mz-tdot" style="width:${dotSize}px;height:${dotSize}px;animation-delay:${(g*a+d)*20}ms"></div>`;}
+    return`<div class="mz-times-grid"><div class="mz-times-grid-title">${b} groups of ${a}</div><div class="mz-times-dots">${html}</div><div style="text-align:center;font-size:.75rem;font-weight:900;color:var(--purple2);margin-top:.4rem">${b} × ${a} = ?</div></div>`;
+  },
+
+  buildDivVisual(a,b,ans){
+    const dotSize=a>30?7:10; let groups='';
+    for(let g=0;g<b;g++){let dots='';for(let d=0;d<ans&&d<8;d++)dots+=`<div class="mz-div-dot" style="width:${dotSize}px;height:${dotSize}px"></div>`;if(ans>8)dots+=`<div style="font-size:.55rem;font-weight:900;color:#aaa">+${ans-8}</div>`;groups+=`<div class="mz-div-group">${dots}</div>`;}
+    return`<div class="mz-div-visual"><div class="mz-times-grid-title">${a} shared into ${b} groups</div><div class="mz-div-groups">${groups}</div><div style="text-align:center;font-size:.75rem;font-weight:900;color:var(--purple2);margin-top:.4rem">${a} ÷ ${b} = ?</div></div>`;
+  },
+
+  initAnsBoxes(){
+    this.activeAnsBox='u';
+    this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+    const first=document.getElementById('mz-ans-box-u');if(first)first.classList.add('mz-active-box');
+    this.updateStripLabel();
+  },
+  updateStripLabel(){ const el=document.getElementById('mz-ds-col-name');if(el)el.textContent=this.BOX_NAMES[this.activeAnsBox]||''; },
+  fillAnsBox(col){
+    this.activeAnsBox=col;
+    this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+    const box=document.getElementById('mz-ans-box-'+col);if(box)box.classList.add('mz-active-box');
+    this.updateStripLabel();
+  },
+  pickDigit(d){
+    if(!this.activeAnsBox) return;
+    this.setAnsBox(this.activeAnsBox,d);
+    const nextCol=this.BOX_ORDER.find(col=>{if(col===this.activeAnsBox)return false;const b=document.getElementById('mz-ans-box-'+col);return b&&!b.classList.contains('mz-filled');});
+    this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+    if(nextCol){this.activeAnsBox=nextCol;const nb=document.getElementById('mz-ans-box-'+nextCol);if(nb)nb.classList.add('mz-active-box');this.updateStripLabel();}
+    else{this.activeAnsBox=null;const strip=document.getElementById('mz-digit-strip');if(strip){strip.style.opacity='.4';strip.style.pointerEvents='none';}}
+  },
+  setAnsBox(col,digit){
+    const box=document.getElementById('mz-ans-box-'+col);if(!box)return;
+    box.classList.remove('mz-active-box');box.classList.add('mz-filled');
+    box.innerHTML=`<span class="mz-blank-line">${digit}</span>`;
+    box.onclick=()=>this.fillAnsBox(col);
+  },
+
+  setVoiceBox(text,style,icon){
+    const box=document.getElementById('mz-vf'),word=document.getElementById('mz-vf-word'),mic=document.getElementById('mz-vf-mic');
+    if(!box||!word)return;
+    word.textContent=text; word.className='mz-vf-word '+(style||'interim');
+    if(mic)mic.textContent=icon||'🎙️';
+    box.className='mz-voice-feedback '+(style==='final'?'mz-vf-active':style==='bad'?'mz-vf-bad':'listening');
+  },
+
+  voiceAns(val){
+    if(this.answered) return;
+    document.querySelectorAll('.mz-ans').forEach(b=>{b.classList.remove('mz-vhi');if(parseInt(b.dataset.val)===val)b.classList.add('mz-vhi');});
+    setTimeout(()=>{ const btn=Array.from(document.querySelectorAll('.mz-ans')).find(b=>parseInt(b.dataset.val)===val); if(btn) this.checkAns(val,btn); },300);
+  },
+
+  checkAns(val,btn){
+    if(this.answered) return;
+    this.answered=true;
+    document.querySelectorAll('.mz-ans').forEach(b=>{b.classList.remove('mz-vhi');b.onclick=null;});
+    const mascot=document.getElementById('mz-mascot'), speech=document.getElementById('mz-speech');
+    if(val===this.currentAnswer){
+      btn.classList.add('mz-correct'); this.streak++;
+      this.score+=10+(this.streak>1?Math.min((this.streak-1)*5,20):0);
+      const msg=this.STREAK[Math.min(this.streak,5)]||this.CORRECT[Math.floor(Math.random()*this.CORRECT.length)];
+      if(speech) speech.textContent=msg;
+      if(mascot){ mascot.classList.remove('sad'); void mascot.offsetWidth; mascot.classList.add('cheer'); }
+      const cel=document.getElementById('mz-celeb'),cm=document.getElementById('mz-celeb-msg');
+      if(cel&&cm){ cm.textContent=msg; cel.classList.add('show'); setTimeout(()=>cel.classList.remove('show'),1100); }
+      this.setVoiceBox('✅ '+val,'final','🎉');
+      confetti();
+      ttsSpeak(msg.replace(/[^\w\s!]/g,''),()=>{ this.qNum++; this.renderQ(); },{rate:.88,pitch:1.15});
+    } else {
+      btn.classList.add('mz-wrong');
+      document.querySelectorAll('.mz-ans').forEach(b=>{ if(parseInt(b.dataset.val)===this.currentAnswer) b.classList.add('mz-correct'); });
+      this.streak=0;
+      const wm=this.WRONG[Math.floor(Math.random()*this.WRONG.length)];
+      if(speech) speech.textContent='The answer was '+this.currentAnswer+'! '+wm;
+      if(mascot){ mascot.classList.remove('cheer'); void mascot.offsetWidth; mascot.classList.add('sad'); }
+      const wmEl=document.getElementById('mz-wrong-msg'); if(wmEl) wmEl.textContent='The answer was '+this.currentAnswer+' 💪';
+      this.setVoiceBox('Answer: '+this.currentAnswer,'bad','💛');
+      // Inject explainer into work col
+      const workCol=document.getElementById('mz-work-col');
+      if(workCol){ const exp=document.createElement('div'); exp.innerHTML=this.buildExplainer(this.currentA,this.currentB,this.currentAnswer); if(exp.firstElementChild)workCol.appendChild(exp.firstElementChild); }
+      ttsSpeak('Not quite! The answer was '+this.currentAnswer+'. '+wm.replace(/[^\w\s!]/g,''),()=>{ this.qNum++; this.renderQ(); },{rate:.88});
+    }
+  },
+
+  buildExplainer(a,b,ans){
+    let steps='';
+    if(this.currentGame==='addition'){
+      const uSum=(a%10)+(b%10),uCarry=Math.floor(uSum/10);
+      const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry,tCarry=Math.floor(tSum/10);
+      const hSum=Math.floor(a/100)+Math.floor(b/100)+tCarry;
+      steps=`<div class="mz-exp-step"><div class="mz-exp-num">1</div><div class="mz-exp-text">Units: <span class="mz-hi">${a%10}</span> + <span class="mz-hi">${b%10}</span> = <span class="mz-hi">${uSum}</span>${uCarry?` → write <span class="mz-hi">${uSum%10}</span>, carry 1`:''}</div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">2</div><div class="mz-exp-text">Tens: <span class="mz-hi">${Math.floor((a%100)/10)}</span>+<span class="mz-hi">${Math.floor((b%100)/10)}</span>${uCarry?'+1 carry':''}=<span class="mz-hi">${tSum}</span>${tCarry?` → write <span class="mz-hi">${tSum%10}</span>, carry 1`:''}</div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">3</div><div class="mz-exp-text">Hundreds: <span class="mz-hi">${Math.floor(a/100)||0}</span>+<span class="mz-hi">${Math.floor(b/100)||0}</span>${tCarry?'+1 carry':''}=<span class="mz-hi">${hSum}</span></div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">4</div><div class="mz-exp-text">Answer = <span class="mz-ans"> ${ans} ✅</span></div></div>`;
+    } else if(this.currentGame==='subtraction'){
+      const uA=a%10,uB=b%10,tA=Math.floor((a%100)/10),tB=Math.floor((b%100)/10),hA=Math.floor(a/100),hB=Math.floor(b/100);
+      const needUBorrow=uA<uB,needTBorrow=(tA-(needUBorrow?1:0))<tB;
+      steps=`<div class="mz-exp-step"><div class="mz-exp-num">1</div><div class="mz-exp-text">Units: <span class="mz-hi">${uA}</span>−<span class="mz-hi">${uB}</span>${needUBorrow?` → borrow → <span class="mz-hi">${uA+10}</span>−<span class="mz-hi">${uB}</span>`:''}=<span class="mz-hi">${(uA+(needUBorrow?10:0))-uB}</span></div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">2</div><div class="mz-exp-text">Tens: <span class="mz-hi">${tA}${needUBorrow?' (−1 lent)':''}</span>−<span class="mz-hi">${tB}</span>${needTBorrow?` → borrow → <span class="mz-hi">${tA-(needUBorrow?1:0)+10}</span>−<span class="mz-hi">${tB}</span>`:''}=<span class="mz-hi">${(tA-(needUBorrow?1:0)+(needTBorrow?10:0))-tB}</span></div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">3</div><div class="mz-exp-text">Answer = <span class="mz-ans"> ${ans} ✅</span></div></div>`;
+    } else if(this.currentGame==='multiply'){
+      steps=`<div class="mz-exp-step"><div class="mz-exp-num">1</div><div class="mz-exp-text">Think: <span class="mz-hi">${b}</span> groups of <span class="mz-hi">${a}</span></div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">2</div><div class="mz-exp-text">${b<=8?Array.from({length:b},(_,i)=>`<span class="mz-hi">${a*(i+1)}</span>`).join(' → '):'Count up by '+a+'s'} = <span class="mz-ans"> ${ans} ✅</span></div></div>`;
+    } else {
+      steps=`<div class="mz-exp-step"><div class="mz-exp-num">1</div><div class="mz-exp-text">Share <span class="mz-hi">${a}</span> into <span class="mz-hi">${b}</span> equal groups</div></div>
+      <div class="mz-exp-step"><div class="mz-exp-num">2</div><div class="mz-exp-text"><span class="mz-hi">${b}</span> × <span class="mz-hi">${ans}</span> = <span class="mz-hi">${a}</span>, so answer = <span class="mz-ans"> ${ans} ✅</span></div></div>`;
+    }
+    return`<div class="mz-explainer"><div class="mz-explainer-title">💡 Here's how!</div><div class="mz-exp-steps">${steps}</div></div>`;
+  },
+
+  endScreen(){
+    const stN=this.score>=45?3:this.score>=25?2:1;
+    const stars='⭐'.repeat(stN)+'☆'.repeat(3-stN);
+    const title=stN===3?'Perfect Score! 🏆':stN===2?'Great Job! 🌟':'Good Try! 💪';
+    document.getElementById('mz-panel').innerHTML=`
+      <div class="mz-screen">
+        <div style="font-size:4.2rem">${this.mascot}</div>
+        <h2>${title}</h2>
+        <div class="mz-stars">${stars}</div>
+        <p>You scored <strong style="color:var(--orange2);font-size:1.25em">${this.score}</strong> points!</p>
+        <p style="color:var(--purple2);font-weight:900;font-size:.86rem">🗣️ Say <strong>"play again"</strong> or <strong>"different game"</strong></p>
+        <button class="mz-big-btn mz-btn-blue" onclick="MZ.selectGame('${this.currentGame}')">🔁 Play Again!</button>
+        <button class="mz-big-btn mz-btn-purple" onclick="MZ.pickDiff()">🌍 Different Game!</button>
+      </div>`;
+    confetti();
+    ttsSpeak(title+' You scored '+this.score+' points! Say play again or pick a different game!',null,{rate:.88});
+  },
 };
 </script>
 </body>
