@@ -2441,124 +2441,223 @@ const RB={
   },
 
   // ── COMPREHENSION CHECK VOICE ANSWER ──
-  voiceCheckAns(idx){
-    // Find the most recently visible unanswered check card
-    const cards=[...document.querySelectorAll('.rb-check-card')];
-    for(let i=cards.length-1;i>=0;i--){
-      const btns=cards[i].querySelectorAll('.rb-check-opt:not([disabled])');
-      if(btns.length&&btns[idx]){ btns[idx].click(); return; }
-    }
-  },
-
   openDB(){
-    return new Promise((res,rej)=>{
-      const req=indexedDB.open('ReadingBuddyHub3',1);
-      req.onupgradeneeded=e=>{const db=e.target.result; if(!db.objectStoreNames.contains('books')) db.createObjectStore('books',{keyPath:'id'});};
-      req.onsuccess=e=>res(e.target.result);
-      req.onerror=()=>rej();
-    });
-  },
-  dbPut(store,obj){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite'); tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result); tx.onerror=rej; }); },
-  dbGet(store,key){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly'); tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result); tx.onerror=rej; }); },
-  dbAll(store)    { return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly'); tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result); tx.onerror=rej; }); },
-  dbDel(store,key){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite'); tx.objectStore(store).delete(key).onsuccess=res; tx.onerror=rej; }); },
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open('ReadingBuddyHub3',1);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('books'))
+        db.createObjectStore('books',{keyPath:'id'});
+    };
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=()=>rej();
+  });
+},
 
-  async upload(files){
-    for(const f of files){
-      toast('📄 Loading '+f.name+'…');
-      try{
-        let lines=[];
-        if(f.name.toLowerCase().endsWith('.pdf')){
-          const buf=await f.arrayBuffer();
-          const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-          for(let p=1;p<=pdf.numPages;p++){
-            const page=await pdf.getPage(p);
-            const tc=await page.getTextContent();
-            const txt=tc.items.map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();
-            if(txt) lines.push(...this.splitLines(txt));
-          }
-        } else {
-          lines=this.splitLines((await f.text()).replace(/\r\n/g,'\n'));
+dbPut(store,obj){
+  return new Promise((res,rej)=>{
+    const tx=this.db.transaction(store,'readwrite');
+    tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result);
+    tx.onerror=rej;
+  });
+},
+
+dbGet(store,key){
+  return new Promise((res,rej)=>{
+    const tx=this.db.transaction(store,'readonly');
+    tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result);
+    tx.onerror=rej;
+  });
+},
+
+dbAll(store){
+  return new Promise((res,rej)=>{
+    const tx=this.db.transaction(store,'readonly');
+    tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result);
+    tx.onerror=rej;
+  });
+},
+
+dbDel(store,key){
+  return new Promise((res,rej)=>{
+    const tx=this.db.transaction(store,'readwrite');
+    tx.objectStore(store).delete(key).onsuccess=res;
+    tx.onerror=rej;
+  });
+},
+
+async upload(files){
+  for(const f of files){
+    toast('📄 Loading '+f.name+'…');
+    try{
+      let lines=[];
+      if(f.name.toLowerCase().endsWith('.pdf')){
+        const buf=await f.arrayBuffer();
+        const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+
+        for(let p=1;p<=pdf.numPages;p++){
+          const page=await pdf.getPage(p);
+          const tc=await page.getTextContent();
+          const txt=tc.items.map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();
+          if(txt) lines.push(...this.splitLines(txt));
         }
-        if(!lines.length){ toast('❌ Could not read text'); continue; }
-        const book={id:'b_'+Date.now()+Math.random().toString(36).slice(2),name:f.name.replace(/\.[^.]+$/,''),lines,lineCount:lines.length,progress:0};
-        await this.dbPut('books',book);
-        toast('✅ Loaded: '+book.name+' ('+lines.length+' lines)');
-        await this.renderLib();
-        this.openBook(book.id);
-      }catch(err){ toast('❌ '+err.message); }
-    }
-  },
-
-  splitLines(text){
-    const sents=text.replace(/([.!?]+)\s+/g,'$1\n').split('\n');
-    const out=[];
-    for(const s of sents){
-      const t=s.trim(); if(!t) continue;
-      if(t.length<=120){ out.push(t); }
-      else{
-        const words=t.split(' '); let chunk='';
-        for(const w of words){ if((chunk+' '+w).length>100&&chunk){ out.push(chunk.trim()); chunk=w; } else { chunk+=' '+w; } }
-        if(chunk.trim()) out.push(chunk.trim());
+      } else {
+        lines=this.splitLines(
+          (await f.text()).replace(/\r\n/g,'\n')
+        );
       }
+
+      if(!lines.length){
+        toast('❌ Could not read text');
+        continue;
+      }
+
+      const book={
+        id:'b_'+Date.now()+Math.random().toString(36).slice(2),
+        name:f.name.replace(/\.[^.]+$/,''),
+        lines,
+        lineCount:lines.length,
+        progress:0
+      };
+
+      await this.dbPut('books',book);
+
+      toast('✅ Loaded: '+book.name+' ('+lines.length+' lines)');
+      await this.renderLib();
+      this.openBook(book.id);
+
+    }catch(err){
+      toast('❌ '+err.message);
     }
-    return out.filter(l=>l.length>2);
-  },
+  }
+},
 
-  async renderLib(){
-    const books=await this.dbAll('books').catch(()=>[]);
-    const lib=document.getElementById('rb-library'); if(!lib) return;
-    lib.innerHTML=books.map(b=>`
-      <div class="rb-lib-card ${this.bookId===b.id?'active':''}" onclick="RB.openBook('${b.id}')">
-        <div class="rb-lib-ico">📘</div>
-        <div class="rb-lib-name">${b.name}</div>
-        <div class="rb-lib-meta">${b.lineCount} lines · ${Math.round((b.progress||0)/b.lineCount*100)||0}%</div>
-        <button class="rb-lib-del" onclick="event.stopPropagation();RB.deleteBook('${b.id}')">🗑️</button>
-      </div>`).join('')||'<div style="text-align:center;padding:1rem;color:#aaa;font-weight:800;font-size:.82rem">No books yet! Upload a PDF above.</div>';
-  },
+splitLines(text){
+  const sents=text
+    .replace(/([.!?]+)\s+/g,'$1\n')
+    .split('\n');
 
-  async openBook(id){
-    const book=await this.dbGet('books',id).catch(()=>null);
-    if(!book){ toast('❌ Book not found'); return; }
-    this.stopReading();
-    this.lines=book.lines; this.cur=book.progress||0; this.bookId=id;
-    this.wordIdx=book.wordIdx||0;
-    this.advancedThisLine=false;
-    document.getElementById('rb-upload-section').style.display='none';
-    document.getElementById('rb-reader-section').style.display='block';
-    ['rb-prev-btn','rb-next-btn','rb-help-btn'].forEach(x=>document.getElementById(x).disabled=false);
-    this.renderLines();
-    this.setStatus('📖 '+book.name+' — say "start" to begin reading aloud!');
-    await this.renderLib();
-    toast('📖 Opened: '+book.name);
-  },
+  const out=[];
 
-  async deleteBook(id){
-    if(!confirm('Delete this book?')) return;
-    await this.dbDel('books',id).catch(()=>{});
-    if(this.bookId===id){ this.bookId=null; document.getElementById('rb-upload-section').style.display='block'; document.getElementById('rb-reader-section').style.display='none'; }
-    await this.renderLib(); toast('🗑️ Deleted');
-  },
+  for(const s of sents){
+    const t=s.trim();
+    if(!t) continue;
 
-  closeBook(){
-    this.stopReading(); this.bookId=null; this.wordIdx=0;
+    if(t.length<=120){
+      out.push(t);
+    } else {
+      const words=t.split(' ');
+      let chunk='';
+
+      for(const w of words){
+        if((chunk+' '+w).length>100 && chunk){
+          out.push(chunk.trim());
+          chunk=w;
+        } else {
+          chunk+=' '+w;
+        }
+      }
+
+      if(chunk.trim()) out.push(chunk.trim());
+    }
+  }
+
+  return out.filter(l=>l.length>2);
+},
+
+async renderLib(){
+  const books=await this.dbAll('books').catch(()=>[]);
+  const lib=document.getElementById('rb-library');
+  if(!lib) return;
+
+  lib.innerHTML = books.map(b=>`
+    <div class="rb-lib-card ${this.bookId===b.id?'active':''}" onclick="RB.openBook('${b.id}')">
+      <div class="rb-lib-ico">📘</div>
+      <div class="rb-lib-name">${b.name}</div>
+      <div class="rb-lib-meta">
+        ${b.lineCount} lines · ${Math.round((b.progress||0)/b.lineCount*100)||0}%
+      </div>
+      <button class="rb-lib-del" onclick="event.stopPropagation();RB.deleteBook('${b.id}')">🗑️</button>
+    </div>
+  `).join('') || `
+    <div style="text-align:center;padding:1rem;color:#aaa;font-weight:800;font-size:.82rem">
+      No books yet! Upload a PDF above.
+    </div>`;
+},
+
+async openBook(id){
+  const book=await this.dbGet('books',id).catch(()=>null);
+
+  if(!book){
+    toast('❌ Book not found');
+    return;
+  }
+
+  this.stopReading();
+
+  this.lines=book.lines;
+  this.cur=book.progress||0;
+  this.bookId=id;
+  this.wordIdx=book.wordIdx||0;
+  this.advancedThisLine=false;
+
+  document.getElementById('rb-upload-section').style.display='none';
+  document.getElementById('rb-reader-section').style.display='block';
+
+  ['rb-prev-btn','rb-next-btn','rb-help-btn']
+    .forEach(x=>document.getElementById(x).disabled=false);
+
+  this.renderLines();
+  this.setStatus('📖 '+book.name+' — say "start" to begin reading aloud!');
+
+  await this.renderLib();
+  toast('📖 Opened: '+book.name);
+},
+
+async deleteBook(id){
+  if(!confirm('Delete this book?')) return;
+
+  await this.dbDel('books',id).catch(()=>{});
+
+  if(this.bookId===id){
+    this.bookId=null;
     document.getElementById('rb-upload-section').style.display='block';
     document.getElementById('rb-reader-section').style.display='none';
-    this.renderLib(); this.updateBadge();
-  },
+  }
 
-  renderLines(){
-    const area=document.getElementById('rb-reading-area'); area.innerHTML='';
-    this.lines.forEach((text,i)=>{
-      if(i>0&&i%this.CHECK_EVERY===0) area.appendChild(this.buildCheck(i));
-      const el=document.createElement('div'); el.className='rb-line'; el.dataset.idx=i;
-      // Render as plain text — word spans added when line becomes active
-      el.textContent=text;
-      el.addEventListener('click',()=>this.jumpTo(i));
-      area.appendChild(el);
-    });
-    this.highlight(this.cur);
-  },
+  await this.renderLib();
+  toast('🗑️ Deleted');
+},
+
+closeBook(){
+  this.stopReading();
+  this.bookId=null;
+  this.wordIdx=0;
+
+  document.getElementById('rb-upload-section').style.display='block';
+  document.getElementById('rb-reader-section').style.display='none';
+
+  this.renderLib();
+  this.updateBadge();
+},
+
+renderLines(){
+  const area=document.getElementById('rb-reading-area');
+  area.innerHTML='';
+
+  this.lines.forEach((text,i)=>{
+    const el=document.createElement('div');
+    el.className='rb-line';
+    el.dataset.idx=i;
+
+    el.textContent=text;
+    el.addEventListener('click',()=>this.jumpTo(i));
+
+    area.appendChild(el);
+  });
+
+  this.highlight(this.cur);
+}
 
   // Wrap the active line's text into per-word spans for highlighting
   renderWordSpans(lineEl, text, startWordIdx){
