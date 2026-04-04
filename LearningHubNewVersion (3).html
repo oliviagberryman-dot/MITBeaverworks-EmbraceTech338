@@ -2562,7 +2562,7 @@ splitLines(text){
     }
   }
 
-  return out.filter(l=>l.length>2);
+  return out.filter(l=>l.length>2&&/[a-zA-Z0-9]/.test(l));
 },
 
 async renderLib(){
