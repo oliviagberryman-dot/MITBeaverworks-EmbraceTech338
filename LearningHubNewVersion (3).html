@@ -1190,8 +1190,8 @@ function route(raw){
   }
 
   // Global nav
-  if(/\b(go home|home screen|main menu|home)\b/.test(lo)){ goHome(); return; }
-  if(/\b(voice|voice buddy|dictate|transcri)\b/.test(lo) && currentZone!=='voice'){ hlCard('voice'); setTimeout(()=>switchZone('voice'),360); return; }
+  if(/\b(go home|home screen|main menu)\b/.test(lo)){ goHome(); return; }
+  if(/\b(voice buddy|go to voice|open voice)\b/.test(lo) && currentZone!=='voice'){ hlCard('voice'); setTimeout(()=>switchZone('voice'),360); return; }
   if(/\b(word blast|word game|synonyms?|antonyms?|grammar game)\b/.test(lo) && currentZone!=='words'){ hlCard('words'); setTimeout(()=>switchZone('words'),360); return; }
   if(/\b(reading|reading buddy|book|books|story|stories|pdf)\b/.test(lo) && currentZone!=='reading'){ hlCard('reading'); setTimeout(()=>switchZone('reading'),360); return; }
   if(/\b(math|maths|number|numbers)\b/.test(lo) && currentZone!=='math'){ hlCard('math'); setTimeout(()=>switchZone('math'),360); return; }
@@ -1262,7 +1262,7 @@ const VB={
 
   onCommand(raw){
     const lo=raw.toLowerCase();
-    if(/\b(stop|finish|done)\b/.test(lo)){ this.stopProcess(); return; }
+    if(/\b(stop recording|finish recording|i am done)\b/.test(lo)){ this.stopProcess(); return; }
     if(/\bpause\b/.test(lo)){ this.pause(); return; }
     if(/\b(resume|continue)\b/.test(lo)){ this.resume(); return; }
     if(/\bnew session\b/.test(lo)){ this.newSession(); return; }
@@ -1275,7 +1275,7 @@ const VB={
   },
 
   onSpeech(raw){
-    if(/\b(stop|finish|done)\b/i.test(raw)){ this.stopProcess(); return; }
+    if(/\b(stop recording|finish recording|i am done)\b/i.test(raw)){ this.stopProcess(); return; }
     if(/\bpause\b/i.test(raw)){ this.pause(); return; }
     this.rawAccum+=raw+' ';
     this.silReset();
@@ -2322,13 +2322,13 @@ const RB={
     }
 
     // Start/stop reading
-    if(/\b(start|begin|go|listen)\b/.test(lo)&&!this.reading){ this.startReading(); return; }
-    if(/\b(stop|pause|halt)\b/.test(lo)){ this.stopReading(); return; }
+    if(/\b(start reading|begin reading|start listening)\b/.test(lo)&&!this.reading){ this.startReading(); return; }
+    if(/\b(stop reading|pause reading|stop now)\b/.test(lo)){ this.stopReading(); return; }
 
     // Manual nav (not in reading mode)
     if(!this.reading){
-      if(/\b(next|forward|skip|continue)\b/.test(lo)){ this.nextLine(); return; }
-      if(/\b(back|previous|again|repeat|go back)\b/.test(lo)){ this.prevLine(); return; }
+      if(/\b(next line|go forward|skip ahead|continue reading)\b/.test(lo)){ this.nextLine(); return; }
+      if(/\b(go back|previous line|read again|repeat that)\b/.test(lo)){ this.prevLine(); return; }
     }
 
     // Comprehension check answers by voice
