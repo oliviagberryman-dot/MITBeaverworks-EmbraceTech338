@@ -2426,7 +2426,7 @@ if(match){ this.helpWord(match[1]); return; }
       }
     }
     if(bestMatch>this.wordIdx){
-      this.wordIdx=bestMatch;
+      this.wordIdx=bestMatch + 1;      
       this.updateWordHighlight(this.wordIdx);
       this.saveWordProgress();
     }
