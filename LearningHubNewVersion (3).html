@@ -2357,7 +2357,10 @@ const RB={
     if(/\bhelp me\b/.test(lo)){
       this.helpWord(); return;
     }
+    const match = /\blook up (\w+)/.exec(lo);
+if(match){ this.helpWord(match[1]); return; }
 
+    
     // ── VOCAB POPUP CONTROLS (only when popup is open) ──
     if(this.vocabOpen()){
       if(/\b(favorite|save|keep it|add it)\b/.test(lo)){ this.saveVocabByVoice(); return; }
