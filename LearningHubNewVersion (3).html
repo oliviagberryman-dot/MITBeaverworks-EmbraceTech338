@@ -2592,6 +2592,7 @@ if(match){ this.helpWord(match[1]); return; }
   renderLines(){
     const area=document.getElementById('rb-reading-area'); area.innerHTML='';
     this.lines.forEach((text,i)=>{
+      const el=document.createElement('div'); el.className='rb-line'; el.dataset.idx=i;
       el.textContent=text;
       el.addEventListener('click',()=>this.jumpTo(i));
       area.appendChild(el);
