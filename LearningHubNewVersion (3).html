@@ -695,7 +695,7 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
       <button class="app-card" data-z="words"   onclick="switchZone('words')">
         <span class="ac-ico">💥</span><span class="ac-name">Word Blast!</span>
         <span class="ac-desc">Fun word games — say your answer!</span>
-        <span class="ac-hint">say "words"</span>
+        <span class="ac-hint">say "word blast"</span>
       </button>
       <button class="app-card" data-z="reading" onclick="switchZone('reading')">
         <span class="ac-ico">📖</span><span class="ac-name">Reading Buddy</span>
@@ -775,7 +775,7 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
         <span class="wb-heard-lbl">I HEARD:</span><span class="wb-heard-word" id="wb-heard">—</span>
         <div class="wb-mic-status" id="wb-mic-status">Waiting…</div>
       </div>
-      <button class="wb-nxt" id="wb-nxt" onclick="WB.advance()">NEXT QUESTION ▶</button>
+      <button class="wb-nxt" id="wb-nxt" onclick="WB.advance()">NEXT QUESTION ▶ <span style="font-size:.7rem;opacity:.7;font-family:'Nunito',sans-serif;font-weight:800">(or say "next")</span></button>
     </div>
     <div class="wb-screen" id="wb-results" style="gap:12px;text-align:center;padding-top:26px;">
       <div class="wb-res-trophy" id="wb-res-trophy">🏆</div>
@@ -819,8 +819,7 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
             <button class="fun-ctrl-btn" style="--bc:#10B981;--bs:#006644" id="rb-start-btn" onclick="RB.startReading()">🎤 Start Listening</button>
             <button class="fun-ctrl-btn" style="--bc:#f87171;--bs:#cc0000" id="rb-stop-btn" onclick="RB.stopReading()" disabled>⏹ Stop</button>
             <button class="fun-ctrl-btn" style="--bc:#F59E0B;--bs:#cc6600" id="rb-prev-btn" onclick="RB.prevLine()" disabled>◀ Back</button>
-            <button class="fun-ctrl-btn" style="--bc:#F59E0B;--bs:#cc6600" id="rb-next-btn" onclick="RB.nextLine()" disabled>Next ▶</button>
-            <button class="fun-ctrl-btn" style="--bc:#8B5CF6;--bs:#550088" id="rb-help-btn" onclick="RB.helpWord()" disabled>❓ Word Help <span style="font-size:.65rem;opacity:.8">(or tap any word)</span></button>
+            <button class="fun-ctrl-btn" style="--bc:#F59E0B;--bs:#cc6600" id="rb-next-btn" onclick="RB.nextLine()" disabled>Next ▶</button><button class="fun-ctrl-btn" style="--bc:#8B5CF6;--bs:#550088" id="rb-help-btn" onclick="RB.helpWord()" disabled>❓ Word Help <span style="font-size:.65rem;opacity:.8">(tap a word, or say "help me")</span></button>
             <button class="fun-ctrl-btn" style="--bc:#aaa;--bs:#666" onclick="RB.closeBook()">📚 Library</button>
           </div>
         </div>
@@ -1273,7 +1272,6 @@ const VB={
       if(m) this.openSessionByNum(m[1]); return;
     }
     if(/\bgo back\b|\bback to sessions\b/.test(lo)){ this.viewSession=null; this.renderSessions(); return; }
-    if(this.state==='idle') this.startListen();
   },
 
   onSpeech(raw){
@@ -1286,6 +1284,7 @@ const VB={
 
   // Called from recog.onresult with INTERIM text — shows it greyed out while speaking
   updateInterim(interim){
+    this._lastInterim = interim;
     const lb=document.getElementById('vb-live'); if(!lb) return;
     const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
     lb.innerHTML=(this.rawAccum?`<span>${esc(this.rawAccum)}</span>`:'')
@@ -1344,6 +1343,12 @@ const VB={
 
   async stopProcess(){
     this.capturing=false; this.silStop();
+    await new Promise(r=>setTimeout(r,450));
+    const extra=(this._lastInterim||'').trim();
+    if(extra && !this.rawAccum.toLowerCase().includes(extra.toLowerCase().slice(0,12))){
+        this.rawAccum+=(this.rawAccum?' ':'')+extra;
+    }
+    this._lastInterim='';
     const txt=this.rawAccum.trim(); this.rawAccum=''; this.updateLive();
     if(!txt){ this.setS('idle'); return; }
     this.setS('thinking');
@@ -2954,7 +2959,7 @@ const MZ={
             <div class="mz-vf-status" id="mz-vf-status">🗣️ Say a<br>number</div>
           </div>
           <div class="mz-dots">${dots}</div>
-          <div class="mz-v-hint">💡 Say "addition easy/medium/hard" · "division hard" · or game name to switch</div>
+          <div class="mz-v-hint">💡 Say any game + difficulty: "addition hard" · "subtraction easy" · "times tables medium" · "division hard"</div>
         </div>
       </div>`;
     setTimeout(()=>ttsSpeak(`What is ${a} ${word} ${b}?`,null,{rate:.88,pitch:1.15}),250);
