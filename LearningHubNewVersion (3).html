@@ -52,11 +52,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:500;height:var(--hh);backgrou
 .nav-tab.active{background:rgba(255,255,255,.92);color:var(--dark);text-shadow:none;transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.22);}
 .nav-tab-ico{font-size:1.15rem;line-height:1;}
 .nav-tab-lbl{font-size:.6rem;letter-spacing:.2px;}
-.h-mic{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:50px;padding:.3rem .55rem;flex-shrink:0;cursor:pointer;}
+.h-mic{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:50px;padding:.3rem .55rem;flex-shrink:0;cursor:pointer;width:120px;min-width:120px;max-width:120px;overflow:hidden;}
 .h-mic-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transition:all .3s;flex-shrink:0;}
-.h-mic-dot.on{background:#ff4f4f;box-shadow:0 0 8px #ff4f4f;animation:micPulse 1s ease infinite;}
+.h-mic-dot.on{background:#ff4f4f;box-shadow:0 0 8px #ff4f4f;}
 @keyframes micPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.h-heard{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.9);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.h-heard{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.9);width:90px;min-width:90px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;}
 
 /* ── CONTENT ── */
 #content{margin-top:var(--hh);min-height:calc(100vh - var(--hh));position:relative;z-index:10;}
@@ -604,6 +604,17 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 .sc-carry-revealed{border-color:var(--green2);color:var(--green2);background:#e8ffe8;}
 /* Voice prompt inside scratch box */
 .sc-voice-prompt{font-size:.63rem;font-weight:800;color:#aaa;text-align:center;margin-top:.2rem;line-height:1.4;}
+/* Subtraction borrow clue */
+.sc-borrow-clue{display:flex;flex-direction:column;align-items:center;gap:.3rem;width:100%;margin-bottom:.15rem;}
+.sc-clue-q{font-family:'Fredoka One',sans-serif;font-size:.75rem;color:#555;text-align:center;}
+.sc-clue-btns{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center;}
+.sc-clue-btn{font-family:'Fredoka One',sans-serif;font-size:.68rem;border:none;border-radius:10px;padding:.25rem .55rem;cursor:pointer;transition:transform .1s,box-shadow .1s;box-shadow:0 2px 0 rgba(0,0,0,.12);}
+.sc-clue-btn:hover{transform:translateY(-2px);}
+.sc-clue-yes{background:linear-gradient(135deg,#ff8c3d,#ffb800);color:#fff;}
+.sc-clue-no{background:linear-gradient(135deg,#3ddc68,#1fad44);color:#fff;}
+.sc-clue-info{font-family:'Fredoka One',sans-serif;font-size:.72rem;text-align:center;color:#555;}
+.sc-borrow-confirmed{color:var(--green2)!important;}
+.sc-borrow-lent .sc-clue-info{color:#6366f1;font-size:.7rem;}
 
 /* ══ CONFETTI ══ */
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:8000;overflow:hidden;}
@@ -1159,56 +1170,7 @@ function micRestart(){
    double-prompt. localStorage remembers so on next load we
    skip the screen and start silently.
 ════════════════════════════════════════════════════════════ */
-async function grantPermission(){
-  const btn = document.querySelector('.perm-btn');
-  const st  = document.getElementById('perm-status');
 
-  // Disable button immediately — never let it be tapped twice
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Starting…'; }
-  if(st)  st.textContent='When Chrome asks — tap Allow ☝️';
-
-  // Create recognition object inside the user gesture (this tap)
-  // so Chrome links this request to the button click
-  initRecog();
-
-  // Attach ONE-TIME handlers BEFORE calling start()
-  // These fire exactly once and tell us if it worked
-  const origOnStart = recog.onstart;
-  const origOnError = recog.onerror;
-
-  recog.onstart = function(e){
-    // SUCCESS — mic is live
-    recog.onstart = origOnStart; // restore normal handler
-    recog.onerror = origOnError;
-    micActive = true;
-    setMicVis(true);
-    try{ localStorage.setItem('hub_mic_ok','1'); }catch(ex){}
-    if(st)  st.textContent = '✅ Microphone on! Opening hub…';
-    if(btn) btn.textContent = "🎉 Done!";
-    // Hide perm screen smoothly
-    setTimeout(()=>{
-      const ps = document.getElementById('perm-screen');
-      if(ps){ ps.style.transition='opacity .5s'; ps.style.opacity='0';
-              setTimeout(()=>{ ps.style.display='none'; },500); }
-    }, 600);
-  };
-
-  recog.onerror = function(e){
-    recog.onstart = origOnStart;
-    recog.onerror = origOnError;
-    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
-      // User tapped Deny
-      if(btn){ btn.disabled=false; btn.textContent='🎤 Try Again'; }
-      if(st)  st.textContent='❌ Tap Allow when Chrome asks! Click 🔒 in browser bar → Microphone → Allow, then refresh.';
-    } else {
-      // Any other error (aborted, network) — just try to restart normally
-      origOnError && origOnError.call(recog, e);
-    }
-  };
-
-  // This ONE call triggers the Chrome permission popup
-  micRestart();
-}
 
 /* ════════════════════════════════════
    HUB ROUTING
@@ -2862,12 +2824,25 @@ const MZ={
   onSpeech(raw){
     if(speechLock) return;
     const lo=raw.toLowerCase().trim();
-    // Difficulty voice commands
+    // ── Difficulty voice commands ──
+    // Recognise: "division hard", "hard division", "addition easy", "change subtraction to medium" etc.
     let foundGame=null,foundLevel=null;
     for(const[g,words] of Object.entries(this.GAME_WORDS)){ if(words.some(w=>lo.includes(w))){ foundGame=g; break; } }
     for(const[l,words] of Object.entries(this.LEVEL_WORDS)){ if(words.some(w=>lo.includes(w))){ foundLevel=l; break; } }
-    if(foundGame&&foundLevel){ this.setDiff(foundGame,foundLevel); return; }
-    if(foundLevel&&this.currentGame&&!foundGame){ this.setDiff(this.currentGame,foundLevel); return; }
+    if(foundGame&&foundLevel){
+      const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
+      const gameLabel=foundGame.charAt(0).toUpperCase()+foundGame.slice(1);
+      showToast(`${gameLabel}: ${lvlLabel}`);
+      ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
+      this.setDiff(foundGame,foundLevel); return;
+    }
+    if(foundLevel&&this.currentGame&&!foundGame){
+      const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
+      const gameLabel=this.currentGame.charAt(0).toUpperCase()+this.currentGame.slice(1);
+      showToast(`${gameLabel}: ${lvlLabel}`);
+      ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
+      this.setDiff(this.currentGame,foundLevel); return;
+    }
     // Column box voice (add/sub)
     if(this.currentGame==='addition'||this.currentGame==='subtraction'){
       // Match: "ones place 3", "ones 3", "tens place 5", "hundreds 2", "units 4" etc.
@@ -2979,7 +2954,7 @@ const MZ={
             <div class="mz-vf-status" id="mz-vf-status">🗣️ Say a<br>number</div>
           </div>
           <div class="mz-dots">${dots}</div>
-          <div class="mz-v-hint">💡 Or say "addition" · "subtraction" · "times tables" · "division"</div>
+          <div class="mz-v-hint">💡 Say "addition easy/medium/hard" · "division hard" · or game name to switch</div>
         </div>
       </div>`;
     setTimeout(()=>ttsSpeak(`What is ${a} ${word} ${b}?`,null,{rate:.88,pitch:1.15}),250);
@@ -3017,13 +2992,18 @@ const MZ={
     const headerRow=`<div class="mz-col-row" style="margin-bottom:.08rem"><div class="mz-col-label" style="width:30px"></div>${cols.map(c=>`<div class="mz-col-label">${c}</div>`).join('')}</div>`;
 
     // Carry row: show an EMPTY highlighted bubble where a carry exists — no number, no text
+    // Only show h-carry bubble if both numbers have/need a hundreds column
+    const hasHundreds = a >= 100 || b >= 100 || (carries.h === 1);
     let carryRowHtml;
     if(this.currentGame==='addition'){
-      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:30px"></div>${['h','t','u'].map(col=>
-        carries[col]===1
+      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:30px"></div>${['h','t','u'].map(col=>{
+        // Never show a carry bubble in the h column if neither number has hundreds digits
+        // (the carry would spill into a 3rd digit that IS the answer, not a column above)
+        if(col==='h' && !(a>=100||b>=100)) return `<div class="mz-carry-bubble"></div>`;
+        return carries[col]===1
           ? `<div class="mz-carry-bubble"><div class="mz-carry-blank"></div></div>`
-          : `<div class="mz-carry-bubble"></div>`
-      ).join('')}</div>`;
+          : `<div class="mz-carry-bubble"></div>`;
+      }).join('')}</div>`;
     } else {
       // Subtraction: show blank bubble above columns that need borrowing
       carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:30px"></div>${['h','t','u'].map(col=>{
@@ -3093,33 +3073,46 @@ const MZ={
           <div class="sc-voice-prompt">🗣️ Say "${colNames[ci].toLowerCase()} place ${writeDigit}"</div>
         </div>`;
       } else {
-        // Subtraction
+        // Subtraction — don't reveal the adjusted top digit; give a clue instead
         const borrow = borrows[col] || {};
         const dA_eff = dA_col - (borrow.lent ? 1 : 0);
         const dA_actual = dA_eff + (borrow.received ? 10 : 0);
         const result = dA_actual - dB_col;
-        this._scratchData[col] = { result };
+        this._scratchData[col] = { result, needsBorrow: !!(borrow.received), lentBorrow: !!(borrow.lent) };
 
-        const topDisplay = borrow.received
-          ? `<span style="text-decoration:line-through;opacity:.45;font-size:.9em">${dA_col}</span><span style="font-size:.82em;color:#e65100"> →${dA_actual}</span>`
-          : (borrow.lent
-            ? `<span style="text-decoration:line-through;opacity:.45;font-size:.9em">${dA_col}</span><span style="font-size:.82em"> →${dA_eff}</span>`
-            : String(isLeadingA ? '0' : dA_col));
+        // Show the raw top digit (before any borrowing adjustment) — student must decide
+        const topRaw = isLeadingA ? '0' : String(dA_col);
         const botDigit = isLeadingB ? '0' : String(dB_col);
-        const borrowNote = borrow.received ? `<div class="sc-carry-in">borrowed 10</div>` : (borrow.lent ? `<div class="sc-carry-in sc-lent">lends 10 →</div>` : '');
+
+        // Clue: tell them the top number, ask if they can subtract
+        let clueHtml = '';
+        if(borrow.received){
+          // This column needs a 10 borrowed in — show the question, not the answer
+          clueHtml = `<div class="sc-borrow-clue" id="sc-borrow-clue-${col}">
+            <span class="sc-clue-q">Is ${topRaw} − ${botDigit} enough?</span>
+            <div class="sc-clue-btns">
+              <button class="sc-clue-btn sc-clue-yes" onclick="MZ._confirmBorrow('${col}',true)">Need 10! ➕</button>
+              <button class="sc-clue-btn sc-clue-no" onclick="MZ._confirmBorrow('${col}',false)">Yes, enough</button>
+            </div>
+          </div>`;
+        } else if(borrow.lent){
+          clueHtml = `<div class="sc-borrow-clue sc-borrow-lent" id="sc-borrow-clue-${col}">
+            <span class="sc-clue-info">⬅️ Lent a 10 to ones</span>
+          </div>`;
+        }
 
         return `<div class="mz-scratch-box ${colCls[ci]}" id="sc-box-${col}">
           <div class="mz-scratch-lbl">${colNames[ci]}</div>
-          ${borrowNote}
+          ${clueHtml}
           <div class="sc-sum-stack">
-            <div class="sc-stack-digit sc-top">${topDisplay}</div>
-            <div class="sc-stack-op">${symChar}${botDigit}</div>
+            <div class="sc-stack-digit sc-top" id="sc-top-${col}">${topRaw}</div>
+            <div class="sc-stack-op">−${botDigit}</div>
             <div class="sc-stack-line"></div>
             <div class="sc-stack-result" id="sc-result-${col}">
               <span class="sc-result-blank">?</span>
             </div>
           </div>
-          <div class="sc-voice-prompt">🗣️ Say "${colNames[ci].toLowerCase()} place ${result}"</div>
+          <div class="sc-voice-prompt">🗣️ Say "${colNames[ci].toLowerCase()} place ___"</div>
         </div>`;
       }
     }).filter(Boolean);
@@ -3149,6 +3142,37 @@ const MZ={
         carryVal.className = 'sc-carry-blank sc-carry-revealed';
       }
       if(!sd.carryOut && carryHint) carryHint.style.display='none';
+    }
+    // For subtraction: hide the clue buttons once answered
+    if(this.currentGame==='subtraction'){
+      const clueEl = document.getElementById('sc-borrow-clue-'+col);
+      if(clueEl && sd.needsBorrow){
+        clueEl.innerHTML = `<span class="sc-clue-info sc-borrow-confirmed">✅ Added 10!</span>`;
+      }
+    }
+  },
+
+  // Student clicked "Need 10!" or "Yes, enough" on a subtraction scratch box
+  _confirmBorrow(col, needsTen){
+    const sd = this._scratchData && this._scratchData[col];
+    if(!sd) return;
+    const topEl = document.getElementById('sc-top-'+col);
+    const clueEl = document.getElementById('sc-borrow-clue-'+col);
+    if(needsTen && sd.needsBorrow){
+      // Reveal the adjusted top digit
+      const dA_col = [Math.floor(this.currentA/100), Math.floor((this.currentA%100)/10), this.currentA%10][['h','t','u'].indexOf(col)];
+      const dA_actual = dA_col + 10; // already adjusted by borrow
+      if(topEl) topEl.innerHTML = `<span style="text-decoration:line-through;opacity:.4;font-size:.85em">${dA_col}</span><span style="color:#7c3aed;font-size:.9em"> →${dA_actual}</span>`;
+      if(clueEl) clueEl.innerHTML = `<span class="sc-clue-info sc-borrow-confirmed">✅ Now it's ${dA_actual}!</span>`;
+      this.setVoiceBox(`Got it! Now subtract from ${dA_actual}`,'final','💡');
+      ttsSpeak(`Right! Borrow a ten. Now you have ${dA_actual}. What is ${dA_actual} minus ${[Math.floor(this.currentB/100),Math.floor((this.currentB%100)/10),this.currentB%10][['h','t','u'].indexOf(col)]}?`,null,{rate:.88});
+    } else if(!needsTen){
+      if(clueEl) clueEl.innerHTML = `<span class="sc-clue-info" style="color:#007020">✅ No borrow needed!</span>`;
+      this.setVoiceBox('No borrow needed! ✅','final','✔️');
+    } else {
+      // Told us they need ten but actually don't — gentle correction
+      if(clueEl) clueEl.innerHTML = `<span class="sc-clue-info" style="color:#c00">Hmm, look again!</span>`;
+      this.setVoiceBox('Check again! 🤔','bad','🤔');
     }
   },
 
@@ -3286,6 +3310,24 @@ const MZ={
   },
 };
 
+
+
+async function openMic(){
+  if(micStream) return true;
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    // Pipe through AudioContext so Chrome sees mic as "actively in use".
+    // This prevents SpeechRecognition from triggering its own separate popup.
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      const src=ctx.createMediaStreamSource(micStream);
+      const gain=ctx.createGain(); gain.gain.value=0;
+      src.connect(gain); gain.connect(ctx.destination);
+    }catch(e){}
+    return true;
+  }catch(e){ return false; }
+}
+
 (async function boot(){
   buildBg();
   if(window.speechSynthesis) window.speechSynthesis.getVoices();
@@ -3293,22 +3335,40 @@ const MZ={
   // If we saved the flag before, open the stream silently (no popup — browser remembers)
   // then go straight to the hub.
   if(localStorage.getItem('hub_mic_ok')==='1'){
-    // Previously granted — start silently, no prompt needed
-    const ps = document.getElementById('perm-screen');
-    if(ps) ps.style.display='none';
-    initRecog();
-    micRestart();
+    const ok = await openMic();
+    if(ok){
+      document.getElementById('perm-screen').style.display='none';
+      initRecog();
+    } else {
+      // Permission was revoked in browser settings — clear flag, show screen
+      localStorage.removeItem('hub_mic_ok');
+      document.getElementById('perm-screen').style.display='flex';
+    }
   } else {
-    // First time — show the friendly permission screen
-    const ps = document.getElementById('perm-screen');
-    if(ps) ps.style.display='flex';
+    // First time — show our friendly screen, user taps once
+    document.getElementById('perm-screen').style.display='flex';
   }
 
   VB.init();
   WB.buildHome();
   await RB.init();
-})()
+})();
 
-</script>
+async function grantPermission(){
+  const btn=document.querySelector('.perm-btn');
+  const st=document.getElementById('perm-status');
+  btn.disabled=true; btn.textContent='⏳ Waiting…';
+  st.textContent='Tap Allow when your browser asks ☝️';
+  const ok = await openMic();
+  if(ok){
+    localStorage.setItem('hub_mic_ok','1');  // remember forever
+    st.textContent='✅ Got it! Opening Hub…';
+    btn.textContent='🎉 Let\'s Go!';
+    setTimeout(()=>{ document.getElementById('perm-screen').style.display='none'; initRecog(); }, 500);
+  } else {
+    btn.disabled=false; btn.textContent='🎤 Try Again';
+    st.textContent='❌ Microphone blocked. In your browser bar, click the 🔒 lock icon → Site settings → Microphone → Allow, then refresh.';
+  }
+}</script>
 </body>
 </html>
