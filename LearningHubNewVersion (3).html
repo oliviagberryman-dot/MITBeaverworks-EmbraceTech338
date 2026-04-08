@@ -2149,7 +2149,12 @@ const WB={
     }
 
     // ── QUIZ SCREEN: handle answers ──
-    if(this.G.answered) return;
+    if(this.G.answered) {
+      if(/\b(next|next question|continue|go|ready|okay|ok|yes|yep|move on|skip)\b/.test(lo)){
+        WB.advance();
+      }
+      return;
+    }
     const cands=new Set([lo,...lo.split(/\s+/)]);
     let matchPos=null;
     for(const c of cands){
