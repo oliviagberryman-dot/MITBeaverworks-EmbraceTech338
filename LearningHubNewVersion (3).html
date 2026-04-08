@@ -2416,8 +2416,8 @@ if(match){ this.helpWord(match[1]); return; }
     this._lineAccum=accumWords.join(' ');
 
     // Advance word highlight: find the furthest word in the line that matches spoken text
-    const lineWords=this.lines[this.cur].toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
-    const spokenWords=this._lineAccum.replace(/[^a-z\s]/g,'').split(/\s+/);
+    const lineWords=this.numToWords(this.lines[this.cur].toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/));
+const spokenWords=this.numToWords(this._lineAccum.replace(/[^a-z\s]/g,'').split(/\s+/).join(' ')).split(/\s+/);
     let bestMatch=this.wordIdx;
    for(let li=this.wordIdx; li<Math.min(this.wordIdx+4, lineWords.length); li++){
       const lw=lineWords[li];
@@ -2426,7 +2426,7 @@ if(match){ this.helpWord(match[1]); return; }
       }
     }
     if(bestMatch>this.wordIdx){
-      this.wordIdx=bestMatch + 1;      
+      this.wordIdx=bestMatch;      
       this.updateWordHighlight(this.wordIdx);
       this.saveWordProgress();
     }
@@ -2450,6 +2450,23 @@ if(match){ this.helpWord(match[1]); return; }
       dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
     return dp[m][n];
   },
+  numToWords(t){
+    return t.replace(/\b(\d+)\b/g, n=>{
+        const map={0:'zero',1:'one',2:'two',3:'three',4:'four',5:'five',
+                   6:'six',7:'seven',8:'eight',9:'nine',10:'ten',
+                   11:'eleven',12:'twelve',13:'thirteen',14:'fourteen',
+                   15:'fifteen',16:'sixteen',17:'seventeen',18:'eighteen',
+                   19:'nineteen',20:'twenty',30:'thirty',40:'forty',
+                   50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety'};
+        const num=parseInt(n);
+        if(num<=20) return map[num]||n;
+        if(num<100){ const t=Math.floor(num/10)*10,u=num%10; return u?map[t]+' '+map[u]:map[t]; }
+        if(num<10000){ const h=Math.floor(num/100),r=num%100,t=Math.floor(num/1000),th=num%1000;
+            if(num>=1000){ const h2=Math.floor(th/100),r2=th%100; return (map[t]||t)+' thousand'+(h2?' '+(map[h2]||h2)+' hundred':'')+(r2?' '+this.numToWords(String(r2)):''); }
+            return (map[h]||h)+' hundred'+(r?' '+this.numToWords(String(r)):''); }
+        return n;
+    });
+},
   checkLineMatch(transcript){
     if(this.cur>=this.lines.length) return false;
     const line=this.lines[this.cur].toLowerCase();
