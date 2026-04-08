@@ -2328,7 +2328,7 @@ const WB={
    READING BUDDY
 ════════════════════════════════════ */
 const RB={
-  db:null, lines:[], cur:0, reading:false, bookId:null, CHECK_EVERY:10,
+  db:null, lines:[], cur:0, reading:false, bookId:null,
   advancedThisLine:false, _voiceDebounce:null, _pendingVocabInfo:null,
   wordIdx:0,  // index of highlighted word within current line
   _lineAccum:'', // accumulated transcript for current line (reset on nextLine)
@@ -2378,11 +2378,6 @@ if(match){ this.helpWord(match[1]); return; }
       if(/\b(next|forward|skip|continue)\b/.test(lo)){ this.nextLine(); return; }
       if(/\b(back|previous|again|repeat|go back)\b/.test(lo)){ this.prevLine(); return; }
     }
-
-    // Comprehension check answers by voice
-    if(/\banswer a\b|\bthe answer is a\b/.test(lo)){ this.voiceCheckAns(0); return; }
-    if(/\banswer b\b|\bthe answer is b\b/.test(lo)){ this.voiceCheckAns(1); return; }
-    if(/\banswer c\b|\bthe answer is c\b/.test(lo)){ this.voiceCheckAns(2); return; }
 
     // Reading mode: match transcript to current line
     if(this.reading){
@@ -2471,8 +2466,6 @@ if(match){ this.helpWord(match[1]); return; }
   },
   processTranscript(transcript){
     if(!this.reading||this.advancedThisLine) return;
-    const nextCheck=document.getElementById('rbc_'+this.cur);
-    if(nextCheck&&!nextCheck.classList.contains('answered')) return;
     // Merge into accumulator
     const newWords=transcript.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);
     const accumWords=this._lineAccum.split(/\s+/).filter(Boolean);
@@ -2599,9 +2592,6 @@ if(match){ this.helpWord(match[1]); return; }
   renderLines(){
     const area=document.getElementById('rb-reading-area'); area.innerHTML='';
     this.lines.forEach((text,i)=>{
-      if(i>0&&i%this.CHECK_EVERY===0) area.appendChild(this.buildCheck(i));
-      const el=document.createElement('div'); el.className='rb-line'; el.dataset.idx=i;
-      // Render as plain text — word spans added when line becomes active
       el.textContent=text;
       el.addEventListener('click',()=>this.jumpTo(i));
       area.appendChild(el);
@@ -2697,13 +2687,6 @@ if(match){ this.helpWord(match[1]); return; }
     }).catch(()=>{});
   },
 
-  buildCheck(idx){
-    const card=document.createElement('div'); card.className='rb-check-card'; card.id='rbc_'+idx;
-    card.innerHTML=`<div class="rb-check-badge">🧠 Quick Check — line ${idx}</div><div class="rb-check-q" id="rbcq_${idx}">Generating question…</div><div class="rb-check-opts" id="rbco_${idx}"></div><div style="font-size:.65rem;color:#8B5CF6;font-weight:800;margin-top:.4rem">🎙️ Say A, B, or C to answer!</div>`;
-    this.genCheck(idx,this.lines.slice(Math.max(0,idx-this.CHECK_EVERY),idx));
-    return card;
-  },
-
   startReading(){
     if(!this.bookId){ toast('📚 Open a book first!'); return; }
     if(this.reading) return;
@@ -2739,30 +2722,6 @@ if(match){ this.helpWord(match[1]); return; }
     this.highlight(this.cur);
   },
   setStatus(msg){ const s=document.getElementById('rb-status'); if(s) s.textContent=msg; },
-
-  async genCheck(idx,lines){
-    const passage=lines.join(' ').slice(0,600);
-    const qEl=document.getElementById('rbcq_'+idx), oEl=document.getElementById('rbco_'+idx);
-    if(!qEl) return;
-    try{
-      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:280,messages:[{role:'user',content:`Based on this passage: "${passage}"\n\nWrite ONE simple multiple-choice comprehension question with 3 options for a child. Return ONLY valid JSON: {"q":"...","options":["A. ...","B. ...","C. ..."],"correct":0,"hint":"..."} — correct is the 0-based index.`}]})});
-      const d=await r.json(); const txt=d.content?.map(b=>b.text||'').join('')||'';
-      const parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());
-      if(qEl){
-        qEl.textContent=parsed.q;
-        oEl.innerHTML=parsed.options.map((opt,i)=>`<button class="rb-check-opt" onclick="RB.ansCheck(this,${i},${parsed.correct},'${(parsed.hint||'').replace(/'/g,"\\'")}')">${opt}</button>`).join('');
-        ttsSpeak(parsed.q,null,{rate:.85}); // read the question aloud
-      }
-    }catch(e){ if(qEl) qEl.textContent='What happened in this part of the story?'; }
-  },
-
-  ansCheck(btn,chosen,correct,hint){
-    const p=btn.closest('.rb-check-opts'); if(!p) return;
-    const card=btn.closest('.rb-check-card'); if(card) card.classList.add('answered');
-    p.querySelectorAll('.rb-check-opt').forEach((b,i)=>{ b.disabled=true; if(i===correct)b.classList.add('correct'); else if(i===chosen)b.classList.add('wrong'); });
-    if(chosen===correct){ confetti(); ttsSpeak('Correct! Great job!',null,{rate:.88,pitch:1.2}); }
-    else{ ttsSpeak('Not quite! '+hint,null,{rate:.88}); }
-  },
 
   // ── VOCABULARY HELP ──
   // Called with a specific word (from tap) or no arg (picks longest tricky word on line)
