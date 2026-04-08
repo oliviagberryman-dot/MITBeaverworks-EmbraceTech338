@@ -46,17 +46,17 @@ body.zone-math   {background:linear-gradient(160deg,#b8eaff,#d4f7c5);}
 /* ── HEADER ── */
 header{position:fixed;top:0;left:0;right:0;z-index:500;height:var(--hh);background:linear-gradient(90deg,var(--purple2),var(--blue),var(--green));padding:.5rem .7rem;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 16px rgba(0,0,0,.18);}
 .h-brand{font-family:'Fredoka One',sans-serif;font-size:1.05rem;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.2);flex-shrink:0;white-space:nowrap;}
-.nav-tabs{display:flex;gap:.3rem;flex:1;min-width:0;}
+.nav-tabs{display:flex;gap:.3rem;flex:1;min-width:0;overflow:hidden;}
 .nav-tab{flex:1;min-width:0;height:50px;border:2px solid rgba(255,255,255,.35);border-radius:14px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);color:#fff;font-family:'Fredoka One',sans-serif;font-size:clamp(.6rem,1.7vw,.82rem);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.56,.64,1);text-shadow:0 1px 3px rgba(0,0,0,.2);}
 .nav-tab:hover{background:rgba(255,255,255,.3);transform:translateY(-2px);}
 .nav-tab.active{background:rgba(255,255,255,.92);color:var(--dark);text-shadow:none;transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.22);}
 .nav-tab-ico{font-size:1.15rem;line-height:1;}
 .nav-tab-lbl{font-size:.6rem;letter-spacing:.2px;}
-.h-mic{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:50px;padding:.3rem .7rem;flex-shrink:0;cursor:pointer;}
+.h-mic{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:50px;padding:.3rem .55rem;flex-shrink:0;cursor:pointer;}
 .h-mic-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transition:all .3s;flex-shrink:0;}
 .h-mic-dot.on{background:#ff4f4f;box-shadow:0 0 8px #ff4f4f;animation:micPulse 1s ease infinite;}
 @keyframes micPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.h-heard{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.9);width:80px; min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.h-heard{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.9);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ── CONTENT ── */
 #content{margin-top:var(--hh);min-height:calc(100vh - var(--hh));position:relative;z-index:10;}
@@ -316,8 +316,8 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 /* ══ MATH FUN ZONE ══ */
 #panel-math{}
 .mz-container{position:relative;z-index:10;max-width:920px;margin:0 auto;padding:1.1rem .9rem 4rem;}
-.mz-game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.9rem;margin-bottom:1rem;}
-.mz-game-card{background:#fff;border:5px solid transparent;border-radius:var(--r);padding:1rem .75rem;cursor:pointer;font-weight:900;color:var(--dark);text-align:center;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:.3rem;user-select:none;}
+.mz-game-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-bottom:.8rem;}
+.mz-game-card{background:#fff;border:5px solid transparent;border-radius:var(--r);padding:.8rem .6rem;cursor:pointer;font-weight:900;color:var(--dark);text-align:center;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:.3rem;user-select:none;flex:1;min-width:0;}
 .mz-game-card:hover{transform:translateY(-4px);box-shadow:0 10px 0 rgba(0,0,0,.1);}
 .mz-game-card:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.1);}
 .mz-game-card.mz-sel{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.1);}
@@ -334,33 +334,33 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 .mz-gc-hint{font-size:.6rem;color:#bbb;font-weight:700;}
 
 /* Difficulty row */
-.mz-diff-grid{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem;background:#fff;border-radius:18px;padding:.75rem 1rem;box-shadow:0 4px 0 rgba(0,0,0,.07);border:2px solid #f0e8ff;}
-.mz-diff-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
-.mz-diff-label{font-family:'Fredoka One',sans-serif;font-size:.78rem;color:var(--dark);min-width:128px;flex-shrink:0;}
-.mz-diff-btn{padding:.28rem .75rem;border-radius:30px;border:2.5px solid #e0d4ff;background:#f8f4ff;font-family:'Nunito',sans-serif;font-weight:900;font-size:.76rem;color:#9a6fd4;cursor:pointer;transition:all .15s;box-shadow:0 3px 0 #e0d4ff;}
-.mz-diff-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #d4b8ff;border-color:var(--purple);color:var(--purple2);}
-.mz-diff-btn.active{box-shadow:0 3px 0 rgba(0,0,0,.12);transform:translateY(1px);}
-.mz-diff-btn[data-level="easy"].active{background:#d4ffd4;border-color:#1fad44;color:#007020;box-shadow:0 3px 0 #1fad44;}
-.mz-diff-btn[data-level="medium"].active{background:#fff8c0;border-color:#ffb800;color:#886000;box-shadow:0 3px 0 #ffb800;}
-.mz-diff-btn[data-level="hard"].active{background:#ffd4d4;border-color:#ff4f4f;color:#c00000;box-shadow:0 3px 0 #ff4f4f;}
+.mz-card-wrap{display:flex;align-items:stretch;gap:.2rem;}
+.mz-side-diff{display:flex;flex-direction:column;justify-content:center;gap:.3rem;padding:.25rem .15rem;}
+/* mz-diff-label removed */
+.mz-diff-btn{width:32px;height:32px;border-radius:50%;border:2.5px solid #e0d4ff;background:#f8f4ff;font-size:1rem;cursor:pointer;transition:all .15s;box-shadow:0 2px 0 #e0d4ff;display:flex;align-items:center;justify-content:center;padding:0;}
+.mz-diff-btn:hover{transform:translateY(-1px) scale(1.12);box-shadow:0 3px 0 #d4b8ff;border-color:var(--purple);}
+.mz-diff-btn.active{transform:scale(1.15);box-shadow:0 0 0 3px rgba(168,85,247,.4);border-color:var(--purple2);background:#f0e8ff;}
+.mz-diff-btn[data-level="easy"].active{background:#d4ffd4;border-color:#1fad44;box-shadow:0 0 0 3px rgba(31,173,68,.4);}
+.mz-diff-btn[data-level="medium"].active{background:#fff8c0;border-color:#ffb800;box-shadow:0 0 0 3px rgba(255,184,0,.4);}
+.mz-diff-btn[data-level="hard"].active{background:#ffd4d4;border-color:#ff4f4f;box-shadow:0 0 0 3px rgba(255,79,79,.4);}
 
 /* Panel two-column layout */
 #mz-panel{background:#fff;border-radius:28px;box-shadow:0 7px 0 rgba(0,0,0,.1);position:relative;overflow:hidden;min-height:360px;}
 #mz-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,var(--pink),var(--yellow),var(--green),var(--blue),var(--purple));border-radius:28px 28px 0 0;z-index:2;}
-.mz-panel-cols{display:grid;grid-template-columns:1fr 1.5fr;gap:0;padding-top:8px;min-height:460px;}
+.mz-panel-cols{display:grid;grid-template-columns:1.4fr 1.2fr;gap:0;padding-top:8px;min-height:500px;}
 @media(max-width:680px){.mz-panel-cols{grid-template-columns:1fr;min-height:auto;}}
 
 /* Work col (left) */
-.mz-work-col{border-right:3px dashed #f0e8ff;padding:1rem .9rem 1rem 1.1rem;display:flex;flex-direction:column;gap:.6rem;background:linear-gradient(180deg,#fafbff 0%,#f5f0ff 100%);}
+.mz-work-col{border-right:3px dashed #f0e8ff;padding:1.4rem 1.2rem 1.2rem 1.5rem;display:flex;flex-direction:column;gap:.8rem;background:linear-gradient(180deg,#fafbff 0%,#f5f0ff 100%);}
 .mz-work-col-title{font-family:'Fredoka One',sans-serif;font-size:.92rem;color:var(--purple2);display:flex;align-items:center;gap:.35rem;border-bottom:2px solid #e8dcff;padding-bottom:.35rem;}
 
 /* Column math */
-.mz-col-math{background:#fff;border-radius:14px;padding:.7rem;box-shadow:0 3px 0 #e8e0f8;border:2px solid #e0d4ff;}
+.mz-col-math{background:#fff;border-radius:18px;padding:1.2rem 1.4rem;box-shadow:0 3px 0 #e8e0f8;border:2px solid #e0d4ff;}
 .mz-col-math-title{font-size:.65rem;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:.45rem;}
 .mz-col-math-grid{display:grid;gap:.25rem;}
-.mz-col-row{display:flex;align-items:center;gap:.25rem;justify-content:flex-end;}
+.mz-col-row{display:flex;align-items:center;gap:.3rem;justify-content:flex-end;}
 .mz-col-label{font-size:.6rem;font-weight:900;color:#bbb;text-align:center;flex-shrink:0;width:26px;}
-.mz-col-digit{width:34px;height:38px;background:#f5f0ff;border:2px solid #d4b8ff;border-radius:9px;font-family:'Fredoka One',sans-serif;font-size:1.2rem;color:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mz-col-digit{width:52px;height:58px;background:#f5f0ff;border:2px solid #d4b8ff;border-radius:13px;font-family:'Fredoka One',sans-serif;font-size:1.75rem;color:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .mz-col-digit.h{background:#fff0e0;border-color:#ffd6a0;color:#c05000;}
 .mz-col-digit.t{background:#e0f0ff;border-color:#a8d8ff;color:#0060a0;}
 .mz-col-digit.u{background:#e0ffe8;border-color:#a0ffb8;color:#007020;}
@@ -369,8 +369,8 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 .mz-col-op-sym{font-family:'Fredoka One',sans-serif;font-size:1.1rem;color:var(--purple2);width:26px;text-align:center;}
 
 /* Carry / borrow row */
-.mz-carry-row{display:flex;align-items:center;gap:.25rem;justify-content:flex-end;min-height:20px;margin-bottom:1px;}
-.mz-carry-bubble{width:34px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mz-carry-row{display:flex;align-items:center;gap:.25rem;justify-content:flex-end;min-height:26px;margin-bottom:2px;}
+.mz-carry-bubble{width:52px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .mz-carry-bubble .mz-carry-val{background:#ff8c3d;color:#fff;border-radius:5px;font-family:'Fredoka One',sans-serif;font-size:.7rem;width:17px;height:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #c05000;animation:mzCarryPop .3s ease;}
 @keyframes mzCarryPop{0%{transform:scale(0) translateY(4px)}70%{transform:scale(1.2) translateY(-2px)}100%{transform:scale(1) translateY(0)}}
 .mz-carry-lent{display:flex;flex-direction:column;align-items:center;line-height:1;gap:1px;}
@@ -390,7 +390,7 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 /* Digit strip */
 .mz-digit-strip{display:flex;align-items:center;gap:.22rem;justify-content:center;padding:.35rem .15rem;background:#f0f4ff;border-radius:9px;margin-top:.3rem;border:2px solid #c8d8ff;flex-wrap:wrap;}
 .mz-digit-strip .mz-ds-label{font-size:.6rem;font-weight:900;color:#7090d0;margin-right:.1rem;white-space:nowrap;}
-.mz-ds-btn{width:28px;height:32px;background:#fff;border:2px solid #c8d8ff;border-radius:7px;font-family:'Fredoka One',sans-serif;font-size:.95rem;color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;box-shadow:0 2px 0 #c8d8ff;}
+.mz-ds-btn{width:40px;height:44px;background:#fff;border:2px solid #c8d8ff;border-radius:9px;font-family:'Fredoka One',sans-serif;font-size:1.2rem;color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;box-shadow:0 2px 0 #c8d8ff;}
 .mz-ds-btn:hover,.mz-ds-btn:active{background:var(--blue);color:#fff;border-color:var(--blue2);transform:translateY(-2px);box-shadow:0 4px 0 var(--blue2);}
 
 /* Times grid / div visual */
@@ -563,6 +563,19 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 .rb-vocab-btns{display:flex;gap:.4rem;flex-wrap:wrap;}
 .rb-vocab-close{background:#f3f4f6;border:none;border-radius:50px;padding:.35rem .8rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.77rem;color:#666;}
 .rb-vocab-saved{background:linear-gradient(135deg,#FFD93D,#FF9F43);border:none;border-radius:50px;padding:.35rem .9rem;cursor:pointer;font-family:'Fredoka One',sans-serif;font-size:.8rem;color:var(--dark);box-shadow:0 3px 0 rgba(0,0,0,.1);}
+
+
+/* Carry/borrow hidden by default — revealed by voice */
+.mz-carry-hidden{visibility:hidden;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);}
+.mz-carry-hidden.mz-carry-shown{visibility:visible;opacity:1;transform:scale(1.1);}
+.mz-carry-prompt{background:linear-gradient(135deg,#ff8c3d,#ffb800);color:#fff;border-radius:12px;padding:.32rem .75rem;font-family:'Fredoka One',sans-serif;font-size:.78rem;text-align:center;animation:mzCarryPromptPulse 1.8s ease-in-out infinite;cursor:default;}
+@keyframes mzCarryPromptPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,140,61,.4);}50%{box-shadow:0 0 0 8px rgba(255,140,61,0);}}
+.mz-borrow-prompt{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border-radius:12px;padding:.32rem .75rem;font-family:'Fredoka One',sans-serif;font-size:.78rem;text-align:center;animation:mzCarryPromptPulse 1.8s ease-in-out infinite;}
+
+
+/* Empty carry bubble — dashed outline, Kabir fills it in */
+.mz-carry-blank{width:26px;height:26px;border:2.5px dashed #ff9966;border-radius:7px;background:#fff5f0;}
+.mz-carry-blank-sub{border-color:#9966ff;background:#f5f0ff;width:26px;height:26px;}
 
 /* ══ CONFETTI ══ */
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:8000;overflow:hidden;}
@@ -789,35 +802,37 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
   <div class="zone-panel" id="panel-math">
     <div class="mz-container">
       <div class="mz-game-grid">
-        <button class="mz-game-card" onclick="MZ.selectGame('addition')"    id="mz-btn-addition">   <span class="mz-gc-icon">🌊</span><span class="mz-gc-name">Add It Up!</span>    <span class="mz-gc-type">Addition</span>       <span class="mz-gc-hint">say "addition"</span></button>
-        <button class="mz-game-card" onclick="MZ.selectGame('subtraction')" id="mz-btn-subtraction"><span class="mz-gc-icon">🌋</span><span class="mz-gc-name">Take Away!</span>   <span class="mz-gc-type">Subtraction</span>    <span class="mz-gc-hint">say "subtraction"</span></button>
-        <button class="mz-game-card" onclick="MZ.selectGame('multiply')"    id="mz-btn-multiply">   <span class="mz-gc-icon">⚡</span><span class="mz-gc-name">Times Tables!</span><span class="mz-gc-type">Multiplication</span><span class="mz-gc-hint">say "times tables"</span></button>
-        <button class="mz-game-card" onclick="MZ.selectGame('division')"    id="mz-btn-division">   <span class="mz-gc-icon">🌈</span><span class="mz-gc-name">Divide It!</span>   <span class="mz-gc-type">Division</span>       <span class="mz-gc-hint">say "division"</span></button>
-      </div>
-      <div class="mz-diff-grid" id="mz-diff-grid">
-        <div class="mz-diff-row" data-game="addition">
-          <span class="mz-diff-label">🌊 Add It Up:</span>
-          <button class="mz-diff-btn active" data-game="addition" data-level="easy"   onclick="MZ.setDiff('addition','easy')">🟢 Easy</button>
-          <button class="mz-diff-btn"        data-game="addition" data-level="medium" onclick="MZ.setDiff('addition','medium')">🟡 Medium</button>
-          <button class="mz-diff-btn"        data-game="addition" data-level="hard"   onclick="MZ.setDiff('addition','hard')">🔴 Hard</button>
+        <div class="mz-card-wrap">
+          <button class="mz-game-card" onclick="MZ.selectGame('addition')" id="mz-btn-addition"><span class="mz-gc-icon">🌊</span><span class="mz-gc-name">Add It Up!</span><span class="mz-gc-type">Addition</span><span class="mz-gc-hint">say "addition"</span></button>
+          <div class="mz-side-diff">
+            <button class="mz-diff-btn active" data-game="addition" data-level="easy" onclick="MZ.setDiff('addition','easy')">🟢</button>
+            <button class="mz-diff-btn" data-game="addition" data-level="medium" onclick="MZ.setDiff('addition','medium')">🟡</button>
+            <button class="mz-diff-btn" data-game="addition" data-level="hard" onclick="MZ.setDiff('addition','hard')">🔴</button>
+          </div>
         </div>
-        <div class="mz-diff-row" data-game="subtraction">
-          <span class="mz-diff-label">🌋 Take Away:</span>
-          <button class="mz-diff-btn active" data-game="subtraction" data-level="easy"   onclick="MZ.setDiff('subtraction','easy')">🟢 Easy</button>
-          <button class="mz-diff-btn"        data-game="subtraction" data-level="medium" onclick="MZ.setDiff('subtraction','medium')">🟡 Medium</button>
-          <button class="mz-diff-btn"        data-game="subtraction" data-level="hard"   onclick="MZ.setDiff('subtraction','hard')">🔴 Hard</button>
+        <div class="mz-card-wrap">
+          <button class="mz-game-card" onclick="MZ.selectGame('subtraction')" id="mz-btn-subtraction"><span class="mz-gc-icon">🌋</span><span class="mz-gc-name">Take Away!</span><span class="mz-gc-type">Subtraction</span><span class="mz-gc-hint">say "subtraction"</span></button>
+          <div class="mz-side-diff">
+            <button class="mz-diff-btn active" data-game="subtraction" data-level="easy" onclick="MZ.setDiff('subtraction','easy')">🟢</button>
+            <button class="mz-diff-btn" data-game="subtraction" data-level="medium" onclick="MZ.setDiff('subtraction','medium')">🟡</button>
+            <button class="mz-diff-btn" data-game="subtraction" data-level="hard" onclick="MZ.setDiff('subtraction','hard')">🔴</button>
+          </div>
         </div>
-        <div class="mz-diff-row" data-game="multiply">
-          <span class="mz-diff-label">⚡ Times Tables:</span>
-          <button class="mz-diff-btn active" data-game="multiply" data-level="easy"   onclick="MZ.setDiff('multiply','easy')">🟢 Easy</button>
-          <button class="mz-diff-btn"        data-game="multiply" data-level="medium" onclick="MZ.setDiff('multiply','medium')">🟡 Medium</button>
-          <button class="mz-diff-btn"        data-game="multiply" data-level="hard"   onclick="MZ.setDiff('multiply','hard')">🔴 Hard</button>
+        <div class="mz-card-wrap">
+          <button class="mz-game-card" onclick="MZ.selectGame('multiply')" id="mz-btn-multiply"><span class="mz-gc-icon">⚡</span><span class="mz-gc-name">Times Tables!</span><span class="mz-gc-type">Multiplication</span><span class="mz-gc-hint">say "times tables"</span></button>
+          <div class="mz-side-diff">
+            <button class="mz-diff-btn active" data-game="multiply" data-level="easy" onclick="MZ.setDiff('multiply','easy')">🟢</button>
+            <button class="mz-diff-btn" data-game="multiply" data-level="medium" onclick="MZ.setDiff('multiply','medium')">🟡</button>
+            <button class="mz-diff-btn" data-game="multiply" data-level="hard" onclick="MZ.setDiff('multiply','hard')">🔴</button>
+          </div>
         </div>
-        <div class="mz-diff-row" data-game="division">
-          <span class="mz-diff-label">🌈 Divide It:</span>
-          <button class="mz-diff-btn active" data-game="division" data-level="easy"   onclick="MZ.setDiff('division','easy')">🟢 Easy</button>
-          <button class="mz-diff-btn"        data-game="division" data-level="medium" onclick="MZ.setDiff('division','medium')">🟡 Medium</button>
-          <button class="mz-diff-btn"        data-game="division" data-level="hard"   onclick="MZ.setDiff('division','hard')">🔴 Hard</button>
+        <div class="mz-card-wrap">
+          <button class="mz-game-card" onclick="MZ.selectGame('division')" id="mz-btn-division"><span class="mz-gc-icon">🌈</span><span class="mz-gc-name">Divide It!</span><span class="mz-gc-type">Division</span><span class="mz-gc-hint">say "division"</span></button>
+          <div class="mz-side-diff">
+            <button class="mz-diff-btn active" data-game="division" data-level="easy" onclick="MZ.setDiff('division','easy')">🟢</button>
+            <button class="mz-diff-btn" data-game="division" data-level="medium" onclick="MZ.setDiff('division','medium')">🟡</button>
+            <button class="mz-diff-btn" data-game="division" data-level="hard" onclick="MZ.setDiff('division','hard')">🔴</button>
+          </div>
         </div>
       </div>
       <div id="mz-panel">
@@ -1105,69 +1120,66 @@ function micRestart(){
 /* ════════════════════════════════════
    BOOT — smart permission check
 ════════════════════════════════════ */
-/* ─────────────────────────────────────────────────────────────
-   openMic() — opens getUserMedia and KEEPS THE STREAM ALIVE.
-   This is the secret: while micStream is open Chrome treats the
-   mic as already in use, so SpeechRecognition.start() never
-   shows its own extra popup.  We call this exactly once.
-───────────────────────────────────────────────────────────── */
-async function openMic(){
-  if(micStream) return true;
-  try{
-    micStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-    // Pipe through AudioContext so Chrome sees mic as "actively in use".
-    // This prevents SpeechRecognition from triggering its own separate popup.
-    try{
-      const ctx=new(window.AudioContext||window.webkitAudioContext)();
-      const src=ctx.createMediaStreamSource(micStream);
-      const gain=ctx.createGain(); gain.gain.value=0;
-      src.connect(gain); gain.connect(ctx.destination);
-    }catch(e){}
-    return true;
-  }catch(e){ return false; }
-}
-
-(async function boot(){
-  buildBg();
-  if(window.speechSynthesis) window.speechSynthesis.getVoices();
-
-  // If we saved the flag before, open the stream silently (no popup — browser remembers)
-  // then go straight to the hub.
-  if(localStorage.getItem('hub_mic_ok')==='1'){
-    const ok = await openMic();
-    if(ok){
-      document.getElementById('perm-screen').style.display='none';
-      initRecog();
-    } else {
-      // Permission was revoked in browser settings — clear flag, show screen
-      localStorage.removeItem('hub_mic_ok');
-      document.getElementById('perm-screen').style.display='flex';
-    }
-  } else {
-    // First time — show our friendly screen, user taps once
-    document.getElementById('perm-screen').style.display='flex';
-  }
-
-  VB.init();
-  WB.buildHome();
-  await RB.init();
-})();
-
+/* ════════════════════════════════════════════════════════════
+   MICROPHONE — single prompt, one tap, works forever
+   ────────────────────────────────────────────────────────────
+   The trick: call recog.start() DIRECTLY from the button-click
+   handler (a real user gesture). Chrome shows ONE prompt.
+   After Allow, we keep the same recog instance running forever
+   by restarting it in onend. We never call getUserMedia or
+   create a second SpeechRecognition — that's what caused the
+   double-prompt. localStorage remembers so on next load we
+   skip the screen and start silently.
+════════════════════════════════════════════════════════════ */
 async function grantPermission(){
-  const btn=document.querySelector('.perm-btn');
-  const st=document.getElementById('perm-status');
-  btn.disabled=true; btn.textContent='⏳ Waiting…';
-  st.textContent='Tap Allow when your browser asks ☝️';
-  const ok = await openMic();
-  if(ok){
-    localStorage.setItem('hub_mic_ok','1');  // remember forever
-    st.textContent='✅ Got it! Opening Hub…';
-    btn.textContent='🎉 Let\'s Go!';
-    setTimeout(()=>{ document.getElementById('perm-screen').style.display='none'; initRecog(); }, 500);
-  } else {
-    btn.disabled=false; btn.textContent='🎤 Try Again';
-    st.textContent='❌ Microphone blocked. In your browser bar, click the 🔒 lock icon → Site settings → Microphone → Allow, then refresh.';
-  }
+  const btn = document.querySelector('.perm-btn');
+  const st  = document.getElementById('perm-status');
+
+  // Disable button immediately — never let it be tapped twice
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Starting…'; }
+  if(st)  st.textContent='When Chrome asks — tap Allow ☝️';
+
+  // Create recognition object inside the user gesture (this tap)
+  // so Chrome links this request to the button click
+  initRecog();
+
+  // Attach ONE-TIME handlers BEFORE calling start()
+  // These fire exactly once and tell us if it worked
+  const origOnStart = recog.onstart;
+  const origOnError = recog.onerror;
+
+  recog.onstart = function(e){
+    // SUCCESS — mic is live
+    recog.onstart = origOnStart; // restore normal handler
+    recog.onerror = origOnError;
+    micActive = true;
+    setMicVis(true);
+    try{ localStorage.setItem('hub_mic_ok','1'); }catch(ex){}
+    if(st)  st.textContent = '✅ Microphone on! Opening hub…';
+    if(btn) btn.textContent = "🎉 Done!";
+    // Hide perm screen smoothly
+    setTimeout(()=>{
+      const ps = document.getElementById('perm-screen');
+      if(ps){ ps.style.transition='opacity .5s'; ps.style.opacity='0';
+              setTimeout(()=>{ ps.style.display='none'; },500); }
+    }, 600);
+  };
+
+  recog.onerror = function(e){
+    recog.onstart = origOnStart;
+    recog.onerror = origOnError;
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      // User tapped Deny
+      if(btn){ btn.disabled=false; btn.textContent='🎤 Try Again'; }
+      if(st)  st.textContent='❌ Tap Allow when Chrome asks! Click 🔒 in browser bar → Microphone → Allow, then refresh.';
+    } else {
+      // Any other error (aborted, network) — just try to restart normally
+      origOnError && origOnError.call(recog, e);
+    }
+  };
+
+  // This ONE call triggers the Chrome permission popup
+  micRestart();
 }
 
 /* ════════════════════════════════════
@@ -1190,11 +1202,11 @@ function route(raw){
   }
 
   // Global nav
-  if(/\b(home screen|main menu)\b/.test(lo)){ goHome(); return; }
-  if(/\b(voice buddy)\b/.test(lo) && currentZone!=='voice'){ hlCard('voice'); setTimeout(()=>switchZone('voice'),360); return; }
-  if(/\b(word blast)\b/.test(lo) && currentZone!=='words'){ hlCard('words'); setTimeout(()=>switchZone('words'),360); return; }
-  if(/\b(reading buddy)\b/.test(lo) && currentZone!=='reading'){ hlCard('reading'); setTimeout(()=>switchZone('reading'),360); return; }
-  if(/\b(math fun zone)\b/.test(lo) && currentZone!=='math'){ hlCard('math'); setTimeout(()=>switchZone('math'),360); return; }
+  if(/\b(go home|home screen|main menu|home)\b/.test(lo)){ goHome(); return; }
+  if(/\b(voice|voice buddy|dictate|transcri)\b/.test(lo) && currentZone!=='voice'){ hlCard('voice'); setTimeout(()=>switchZone('voice'),360); return; }
+  if(/\b(word blast|word game|synonyms?|antonyms?|grammar game)\b/.test(lo) && currentZone!=='words'){ hlCard('words'); setTimeout(()=>switchZone('words'),360); return; }
+  if(/\b(reading|reading buddy|book|books|story|stories|pdf)\b/.test(lo) && currentZone!=='reading'){ hlCard('reading'); setTimeout(()=>switchZone('reading'),360); return; }
+  if(/\b(math|maths|number|numbers)\b/.test(lo) && currentZone!=='math'){ hlCard('math'); setTimeout(()=>switchZone('math'),360); return; }
 
   // Forward
   if(currentZone==='voice')   VB.onCommand(raw);
@@ -1262,7 +1274,7 @@ const VB={
 
   onCommand(raw){
     const lo=raw.toLowerCase();
-    if(/\b(stop recording|finish recording|i am done)\b/.test(lo)){ this.stopProcess(); return; }
+    if(/\b(stop|finish|done)\b/.test(lo)){ this.stopProcess(); return; }
     if(/\bpause\b/.test(lo)){ this.pause(); return; }
     if(/\b(resume|continue)\b/.test(lo)){ this.resume(); return; }
     if(/\bnew session\b/.test(lo)){ this.newSession(); return; }
@@ -1275,7 +1287,7 @@ const VB={
   },
 
   onSpeech(raw){
-    if(/\b(stop recording|finish recording|i am done)\b/i.test(raw)){ this.stopProcess(); return; }
+    if(/\b(stop|finish|done)\b/i.test(raw)){ this.stopProcess(); return; }
     if(/\bpause\b/i.test(raw)){ this.pause(); return; }
     this.rawAccum+=raw+' ';
     this.silReset();
@@ -2322,13 +2334,13 @@ const RB={
     }
 
     // Start/stop reading
-    if(/\b(start reading|begin reading|start listening)\b/.test(lo)&&!this.reading){ this.startReading(); return; }
-    if(/\b(stop reading|pause reading|stop now)\b/.test(lo)){ this.stopReading(); return; }
+    if(/\b(start|begin|go|listen)\b/.test(lo)&&!this.reading){ this.startReading(); return; }
+    if(/\b(stop|pause|halt)\b/.test(lo)){ this.stopReading(); return; }
 
     // Manual nav (not in reading mode)
     if(!this.reading){
-      if(/\b(next line|go forward|skip ahead|continue reading)\b/.test(lo)){ this.nextLine(); return; }
-      if(/\b(go back|previous line|read again|repeat that)\b/.test(lo)){ this.prevLine(); return; }
+      if(/\b(next|forward|skip|continue)\b/.test(lo)){ this.nextLine(); return; }
+      if(/\b(back|previous|again|repeat|go back)\b/.test(lo)){ this.prevLine(); return; }
     }
 
     // Comprehension check answers by voice
@@ -2441,223 +2453,124 @@ const RB={
   },
 
   // ── COMPREHENSION CHECK VOICE ANSWER ──
+  voiceCheckAns(idx){
+    // Find the most recently visible unanswered check card
+    const cards=[...document.querySelectorAll('.rb-check-card')];
+    for(let i=cards.length-1;i>=0;i--){
+      const btns=cards[i].querySelectorAll('.rb-check-opt:not([disabled])');
+      if(btns.length&&btns[idx]){ btns[idx].click(); return; }
+    }
+  },
+
   openDB(){
-  return new Promise((res,rej)=>{
-    const req=indexedDB.open('ReadingBuddyHub3',1);
-    req.onupgradeneeded=e=>{
-      const db=e.target.result;
-      if(!db.objectStoreNames.contains('books'))
-        db.createObjectStore('books',{keyPath:'id'});
-    };
-    req.onsuccess=e=>res(e.target.result);
-    req.onerror=()=>rej();
-  });
-},
+    return new Promise((res,rej)=>{
+      const req=indexedDB.open('ReadingBuddyHub3',1);
+      req.onupgradeneeded=e=>{const db=e.target.result; if(!db.objectStoreNames.contains('books')) db.createObjectStore('books',{keyPath:'id'});};
+      req.onsuccess=e=>res(e.target.result);
+      req.onerror=()=>rej();
+    });
+  },
+  dbPut(store,obj){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite'); tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result); tx.onerror=rej; }); },
+  dbGet(store,key){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly'); tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result); tx.onerror=rej; }); },
+  dbAll(store)    { return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly'); tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result); tx.onerror=rej; }); },
+  dbDel(store,key){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite'); tx.objectStore(store).delete(key).onsuccess=res; tx.onerror=rej; }); },
 
-dbPut(store,obj){
-  return new Promise((res,rej)=>{
-    const tx=this.db.transaction(store,'readwrite');
-    tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result);
-    tx.onerror=rej;
-  });
-},
-
-dbGet(store,key){
-  return new Promise((res,rej)=>{
-    const tx=this.db.transaction(store,'readonly');
-    tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result);
-    tx.onerror=rej;
-  });
-},
-
-dbAll(store){
-  return new Promise((res,rej)=>{
-    const tx=this.db.transaction(store,'readonly');
-    tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result);
-    tx.onerror=rej;
-  });
-},
-
-dbDel(store,key){
-  return new Promise((res,rej)=>{
-    const tx=this.db.transaction(store,'readwrite');
-    tx.objectStore(store).delete(key).onsuccess=res;
-    tx.onerror=rej;
-  });
-},
-
-async upload(files){
-  for(const f of files){
-    toast('📄 Loading '+f.name+'…');
-    try{
-      let lines=[];
-      if(f.name.toLowerCase().endsWith('.pdf')){
-        const buf=await f.arrayBuffer();
-        const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-
-        for(let p=1;p<=pdf.numPages;p++){
-          const page=await pdf.getPage(p);
-          const tc=await page.getTextContent();
-          const txt=tc.items.map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();
-          if(txt) lines.push(...this.splitLines(txt));
-        }
-      } else {
-        lines=this.splitLines(
-          (await f.text()).replace(/\r\n/g,'\n')
-        );
-      }
-
-      if(!lines.length){
-        toast('❌ Could not read text');
-        continue;
-      }
-
-      const book={
-        id:'b_'+Date.now()+Math.random().toString(36).slice(2),
-        name:f.name.replace(/\.[^.]+$/,''),
-        lines,
-        lineCount:lines.length,
-        progress:0
-      };
-
-      await this.dbPut('books',book);
-
-      toast('✅ Loaded: '+book.name+' ('+lines.length+' lines)');
-      await this.renderLib();
-      this.openBook(book.id);
-
-    }catch(err){
-      toast('❌ '+err.message);
-    }
-  }
-},
-
-splitLines(text){
-  const sents=text
-    .replace(/([.!?]+)\s+/g,'$1\n')
-    .split('\n');
-
-  const out=[];
-
-  for(const s of sents){
-    const t=s.trim();
-    if(!t) continue;
-
-    if(t.length<=120){
-      out.push(t);
-    } else {
-      const words=t.split(' ');
-      let chunk='';
-
-      for(const w of words){
-        if((chunk+' '+w).length>100 && chunk){
-          out.push(chunk.trim());
-          chunk=w;
+  async upload(files){
+    for(const f of files){
+      toast('📄 Loading '+f.name+'…');
+      try{
+        let lines=[];
+        if(f.name.toLowerCase().endsWith('.pdf')){
+          const buf=await f.arrayBuffer();
+          const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+          for(let p=1;p<=pdf.numPages;p++){
+            const page=await pdf.getPage(p);
+            const tc=await page.getTextContent();
+            const txt=tc.items.map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();
+            if(txt) lines.push(...this.splitLines(txt));
+          }
         } else {
-          chunk+=' '+w;
+          lines=this.splitLines((await f.text()).replace(/\r\n/g,'\n'));
         }
-      }
-
-      if(chunk.trim()) out.push(chunk.trim());
+        if(!lines.length){ toast('❌ Could not read text'); continue; }
+        const book={id:'b_'+Date.now()+Math.random().toString(36).slice(2),name:f.name.replace(/\.[^.]+$/,''),lines,lineCount:lines.length,progress:0};
+        await this.dbPut('books',book);
+        toast('✅ Loaded: '+book.name+' ('+lines.length+' lines)');
+        await this.renderLib();
+        this.openBook(book.id);
+      }catch(err){ toast('❌ '+err.message); }
     }
-  }
+  },
 
-  return out.filter(l=>l.length>2&&/[a-zA-Z0-9]/.test(l));
-},
+  splitLines(text){
+    const sents=text.replace(/([.!?]+)\s+/g,'$1\n').split('\n');
+    const out=[];
+    for(const s of sents){
+      const t=s.trim(); if(!t) continue;
+      if(t.length<=120){ out.push(t); }
+      else{
+        const words=t.split(' '); let chunk='';
+        for(const w of words){ if((chunk+' '+w).length>100&&chunk){ out.push(chunk.trim()); chunk=w; } else { chunk+=' '+w; } }
+        if(chunk.trim()) out.push(chunk.trim());
+      }
+    }
+    return out.filter(l=>l.length>2);
+  },
 
-async renderLib(){
-  const books=await this.dbAll('books').catch(()=>[]);
-  const lib=document.getElementById('rb-library');
-  if(!lib) return;
+  async renderLib(){
+    const books=await this.dbAll('books').catch(()=>[]);
+    const lib=document.getElementById('rb-library'); if(!lib) return;
+    lib.innerHTML=books.map(b=>`
+      <div class="rb-lib-card ${this.bookId===b.id?'active':''}" onclick="RB.openBook('${b.id}')">
+        <div class="rb-lib-ico">📘</div>
+        <div class="rb-lib-name">${b.name}</div>
+        <div class="rb-lib-meta">${b.lineCount} lines · ${Math.round((b.progress||0)/b.lineCount*100)||0}%</div>
+        <button class="rb-lib-del" onclick="event.stopPropagation();RB.deleteBook('${b.id}')">🗑️</button>
+      </div>`).join('')||'<div style="text-align:center;padding:1rem;color:#aaa;font-weight:800;font-size:.82rem">No books yet! Upload a PDF above.</div>';
+  },
 
-  lib.innerHTML = books.map(b=>`
-    <div class="rb-lib-card ${this.bookId===b.id?'active':''}" onclick="RB.openBook('${b.id}')">
-      <div class="rb-lib-ico">📘</div>
-      <div class="rb-lib-name">${b.name}</div>
-      <div class="rb-lib-meta">
-        ${b.lineCount} lines · ${Math.round((b.progress||0)/b.lineCount*100)||0}%
-      </div>
-      <button class="rb-lib-del" onclick="event.stopPropagation();RB.deleteBook('${b.id}')">🗑️</button>
-    </div>
-  `).join('') || `
-    <div style="text-align:center;padding:1rem;color:#aaa;font-weight:800;font-size:.82rem">
-      No books yet! Upload a PDF above.
-    </div>`;
-},
+  async openBook(id){
+    const book=await this.dbGet('books',id).catch(()=>null);
+    if(!book){ toast('❌ Book not found'); return; }
+    this.stopReading();
+    this.lines=book.lines; this.cur=book.progress||0; this.bookId=id;
+    this.wordIdx=book.wordIdx||0;
+    this.advancedThisLine=false;
+    document.getElementById('rb-upload-section').style.display='none';
+    document.getElementById('rb-reader-section').style.display='block';
+    ['rb-prev-btn','rb-next-btn','rb-help-btn'].forEach(x=>document.getElementById(x).disabled=false);
+    this.renderLines();
+    this.setStatus('📖 '+book.name+' — say "start" to begin reading aloud!');
+    await this.renderLib();
+    toast('📖 Opened: '+book.name);
+  },
 
-async openBook(id){
-  const book=await this.dbGet('books',id).catch(()=>null);
+  async deleteBook(id){
+    if(!confirm('Delete this book?')) return;
+    await this.dbDel('books',id).catch(()=>{});
+    if(this.bookId===id){ this.bookId=null; document.getElementById('rb-upload-section').style.display='block'; document.getElementById('rb-reader-section').style.display='none'; }
+    await this.renderLib(); toast('🗑️ Deleted');
+  },
 
-  if(!book){
-    toast('❌ Book not found');
-    return;
-  }
-
-  this.stopReading();
-
-  this.lines=book.lines;
-  this.cur=book.progress||0;
-  this.bookId=id;
-  this.wordIdx=book.wordIdx||0;
-  this.advancedThisLine=false;
-
-  document.getElementById('rb-upload-section').style.display='none';
-  document.getElementById('rb-reader-section').style.display='block';
-
-  ['rb-prev-btn','rb-next-btn','rb-help-btn']
-    .forEach(x=>document.getElementById(x).disabled=false);
-
-  this.renderLines();
-  this.setStatus('📖 '+book.name+' — say "start" to begin reading aloud!');
-
-  await this.renderLib();
-  toast('📖 Opened: '+book.name);
-},
-
-async deleteBook(id){
-  if(!confirm('Delete this book?')) return;
-
-  await this.dbDel('books',id).catch(()=>{});
-
-  if(this.bookId===id){
-    this.bookId=null;
+  closeBook(){
+    this.stopReading(); this.bookId=null; this.wordIdx=0;
     document.getElementById('rb-upload-section').style.display='block';
     document.getElementById('rb-reader-section').style.display='none';
-  }
+    this.renderLib(); this.updateBadge();
+  },
 
-  await this.renderLib();
-  toast('🗑️ Deleted');
-},
-
-closeBook(){
-  this.stopReading();
-  this.bookId=null;
-  this.wordIdx=0;
-
-  document.getElementById('rb-upload-section').style.display='block';
-  document.getElementById('rb-reader-section').style.display='none';
-
-  this.renderLib();
-  this.updateBadge();
-},
-
-renderLines(){
-  const area=document.getElementById('rb-reading-area');
-  area.innerHTML='';
-
-  this.lines.forEach((text,i)=>{
-    const el=document.createElement('div');
-    el.className='rb-line';
-    el.dataset.idx=i;
-
-    el.textContent=text;
-    el.addEventListener('click',()=>this.jumpTo(i));
-
-    area.appendChild(el);
-  });
-
-  this.highlight(this.cur);
-},
+  renderLines(){
+    const area=document.getElementById('rb-reading-area'); area.innerHTML='';
+    this.lines.forEach((text,i)=>{
+      if(i>0&&i%this.CHECK_EVERY===0) area.appendChild(this.buildCheck(i));
+      const el=document.createElement('div'); el.className='rb-line'; el.dataset.idx=i;
+      // Render as plain text — word spans added when line becomes active
+      el.textContent=text;
+      el.addEventListener('click',()=>this.jumpTo(i));
+      area.appendChild(el);
+    });
+    this.highlight(this.cur);
+  },
 
   // Wrap the active line's text into per-word spans for highlighting
   renderWordSpans(lineEl, text, startWordIdx){
@@ -2919,7 +2832,7 @@ renderLines(){
 const MZ={
   currentGame:null, qNum:0, TOTAL_Q:5, currentAnswer:null, answered:false,
   currentOpts:[], score:0, streak:0, mascot:'🐬', currentA:0, currentB:0,
-  activeAnsBox:'u',
+  activeAnsBox:'u', _carries:{h:0,t:0,u:0}, _borrows:{h:{},t:{},u:{}},
 
   DIFF:{
     addition:{easy:{aMin:1,aMax:20,bMin:1,bMax:20},medium:{aMin:10,aMax:99,bMin:10,bMax:99},hard:{aMin:100,aMax:499,bMin:100,bMax:499}},
@@ -2938,6 +2851,7 @@ const MZ={
   GAME_WORDS:{addition:['addition','add it up','add','adding','plus','water','dolphin'],subtraction:['subtraction','take away','subtract','minus','lava','fox'],multiply:['times tables','times table','multiply','multiplication','storm','butterfly'],division:['division','divide','rainbow','frog']},
   LEVEL_WORDS:{easy:['easy','simple','beginner','level 1','level one'],medium:['medium','middle','normal','level 2','level two'],hard:['hard','difficult','tricky','advanced','level 3','level three']},
   BOX_ORDER:['u','t','h'], BOX_NAMES:{h:'Hundreds',t:'Tens',u:'Units'},
+
 
   onShow(){ if(!this.currentGame) setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say addition, subtraction, times tables, or division!',null,{rate:.88}),300); },
   onHide(){ ttsStop(); },
@@ -3070,32 +2984,50 @@ const MZ={
     const da=this.digits(a), db=this.digits(b);
     const symChar=this.currentGame==='addition'?'+':'−';
     const cols=['H','T','U'];
+
+    // Compute carries for addition (to know where to place blank bubbles)
     let carries={h:0,t:0,u:0};
     if(this.currentGame==='addition'){
       const uSum=(a%10)+(b%10); const uCarry=Math.floor(uSum/10);
       const tSum=Math.floor((a%100)/10)+Math.floor((b%100)/10)+uCarry; const tCarry=Math.floor(tSum/10);
       carries={h:tCarry,t:uCarry,u:0};
     }
+
+    // Compute borrows for subtraction (to know where to place blank bubbles)
     let borrows={h:{},t:{},u:{}};
     if(this.currentGame==='subtraction'){
       const uA=a%10,uB=b%10,tA=Math.floor((a%100)/10),tB=Math.floor((b%100)/10),hA=Math.floor(a/100);
       const needUBorrow=uA<uB; const needTBorrow=(tA-(needUBorrow?1:0))<tB;
-      if(needUBorrow){ borrows.t.lent=true;borrows.t.originalDigit=tA;borrows.t.newDigit=tA-1;borrows.u.received=true;borrows.u.originalDigit=uA;borrows.u.newDigit=uA+10; }
-      if(needTBorrow){ borrows.h.lent=true;borrows.h.originalDigit=hA;borrows.h.newDigit=hA-1;const tEff=(needUBorrow?tA-1:tA)+10;borrows.t.received=true;borrows.t.originalDigit=borrows.t.originalDigit!==undefined?borrows.t.originalDigit:tA;borrows.t.newDigit=tEff; }
+      if(needUBorrow){ borrows.t.lent=true; borrows.u.received=true; }
+      if(needTBorrow){ borrows.h.lent=true; borrows.t.received=borrows.t.received||false; }
     }
-    const headerRow=`<div class="mz-col-row" style="margin-bottom:.08rem"><div class="mz-col-label" style="width:26px"></div>${cols.map(c=>`<div class="mz-col-label">${c}</div>`).join('')}</div>`;
+
+    const headerRow=`<div class="mz-col-row" style="margin-bottom:.08rem"><div class="mz-col-label" style="width:30px"></div>${cols.map(c=>`<div class="mz-col-label">${c}</div>`).join('')}</div>`;
+
+    // Carry row: show an EMPTY highlighted bubble where a carry exists — no number, no text
     let carryRowHtml;
     if(this.currentGame==='addition'){
-      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:26px"></div>${['h','t','u'].map(col=>carries[col]===1?`<div class="mz-carry-bubble"><div class="mz-carry-val">+1</div></div>`:`<div class="mz-carry-bubble"></div>`).join('')}</div>`;
+      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:30px"></div>${['h','t','u'].map(col=>
+        carries[col]===1
+          ? `<div class="mz-carry-bubble"><div class="mz-carry-blank"></div></div>`
+          : `<div class="mz-carry-bubble"></div>`
+      ).join('')}</div>`;
     } else {
-      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:26px"></div>${['h','t','u'].map(col=>{const bw=borrows[col];if(bw.lent)return`<div class="mz-carry-bubble"><div class="mz-carry-lent"><span class="mz-carry-cross">${bw.originalDigit}</span><span class="mz-carry-new">${bw.newDigit}</span></div></div>`;if(bw.received)return`<div class="mz-carry-bubble"><div class="mz-carry-lent"><span class="mz-carry-cross">${bw.originalDigit}</span><span class="mz-carry-new mz-carry-new-received">${bw.newDigit}</span></div></div>`;return`<div class="mz-carry-bubble"></div>`;}).join('')}</div>`;
+      // Subtraction: show blank bubble above columns that need borrowing
+      carryRowHtml=`<div class="mz-carry-row"><div class="mz-carry-bubble" style="width:30px"></div>${['h','t','u'].map(col=>{
+        const bw=borrows[col];
+        return (bw.lent||bw.received)
+          ? `<div class="mz-carry-bubble"><div class="mz-carry-blank mz-carry-blank-sub"></div></div>`
+          : `<div class="mz-carry-bubble"></div>`;
+      }).join('')}</div>`;
     }
+
     const dSpan=(digArr,val)=>digArr.map((d,i)=>{const leading=val<Math.pow(10,2-i);const cls=['h','t','u'][i];return`<div class="mz-col-digit ${cls}${leading?' empty':''}">${leading?'':d}</div>`;}).join('');
-    const topRow=`<div class="mz-col-row"><div style="width:26px"></div>${dSpan(da,a)}</div>`;
+    const topRow=`<div class="mz-col-row"><div style="width:30px"></div>${dSpan(da,a)}</div>`;
     const botRow=`<div class="mz-col-row mz-col-op-row"><div class="mz-col-op-sym">${symChar}</div>${dSpan(db,b)}</div>`;
-    const ansRow=`<div class="mz-col-row" style="margin-top:.25rem" id="mz-ans-row"><div style="width:26px"></div>${['h','t','u'].map((cls,i)=>`<div class="mz-col-digit ${cls} mz-ans-blank" id="mz-ans-box-${cls}" onclick="MZ.fillAnsBox('${cls}')" title="${['Hundreds','Tens','Units'][i]}"><span class="mz-blank-line">?</span></div>`).join('')}</div>`;
-    const digitStrip=`<div class="mz-digit-strip" id="mz-digit-strip"><span class="mz-ds-label">👉 Tap for <span id="mz-ds-col-name" style="color:var(--blue2)">Units</span>:</span>${[0,1,2,3,4,5,6,7,8,9].map(d=>`<button class="mz-ds-btn" onclick="MZ.pickDigit(${d})">${d}</button>`).join('')}</div>`;
-    return`<div class="mz-col-math"><div class="mz-col-math-title">Column method</div><div class="mz-col-math-grid">${headerRow}${carryRowHtml}${topRow}${botRow}<div style="border-top:3px solid var(--purple2);margin:.18rem 0"></div>${ansRow}${digitStrip}</div><div style="font-size:.62rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.3rem">🗣️ Say the digit — or say "hundreds 3" · "tens 5" · "units 7"</div></div>`;
+    const ansRow=`<div class="mz-col-row" style="margin-top:.3rem" id="mz-ans-row"><div style="width:30px"></div>${['h','t','u'].map((cls,i)=>`<div class="mz-col-digit ${cls} mz-ans-blank" id="mz-ans-box-${cls}" onclick="MZ.fillAnsBox('${cls}')" title="${['Hundreds','Tens','Units'][i]}"><span class="mz-blank-line">?</span></div>`).join('')}</div>`;
+    const digitStrip=`<div class="mz-digit-strip" id="mz-digit-strip"><span class="mz-ds-label">👉 <span id="mz-ds-col-name" style="color:var(--blue2)">Units</span>:</span>${[0,1,2,3,4,5,6,7,8,9].map(d=>`<button class="mz-ds-btn" onclick="MZ.pickDigit(${d})">${d}</button>`).join('')}</div>`;
+    return`<div class="mz-col-math"><div class="mz-col-math-title">Column method</div><div class="mz-col-math-grid">${headerRow}${carryRowHtml}${topRow}${botRow}<div style="border-top:3px solid var(--purple2);margin:.22rem 0"></div>${ansRow}${digitStrip}</div><div style="font-size:.63rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.35rem">🗣️ Say a digit · "hundreds 3" · "tens 5" · "units 7"</div></div>`;
   },
 
   buildTimesVisual(a,b){
@@ -3228,6 +3160,30 @@ const MZ={
     ttsSpeak(title+' You scored '+this.score+' points! Say play again or pick a different game!',null,{rate:.88});
   },
 };
+
+(async function boot(){
+  buildBg();
+  if(window.speechSynthesis) window.speechSynthesis.getVoices();
+
+  // If we saved the flag before, open the stream silently (no popup — browser remembers)
+  // then go straight to the hub.
+  if(localStorage.getItem('hub_mic_ok')==='1'){
+    // Previously granted — start silently, no prompt needed
+    const ps = document.getElementById('perm-screen');
+    if(ps) ps.style.display='none';
+    initRecog();
+    micRestart();
+  } else {
+    // First time — show the friendly permission screen
+    const ps = document.getElementById('perm-screen');
+    if(ps) ps.style.display='flex';
+  }
+
+  VB.init();
+  WB.buildHome();
+  await RB.init();
+})()
+
 </script>
 </body>
 </html>
