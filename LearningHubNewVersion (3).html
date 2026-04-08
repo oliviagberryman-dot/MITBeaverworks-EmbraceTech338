@@ -690,7 +690,7 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
       <button class="app-card" data-z="voice"   onclick="switchZone('voice')">
         <span class="ac-ico">🎤</span><span class="ac-name">Voice Buddy</span>
         <span class="ac-desc">Talk and I'll write your words!</span>
-        <span class="ac-hint">say "voice"</span>
+        <span class="ac-hint">say "voice" · then "start recording"</span>
       </button>
       <button class="app-card" data-z="words"   onclick="switchZone('words')">
         <span class="ac-ico">💥</span><span class="ac-name">Word Blast!</span>
@@ -1256,14 +1256,12 @@ const VB={
     this.showLive();
   },
 
-  onShow(){
-    if(this.state==='idle') this.startListen();
-  },
+  onShow(){},
   onHide(){ this.capturing=false; this.silStop(); this.setS('idle'); },
 
-  onCommand(raw){
+onCommand(raw){
     const lo=raw.toLowerCase();
-    if(/\b(stop|finish|done)\b/.test(lo)){ this.stopProcess(); return; }
+    if(/\b(stop recording|stop|finish|done)\b/.test(lo)){ this.stopProcess(); return; }
     if(/\bpause\b/.test(lo)){ this.pause(); return; }
     if(/\b(resume|continue)\b/.test(lo)){ this.resume(); return; }
     if(/\bnew session\b/.test(lo)){ this.newSession(); return; }
@@ -1272,6 +1270,7 @@ const VB={
       if(m) this.openSessionByNum(m[1]); return;
     }
     if(/\bgo back\b|\bback to sessions\b/.test(lo)){ this.viewSession=null; this.renderSessions(); return; }
+    if(/\bstart recording\b/.test(lo)&&this.state==='idle'){ this.startListen(); return; }
   },
 
   onSpeech(raw){
@@ -1313,8 +1312,8 @@ const VB={
     const sp=document.getElementById('vb-speech');
     const m=document.getElementById('vb-mascot');
     btn.className='vb-big-mic';
-    if(s==='idle'){
-      btn.textContent='🎙️'; if(sp)sp.textContent='Tap the mic to start! 🎙️'; if(m)m.textContent='🐣';
+if(s==='idle'){
+      btn.textContent='🎙️'; if(sp)sp.textContent='Say "start recording" or tap the mic! 🎙️'; if(m)m.textContent='🐣';
       this.stopWave(); this.silStop();
     } else if(s==='listening'){
       btn.classList.add('vb-listening'); btn.textContent='⏹️';
@@ -1355,9 +1354,7 @@ const VB={
     const cleaned=await this.cleanText(this.preClean(txt));
     this.addMsg(txt,cleaned);
     this.setS('idle');
-    // if detail view is open for current session, re-render it
     if(this.viewSession===this.currentId) this.openSession(this.currentId);
-    setTimeout(()=>{ if(this.state==='idle'&&currentZone==='voice') this.startListen(); },800);
   },
 
   newSessId(){
@@ -1485,10 +1482,9 @@ const VB={
     this.renderSessions();
   },
 
-  newSession(){
+newSession(){
     this.capturing=false; this.rawAccum=''; this.silStop();
     this.viewSession=null; this.currentId=null; this.updateLive(); this.setS('idle'); this.renderSessions();
-    setTimeout(()=>{ if(currentZone==='voice') this.startListen(); },400);
   },
 
   micClick(){
