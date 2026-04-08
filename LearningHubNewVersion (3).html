@@ -577,6 +577,34 @@ body.zone-words{background:linear-gradient(160deg,#ede9fe,#dbeafe);}
 .mz-carry-blank{width:26px;height:26px;border:2.5px dashed #ff9966;border-radius:7px;background:#fff5f0;}
 .mz-carry-blank-sub{border-color:#9966ff;background:#f5f0ff;width:26px;height:26px;}
 
+/* ── PER-PLACE SCRATCH SPACES ── */
+.mz-scratch-row{display:flex;gap:.6rem;margin-top:.55rem;flex-wrap:wrap;}
+.mz-scratch-box{flex:1;min-width:90px;border-radius:18px;padding:.75rem .7rem .7rem;display:flex;flex-direction:column;align-items:center;gap:.3rem;box-shadow:0 4px 0 rgba(0,0,0,.1);}
+.mz-scratch-box.sc-h{background:#fff0e0;border:3px solid #ffd6a0;}
+.mz-scratch-box.sc-t{background:#e0f0ff;border:3px solid #a8d8ff;}
+.mz-scratch-box.sc-u{background:#e0ffe8;border:3px solid #a0ffb8;}
+.mz-scratch-lbl{font-family:'Fredoka One',sans-serif;font-size:.8rem;letter-spacing:.5px;font-weight:900;text-transform:uppercase;}
+.mz-scratch-box.sc-h .mz-scratch-lbl{color:#c05000;}
+.mz-scratch-box.sc-t .mz-scratch-lbl{color:#0060a0;}
+.mz-scratch-box.sc-u .mz-scratch-lbl{color:#007020;}
+/* Stacked vertical sum layout */
+.sc-sum-stack{display:flex;flex-direction:column;align-items:flex-end;gap:2px;background:rgba(255,255,255,.75);border-radius:12px;padding:.5rem .8rem .45rem;min-width:66px;}
+.sc-stack-digit{font-family:'Fredoka One',sans-serif;font-size:2rem;line-height:1.1;color:var(--dark);}
+.sc-stack-op{font-family:'Fredoka One',sans-serif;font-size:2rem;line-height:1.1;color:var(--purple2);}
+.sc-stack-line{width:100%;height:3px;background:var(--purple2);border-radius:2px;margin:.2rem 0;}
+.sc-stack-result{font-family:'Fredoka One',sans-serif;font-size:2.1rem;line-height:1.1;min-width:2ch;text-align:right;}
+.sc-result-blank{color:#ccc;border:2.5px dashed #ccc;border-radius:8px;padding:.05rem .4rem;font-size:1.7rem;}
+.sc-result-filled{color:var(--green2);animation:mzBoxFill .3s ease;}
+/* Carry/borrow badges */
+.sc-carry-in{font-family:'Fredoka One',sans-serif;font-size:.72rem;background:#ff8c3d;color:#fff;border-radius:8px;padding:.12rem .5rem;}
+.sc-lent{background:#6366f1;}
+.sc-carry-hint{display:flex;align-items:center;gap:.3rem;font-family:'Fredoka One',sans-serif;font-size:.75rem;color:#555;margin-top:.2rem;}
+.sc-no-carry{display:none;}
+.sc-carry-blank{background:#fff;border:2px dashed #ffb800;border-radius:6px;padding:.05rem .35rem;color:#cc8800;font-family:'Fredoka One',sans-serif;font-size:.82rem;}
+.sc-carry-revealed{border-color:var(--green2);color:var(--green2);background:#e8ffe8;}
+/* Voice prompt inside scratch box */
+.sc-voice-prompt{font-size:.63rem;font-weight:800;color:#aaa;text-align:center;margin-top:.2rem;line-height:1.4;}
+
 /* ══ CONFETTI ══ */
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:8000;overflow:hidden;}
 .cp{position:absolute;top:-30px;animation:cfFall linear forwards;}
@@ -2121,12 +2149,7 @@ const WB={
     }
 
     // ── QUIZ SCREEN: handle answers ──
-    if(this.G.answered) {
-      if(/\b(next|next question|continue|go|ready|okay|ok|yes|yep|move on|skip)\b/.test(lo)){
-        WB.advance();
-      }
-      return;
-    }
+    if(this.G.answered) return;
     const cands=new Set([lo,...lo.split(/\s+/)]);
     let matchPos=null;
     for(const c of cands){
@@ -2329,9 +2352,6 @@ const RB={
     if(/\bhelp me\b/.test(lo)){
       this.helpWord(); return;
     }
-    const match = /\blook up (\w+)/.exec(lo);
-if(match){ this.helpWord(match[1]); return; }
-
 
     // ── VOCAB POPUP CONTROLS (only when popup is open) ──
     if(this.vocabOpen()){
@@ -2398,7 +2418,7 @@ if(match){ this.helpWord(match[1]); return; }
       }
     }
     if(bestMatch>this.wordIdx){
-      this.wordIdx=bestMatch + 1;
+      this.wordIdx=bestMatch;
       this.updateWordHighlight(this.wordIdx);
       this.saveWordProgress();
     }
@@ -2858,7 +2878,7 @@ const MZ={
   GT:{addition:['addition','add','adding','plus','water','dolphin'],subtraction:['subtraction','subtract','minus','take away','lava','fox'],multiply:['multiply','times','times tables','multiplication','storm','butterfly'],division:['division','divide','rainbow','frog']},
   GAME_WORDS:{addition:['addition','add it up','add','adding','plus','water','dolphin'],subtraction:['subtraction','take away','subtract','minus','lava','fox'],multiply:['times tables','times table','multiply','multiplication','storm','butterfly'],division:['division','divide','rainbow','frog']},
   LEVEL_WORDS:{easy:['easy','simple','beginner','level 1','level one'],medium:['medium','middle','normal','level 2','level two'],hard:['hard','difficult','tricky','advanced','level 3','level three']},
-  BOX_ORDER:['u','t','h'], BOX_NAMES:{h:'Hundreds',t:'Tens',u:'Units'},
+  BOX_ORDER:['u','t','h'], BOX_NAMES:{h:'Hundreds',t:'Tens',u:'Ones'},
 
 
   onShow(){ if(!this.currentGame) setTimeout(()=>ttsSpeak('Welcome to Math Fun Zone! Say addition, subtraction, times tables, or division!',null,{rate:.88}),300); },
@@ -2881,15 +2901,30 @@ const MZ={
     if(foundLevel&&this.currentGame&&!foundGame){ this.setDiff(this.currentGame,foundLevel); return; }
     // Column box voice (add/sub)
     if(this.currentGame==='addition'||this.currentGame==='subtraction'){
-      const colMatch=lo.match(/\b(hundreds?|tens?|units?|ones?)\s+(\w+)/);
+      // Match: "ones place 3", "ones 3", "tens place 5", "hundreds 2", "units 4" etc.
+      const colMatch=lo.match(/\b(hundreds?\s*place?|tens?\s*place?|ones?\s*place?|units?\s*place?)\s+(\w+)/);
       if(colMatch){
-        const cw=colMatch[1].replace(/s$/,''); const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
+        const cw=colMatch[1].replace(/\s*place\s*/,'').replace(/s$/,'').trim();
+        const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
         const dig=this.parseNum(colMatch[2]);
-        if(dig!==null&&dig>=0&&dig<=9){ this.activeAnsBox=ck; this.pickDigit(dig); this.setVoiceBox(this.BOX_NAMES[ck]+': '+dig,'final','✏️'); return; }
+        if(dig!==null&&dig>=0&&dig<=9){ this.activeAnsBox=ck; this.pickDigit(dig); this.setVoiceBox(this.BOX_NAMES[ck]+' place: '+dig,'final','✏️'); return; }
+      }
+      // Carry voice: "carry yes" / "carry one" / "carry no" / "no carry"
+      if(this.currentGame==='addition'){
+        if(/\b(carry\s+(yes|one|1|true)|yes\s+carry)\b/.test(lo)){
+          const col=this.activeAnsBox||'u';
+          this._revealScratchResult(col, true);
+          this.setVoiceBox('Carry 1! ✅','final','➕'); return;
+        }
+        if(/\b(carry\s+(no|zero|0|false)|no\s+carry|don'?t\s+carry)\b/.test(lo)){
+          const col=this.activeAnsBox||'u';
+          this._revealScratchResult(col, false);
+          this.setVoiceBox('No carry ✅','final','✔️'); return;
+        }
       }
       if(this.activeAnsBox&&!this.answered){
         const dig=this.parseNum(lo);
-        if(dig!==null&&dig>=0&&dig<=9){ this.setVoiceBox(this.BOX_NAMES[this.activeAnsBox]+': '+dig,'final','✏️'); this.pickDigit(dig); return; }
+        if(dig!==null&&dig>=0&&dig<=9){ this.setVoiceBox(this.BOX_NAMES[this.activeAnsBox]+' place: '+dig,'final','✏️'); this.pickDigit(dig); return; }
       }
     }
     // end screen nav
@@ -2991,7 +3026,7 @@ const MZ={
   buildColumnMath(a,b,sym){
     const da=this.digits(a), db=this.digits(b);
     const symChar=this.currentGame==='addition'?'+':'−';
-    const cols=['H','T','U'];
+    const cols=['H','T','O'];
 
     // Compute carries for addition (to know where to place blank bubbles)
     let carries={h:0,t:0,u:0};
@@ -3033,9 +3068,119 @@ const MZ={
     const dSpan=(digArr,val)=>digArr.map((d,i)=>{const leading=val<Math.pow(10,2-i);const cls=['h','t','u'][i];return`<div class="mz-col-digit ${cls}${leading?' empty':''}">${leading?'':d}</div>`;}).join('');
     const topRow=`<div class="mz-col-row"><div style="width:30px"></div>${dSpan(da,a)}</div>`;
     const botRow=`<div class="mz-col-row mz-col-op-row"><div class="mz-col-op-sym">${symChar}</div>${dSpan(db,b)}</div>`;
-    const ansRow=`<div class="mz-col-row" style="margin-top:.3rem" id="mz-ans-row"><div style="width:30px"></div>${['h','t','u'].map((cls,i)=>`<div class="mz-col-digit ${cls} mz-ans-blank" id="mz-ans-box-${cls}" onclick="MZ.fillAnsBox('${cls}')" title="${['Hundreds','Tens','Units'][i]}"><span class="mz-blank-line">?</span></div>`).join('')}</div>`;
-    const digitStrip=`<div class="mz-digit-strip" id="mz-digit-strip"><span class="mz-ds-label">👉 <span id="mz-ds-col-name" style="color:var(--blue2)">Units</span>:</span>${[0,1,2,3,4,5,6,7,8,9].map(d=>`<button class="mz-ds-btn" onclick="MZ.pickDigit(${d})">${d}</button>`).join('')}</div>`;
-    return`<div class="mz-col-math"><div class="mz-col-math-title">Column method</div><div class="mz-col-math-grid">${headerRow}${carryRowHtml}${topRow}${botRow}<div style="border-top:3px solid var(--purple2);margin:.22rem 0"></div>${ansRow}${digitStrip}</div><div style="font-size:.63rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.35rem">🗣️ Say a digit · "hundreds 3" · "tens 5" · "units 7"</div></div>`;
+    const ansRow=`<div class="mz-col-row" style="margin-top:.3rem" id="mz-ans-row"><div style="width:30px"></div>${['h','t','u'].map((cls,i)=>`<div class="mz-col-digit ${cls} mz-ans-blank" id="mz-ans-box-${cls}" onclick="MZ.fillAnsBox('${cls}')" title="${['Hundreds','Tens','Ones'][i]}"><span class="mz-blank-line">?</span></div>`).join('')}</div>`;
+    const digitStrip=`<div class="mz-digit-strip" id="mz-digit-strip"><span class="mz-ds-label">👉 <span id="mz-ds-col-name" style="color:var(--blue2)">Ones</span>:</span>${[0,1,2,3,4,5,6,7,8,9].map(d=>`<button class="mz-ds-btn" onclick="MZ.pickDigit(${d})">${d}</button>`).join('')}</div>`;
+
+    // ── SCRATCH SPACES: one box per place value ──
+    const scratchBoxes = this._buildScratchSpaces(a, b, symChar, carries, borrows);
+
+    return`<div class="mz-col-math"><div class="mz-col-math-title">Column method</div><div class="mz-col-math-grid">${headerRow}${carryRowHtml}${topRow}${botRow}<div style="border-top:3px solid var(--purple2);margin:.22rem 0"></div>${ansRow}${digitStrip}</div>${scratchBoxes}<div style="font-size:.63rem;font-weight:700;color:#b09ad4;text-align:center;margin-top:.35rem">🗣️ Say "ones place 3" · "tens place 5" · "hundreds place 2"</div></div>`;
+  },
+
+  // Build per-place-value scratch spaces — answers hidden until student says them
+  _buildScratchSpaces(a, b, symChar, carries, borrows){
+    const isAdd = this.currentGame === 'addition';
+    const dA = [Math.floor(a/100), Math.floor((a%100)/10), a%10];
+    const dB = [Math.floor(b/100), Math.floor((b%100)/10), b%10];
+    const colKeys  = ['h','t','u'];
+    const colNames = ['Hundreds','Tens','Ones'];
+    const colCls   = ['sc-h','sc-t','sc-u'];
+
+    // Store scratch data for reveal later
+    this._scratchData = {};
+
+    const boxes = colKeys.map((col, ci) => {
+      const dA_col = dA[ci];
+      const dB_col = dB[ci];
+      const isLeadingA = a < Math.pow(10, 2-ci);
+      const isLeadingB = b < Math.pow(10, 2-ci);
+      if(isLeadingA && isLeadingB) return '';
+
+      if(isAdd){
+        const carryIn = ci===1 ? carries.u : ci===0 ? carries.t : 0;
+        const rawSum = dA_col + dB_col + carryIn;
+        const writeDigit = rawSum % 10;
+        const carryOut = Math.floor(rawSum / 10);
+        this._scratchData[col] = { rawSum, writeDigit, carryOut, carryIn };
+
+        const carryInBadge = carryIn
+          ? `<div class="sc-carry-in">+1 carry</div>`
+          : '';
+        const topDigit = isLeadingA ? '0' : String(dA_col);
+        const botDigit = isLeadingB ? '0' : String(dB_col);
+
+        return `<div class="mz-scratch-box ${colCls[ci]}" id="sc-box-${col}">
+          <div class="mz-scratch-lbl">${colNames[ci]}</div>
+          ${carryInBadge}
+          <div class="sc-sum-stack">
+            <div class="sc-stack-digit sc-top">${topDigit}</div>
+            <div class="sc-stack-op">${symChar}${botDigit}</div>
+            <div class="sc-stack-line"></div>
+            <div class="sc-stack-result" id="sc-result-${col}">
+              <span class="sc-result-blank">?</span>
+            </div>
+          </div>
+          ${carryOut ? `<div class="sc-carry-hint" id="sc-carry-hint-${col}">carry? <span class="sc-carry-blank" id="sc-carry-val-${col}">?</span></div>` : `<div class="sc-carry-hint sc-no-carry" id="sc-carry-hint-${col}" style="display:none"></div>`}
+          <div class="sc-voice-prompt">🗣️ Say "${colNames[ci].toLowerCase()} place ${writeDigit}"</div>
+        </div>`;
+      } else {
+        // Subtraction
+        const borrow = borrows[col] || {};
+        const dA_eff = dA_col - (borrow.lent ? 1 : 0);
+        const dA_actual = dA_eff + (borrow.received ? 10 : 0);
+        const result = dA_actual - dB_col;
+        this._scratchData[col] = { result };
+
+        const topDisplay = borrow.received
+          ? `<span style="text-decoration:line-through;opacity:.45;font-size:.9em">${dA_col}</span><span style="font-size:.82em;color:#e65100"> →${dA_actual}</span>`
+          : (borrow.lent
+            ? `<span style="text-decoration:line-through;opacity:.45;font-size:.9em">${dA_col}</span><span style="font-size:.82em"> →${dA_eff}</span>`
+            : String(isLeadingA ? '0' : dA_col));
+        const botDigit = isLeadingB ? '0' : String(dB_col);
+        const borrowNote = borrow.received ? `<div class="sc-carry-in">borrowed 10</div>` : (borrow.lent ? `<div class="sc-carry-in sc-lent">lends 10 →</div>` : '');
+
+        return `<div class="mz-scratch-box ${colCls[ci]}" id="sc-box-${col}">
+          <div class="mz-scratch-lbl">${colNames[ci]}</div>
+          ${borrowNote}
+          <div class="sc-sum-stack">
+            <div class="sc-stack-digit sc-top">${topDisplay}</div>
+            <div class="sc-stack-op">${symChar}${botDigit}</div>
+            <div class="sc-stack-line"></div>
+            <div class="sc-stack-result" id="sc-result-${col}">
+              <span class="sc-result-blank">?</span>
+            </div>
+          </div>
+          <div class="sc-voice-prompt">🗣️ Say "${colNames[ci].toLowerCase()} place ${result}"</div>
+        </div>`;
+      }
+    }).filter(Boolean);
+
+    return `<div style="margin-top:.65rem">
+      <div style="font-family:'Fredoka One',sans-serif;font-size:.72rem;color:#b09ad4;text-transform:uppercase;letter-spacing:.8px;text-align:center;margin-bottom:.4rem">✏️ Work each place — say your answer!</div>
+      <div class="mz-scratch-row">${boxes.join('')}</div>
+    </div>`;
+  },
+
+  // Called when student fills an answer box — also reveal that scratch box result
+  _revealScratchResult(col, carryConfirmed){
+    const sd = this._scratchData && this._scratchData[col];
+    if(!sd) return;
+    const resultEl = document.getElementById('sc-result-'+col);
+    if(resultEl){
+      const isAdd = this.currentGame==='addition';
+      const val = isAdd ? sd.writeDigit : sd.result;
+      resultEl.innerHTML = `<span class="sc-result-filled">${val}</span>`;
+    }
+    if(this.currentGame==='addition'){
+      const carryHint = document.getElementById('sc-carry-hint-'+col);
+      const carryVal  = document.getElementById('sc-carry-val-'+col);
+      if(sd.carryOut && carryHint && carryVal){
+        carryHint.style.display='flex';
+        carryVal.textContent = carryConfirmed===true ? '1 ✅' : carryConfirmed===false ? '0 ✅' : '1';
+        carryVal.className = 'sc-carry-blank sc-carry-revealed';
+      }
+      if(!sd.carryOut && carryHint) carryHint.style.display='none';
+    }
   },
 
   buildTimesVisual(a,b){
@@ -3065,7 +3210,10 @@ const MZ={
   },
   pickDigit(d){
     if(!this.activeAnsBox) return;
-    this.setAnsBox(this.activeAnsBox,d);
+    const col = this.activeAnsBox;
+    this.setAnsBox(col,d);
+    // Reveal that scratch box result
+    this._revealScratchResult(col, null);
     const nextCol=this.BOX_ORDER.find(col=>{if(col===this.activeAnsBox)return false;const b=document.getElementById('mz-ans-box-'+col);return b&&!b.classList.contains('mz-filled');});
     this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
     if(nextCol){this.activeAnsBox=nextCol;const nb=document.getElementById('mz-ans-box-'+nextCol);if(nb)nb.classList.add('mz-active-box');this.updateStripLabel();}
