@@ -2824,7 +2824,7 @@ const MZ={
 
 onSpeech(raw){
     const lo=raw.toLowerCase().trim();
-    // ── Difficulty voice commands — checked before speechLock so they always work ──
+    // ── Difficulty voice commands ──
     let foundGame=null,foundLevel=null;
     for(const[g,words] of Object.entries(this.GAME_WORDS)){ if(words.some(w=>lo.includes(w))){ foundGame=g; break; } }
     for(const[l,words] of Object.entries(this.LEVEL_WORDS)){ if(words.some(w=>lo.includes(w))){ foundLevel=l; break; } }
@@ -2835,6 +2835,118 @@ onSpeech(raw){
       ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
       this.setDiff(foundGame,foundLevel); return;
     }
+    if(foundLevel&&this.currentGame&&!foundGame){
+      const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
+      const gameLabel=this.currentGame.charAt(0).toUpperCase()+this.currentGame.slice(1);
+      toast(`${gameLabel}: ${lvlLabel}`);
+      ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
+      this.setDiff(this.currentGame,foundLevel); return;
+    }
+
+    // ── Column math voice (add/sub) ──
+    if(this.currentGame==='addition'||this.currentGame==='subtraction'){
+
+      // ── DELETE: "delete ones place", "clear tens", "erase hundreds" ──
+      const delMatch=lo.match(/\b(delete|clear|erase|remove)\b.*\b(hundred|ten|one|unit)/);
+      if(delMatch){
+        const cw=delMatch[2]==='hundred'?'h':delMatch[2]==='ten'?'t':'u';
+        const tb=document.getElementById('mz-ans-box-'+cw);
+        if(tb){
+          tb.classList.remove('mz-filled','mz-active-box');
+          tb.innerHTML='<span class="mz-blank-line">?</span>';
+          tb.onclick=()=>this.fillAnsBox(cw);
+        }
+        const sr=document.getElementById('sc-result-'+cw);
+        if(sr) sr.innerHTML='<span class="sc-result-blank">?</span>';
+        const strip=document.getElementById('mz-digit-strip');
+        if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
+        this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+        this.activeAnsBox=cw;
+        const ab=document.getElementById('mz-ans-box-'+cw); if(ab) ab.classList.add('mz-active-box');
+        this.updateStripLabel();
+        this.setVoiceBox(this.BOX_NAMES[cw]+' cleared','final','🗑️');
+        return;
+      }
+
+      // ── PLACE NAME ONLY: "ones place", "tens", "hundreds place" — selects that box ──
+      const placeOnly=lo.match(/\b(hundreds?\s*(?:place)?|tens?\s*(?:place)?|ones?\s*(?:place)?|units?\s*(?:place)?)\s*$/);
+      if(placeOnly){
+        const cw=placeOnly[1].replace(/\s*place\s*/,'').replace(/s$/,'').trim();
+        const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
+        this._lastNamedCol=ck;
+        this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+        this.activeAnsBox=ck;
+        const tb=document.getElementById('mz-ans-box-'+ck);
+        if(tb) tb.classList.add('mz-active-box');
+        const strip=document.getElementById('mz-digit-strip');
+        if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
+        this.updateStripLabel();
+        this.setVoiceBox('Selected: '+this.BOX_NAMES[ck],'interim','👉');
+        return;
+      }
+
+      // ── PLACE + DIGIT together: "ones place 3", "tens 5" ──
+      const colMatch=lo.match(/\b(hundreds?\s*(?:place)?|tens?\s*(?:place)?|ones?\s*(?:place)?|units?\s*(?:place)?)\s+(\w+)/);
+      if(colMatch){
+        const cw=colMatch[1].replace(/\s*place\s*/,'').replace(/s$/,'').trim();
+        const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
+        const dig=this.parseNum(colMatch[2]);
+        if(dig!==null&&dig>=0&&dig<=9){
+          this._writeToCol(ck,dig); return;
+        }
+      }
+
+      // ── DIGIT ONLY: use _lastNamedCol if set, otherwise activeAnsBox ──
+      const digOnly=this.parseNum(lo);
+      if(digOnly!==null&&digOnly>=0&&digOnly<=9){
+        const col=this._lastNamedCol||this.activeAnsBox;
+        if(col){ this._writeToCol(col,digOnly); return; }
+      }
+
+      // ── Carry voice ──
+      if(this.currentGame==='addition'){
+        if(/\b(carry\s+(yes|one|1|true)|yes\s+carry)\b/.test(lo)){
+          const col=this.activeAnsBox||'u';
+          this._revealScratchResult(col,true);
+          this.setVoiceBox('Carry 1! ✅','final','➕'); return;
+        }
+        if(/\b(carry\s+(no|zero|0|false)|no\s+carry|don'?t\s+carry)\b/.test(lo)){
+          const col=this.activeAnsBox||'u';
+          this._revealScratchResult(col,false);
+          this.setVoiceBox('No carry ✅','final','✔️'); return;
+        }
+      }
+    }
+
+    // ── End screen nav ──
+    if(this.qNum>=this.TOTAL_Q||!this.currentGame){
+      if(/\b(play again|again|another|yes)\b/.test(lo)){ if(this.currentGame) this.selectGame(this.currentGame); return; }
+      if(/\b(different|switch|change|new game)\b/.test(lo)){ this.pickDiff(); return; }
+    }
+
+    // ── Game switch ──
+    for(const[g,arr] of Object.entries(this.GT)){ if(arr.some(x=>lo.includes(x))){ this.animCard(g); setTimeout(()=>this.selectGame(g),420); return; } }
+
+    // ── Final answer (multiply/division) ──
+    if(this.currentGame&&!this.answered&&this.currentAnswer!==null){
+      const val=this.parseNum(raw);
+      if(val!==null&&this.currentOpts.includes(val)){ this.setVoiceBox(String(val),'final','✅'); this.voiceAns(val); }
+    }
+  },
+
+  _writeToCol(ck,dig){
+    this._lastNamedCol=null;
+    const tb=document.getElementById('mz-ans-box-'+ck);
+    if(tb) tb.classList.remove('mz-filled','mz-active-box');
+    const strip=document.getElementById('mz-digit-strip');
+    if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
+    this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+    this.activeAnsBox=ck;
+    this.setAnsBox(ck,dig);
+    this._revealScratchResult(ck,null);
+    if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
+    this.setVoiceBox(this.BOX_NAMES[ck]+' place: '+dig,'final','✏️');
+  },
     if(foundLevel&&this.currentGame&&!foundGame){
       const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
       const gameLabel=this.currentGame.charAt(0).toUpperCase()+this.currentGame.slice(1);
