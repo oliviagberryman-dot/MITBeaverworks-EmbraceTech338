@@ -2822,25 +2822,23 @@ const MZ={
     this.selectGame(game);
   },
 
-  onSpeech(raw){
-    if(speechLock) return;
+onSpeech(raw){
     const lo=raw.toLowerCase().trim();
-    // ── Difficulty voice commands ──
-    // Recognise: "division hard", "hard division", "addition easy", "change subtraction to medium" etc.
+    // ── Difficulty voice commands — checked before speechLock so they always work ──
     let foundGame=null,foundLevel=null;
     for(const[g,words] of Object.entries(this.GAME_WORDS)){ if(words.some(w=>lo.includes(w))){ foundGame=g; break; } }
     for(const[l,words] of Object.entries(this.LEVEL_WORDS)){ if(words.some(w=>lo.includes(w))){ foundLevel=l; break; } }
     if(foundGame&&foundLevel){
       const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
       const gameLabel=foundGame.charAt(0).toUpperCase()+foundGame.slice(1);
-      showToast(`${gameLabel}: ${lvlLabel}`);
+      toast(`${gameLabel}: ${lvlLabel}`);
       ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
       this.setDiff(foundGame,foundLevel); return;
     }
     if(foundLevel&&this.currentGame&&!foundGame){
       const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
       const gameLabel=this.currentGame.charAt(0).toUpperCase()+this.currentGame.slice(1);
-      showToast(`${gameLabel}: ${lvlLabel}`);
+      toast(`${gameLabel}: ${lvlLabel}`);
       ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
       this.setDiff(this.currentGame,foundLevel); return;
     }
