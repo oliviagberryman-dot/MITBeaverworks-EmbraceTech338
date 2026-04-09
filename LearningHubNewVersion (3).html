@@ -3200,13 +3200,15 @@ onSpeech(raw){
     const box=document.getElementById('mz-ans-box-'+col);if(box)box.classList.add('mz-active-box');
     this.updateStripLabel();
   },
-  pickDigit(d){
+   pickDigit(d){
     if(!this.activeAnsBox) return;
     const col = this.activeAnsBox;
+    const wasAlreadyFilled = document.getElementById('mz-ans-box-'+col)?.classList.contains('mz-filled');
     this.setAnsBox(col,d);
-    // Reveal that scratch box result
     this._revealScratchResult(col, null);
-    const nextCol=this.BOX_ORDER.find(col=>{if(col===this.activeAnsBox)return false;const b=document.getElementById('mz-ans-box-'+col);return b&&!b.classList.contains('mz-filled');});
+    // If overriding an already-filled box, stay on the same box — don't auto-advance
+    if(wasAlreadyFilled) return;
+    const nextCol=this.BOX_ORDER.find(c=>{if(c===col)return false;const b=document.getElementById('mz-ans-box-'+c);return b&&!b.classList.contains('mz-filled');});
     this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
     if(nextCol){this.activeAnsBox=nextCol;const nb=document.getElementById('mz-ans-box-'+nextCol);if(nb)nb.classList.add('mz-active-box');this.updateStripLabel();}
     else{this.activeAnsBox=null;const strip=document.getElementById('mz-digit-strip');if(strip){strip.style.opacity='.4';strip.style.pointerEvents='none';}}
