@@ -1191,11 +1191,11 @@ function route(raw){
   }
 
   // Global nav
-  if(/\b(go home|home screen|main menu|home)\b/.test(lo)){ goHome(); return; }
-  if(/\b(voice|voice buddy|dictate|transcri)\b/.test(lo) && currentZone!=='voice'){ hlCard('voice'); setTimeout(()=>switchZone('voice'),360); return; }
+  if(/\b(home screen|main menu)\b/.test(lo)){ goHome(); return; }
+  if(/\b(voice buddy|dictate|transcri)\b/.test(lo) && currentZone!=='voice'){ hlCard('voice'); setTimeout(()=>switchZone('voice'),360); return; }
   if(/\b(word blast|word game|synonyms?|antonyms?|grammar game)\b/.test(lo) && currentZone!=='words'){ hlCard('words'); setTimeout(()=>switchZone('words'),360); return; }
-  if(/\b(reading|reading buddy|book|books|story|stories|pdf)\b/.test(lo) && currentZone!=='reading'){ hlCard('reading'); setTimeout(()=>switchZone('reading'),360); return; }
-  if(/\b(math|maths|number|numbers)\b/.test(lo) && currentZone!=='math'){ hlCard('math'); setTimeout(()=>switchZone('math'),360); return; }
+  if(/\b(reading buddy|pdf)\b/.test(lo) && currentZone!=='reading'){ hlCard('reading'); setTimeout(()=>switchZone('reading'),360); return; }
+  if(/\b(math fun zone)\b/.test(lo) && currentZone!=='math'){ hlCard('math'); setTimeout(()=>switchZone('math'),360); return; }
 
   // Forward
   if(currentZone==='voice')   VB.onCommand(raw);
