@@ -2947,67 +2947,7 @@ onSpeech(raw){
     if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
     this.setVoiceBox(this.BOX_NAMES[ck]+' place: '+dig,'final','✏️');
   },
-    if(foundLevel&&this.currentGame&&!foundGame){
-      const lvlLabel=foundLevel==='easy'?'Easy 🟢':foundLevel==='medium'?'Medium 🟡':'Hard 🔴';
-      const gameLabel=this.currentGame.charAt(0).toUpperCase()+this.currentGame.slice(1);
-      toast(`${gameLabel}: ${lvlLabel}`);
-      ttsSpeak(`${gameLabel} set to ${foundLevel}`,null,{rate:.9});
-      this.setDiff(this.currentGame,foundLevel); return;
-    }
-    // Column box voice (add/sub)
-    if(this.currentGame==='addition'||this.currentGame==='subtraction'){
-      // Match: "ones place 3", "ones 3", "tens place 5", "hundreds 2", "units 4" etc.
-      const colMatch=lo.match(/\b(hundreds?\s*place?|tens?\s*place?|ones?\s*place?|units?\s*place?)\s+(\w+)/);
-      if(colMatch){
-        const cw=colMatch[1].replace(/\s*place\s*/,'').replace(/s$/,'').trim();
-        const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
-        const dig=this.parseNum(colMatch[2]);
-        if(dig!==null&&dig>=0&&dig<=9){
-          // Force-select the named column before writing, clearing any auto-advance
-          this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
-          this.activeAnsBox=ck;
-          const tb=document.getElementById('mz-ans-box-'+ck);
-          if(tb){ tb.classList.remove('mz-filled'); tb.classList.add('mz-active-box'); }
-          // Re-enable digit strip if it was locked
-          const strip=document.getElementById('mz-digit-strip');
-          if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
-          this.pickDigit(dig);
-          this.setVoiceBox(this.BOX_NAMES[ck]+' place: '+dig,'final','✏️');
-          return;
-        }
-      }
-      // Carry voice: "carry yes" / "carry one" / "carry no" / "no carry"
-      if(this.currentGame==='addition'){
-        if(/\b(carry\s+(yes|one|1|true)|yes\s+carry)\b/.test(lo)){
-          const col=this.activeAnsBox||'u';
-          this._revealScratchResult(col, true);
-          this.setVoiceBox('Carry 1! ✅','final','➕'); return;
-        }
-        if(/\b(carry\s+(no|zero|0|false)|no\s+carry|don'?t\s+carry)\b/.test(lo)){
-          const col=this.activeAnsBox||'u';
-          this._revealScratchResult(col, false);
-          this.setVoiceBox('No carry ✅','final','✔️'); return;
-        }
-      }
-      if(this.activeAnsBox&&!this.answered){
-        const dig=this.parseNum(lo);
-        if(dig!==null&&dig>=0&&dig<=9){ this.setVoiceBox(this.BOX_NAMES[this.activeAnsBox]+' place: '+dig,'final','✏️'); this.pickDigit(dig); return; }
-      }
-    }
-    // end screen nav
-    if(this.qNum>=this.TOTAL_Q||!this.currentGame){
-      if(/\b(play again|again|another|yes)\b/.test(lo)){ if(this.currentGame) this.selectGame(this.currentGame); return; }
-      if(/\b(different|switch|change|new game)\b/.test(lo)){ this.pickDiff(); return; }
-    }
-    // game switch
-    for(const[g,arr] of Object.entries(this.GT)){ if(arr.some(x=>lo.includes(x))){ this.animCard(g); setTimeout(()=>this.selectGame(g),420); return; } }
-    // answer
-    if(this.currentGame&&!this.answered&&this.currentAnswer!==null){
-      const val=this.parseNum(raw);
-      if(val!==null&&this.currentOpts.includes(val)){ this.setVoiceBox(String(val),'final','✅'); this.voiceAns(val); }
-    }
-  },
-
+   
   animCard(g){
     document.querySelectorAll('.mz-game-card').forEach(b=>b.classList.remove('mz-vsel'));
     const b=document.getElementById('mz-btn-'+g); if(b) b.classList.add('mz-vsel');
