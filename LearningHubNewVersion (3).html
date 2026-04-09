@@ -1273,9 +1273,22 @@ onCommand(raw){
     if(/\bstart recording\b/.test(lo)&&this.state==='idle'){ this.startListen(); return; }
   },
 
-  onSpeech(raw){
+ onSpeech(raw){
     if(/\b(stop|finish|done)\b/i.test(raw)){ this.stopProcess(); return; }
     if(/\bpause\b/i.test(raw)){ this.pause(); return; }
+
+    // ── DELETE last word ──
+    if(/\bdelete\b/i.test(raw)){
+      const words = this.rawAccum.trim().split(/\s+/);
+      if(words.length > 0){
+        words.pop();
+        this.rawAccum = words.length ? words.join(' ') + ' ' : '';
+        this.updateLive();
+        this.silReset();
+      }
+      return;
+    }
+
     this.rawAccum+=raw+' ';
     this.silReset();
     this.updateLive();
