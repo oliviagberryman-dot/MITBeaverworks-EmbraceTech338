@@ -2850,7 +2850,19 @@ onSpeech(raw){
         const cw=colMatch[1].replace(/\s*place\s*/,'').replace(/s$/,'').trim();
         const ck=cw==='hundred'?'h':cw==='ten'?'t':'u';
         const dig=this.parseNum(colMatch[2]);
-        if(dig!==null&&dig>=0&&dig<=9){ this.activeAnsBox=ck; this.pickDigit(dig); this.setVoiceBox(this.BOX_NAMES[ck]+' place: '+dig,'final','✏️'); return; }
+        if(dig!==null&&dig>=0&&dig<=9){
+          // Force-select the named column before writing, clearing any auto-advance
+          this.BOX_ORDER.forEach(c=>{const b=document.getElementById('mz-ans-box-'+c);if(b)b.classList.remove('mz-active-box');});
+          this.activeAnsBox=ck;
+          const tb=document.getElementById('mz-ans-box-'+ck);
+          if(tb){ tb.classList.remove('mz-filled'); tb.classList.add('mz-active-box'); }
+          // Re-enable digit strip if it was locked
+          const strip=document.getElementById('mz-digit-strip');
+          if(strip){strip.style.opacity='1';strip.style.pointerEvents='auto';}
+          this.pickDigit(dig);
+          this.setVoiceBox(this.BOX_NAMES[ck]+' place: '+dig,'final','✏️');
+          return;
+        }
       }
       // Carry voice: "carry yes" / "carry one" / "carry no" / "no carry"
       if(this.currentGame==='addition'){
