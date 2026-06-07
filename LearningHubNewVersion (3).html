@@ -2732,26 +2732,48 @@ if(match2){ this.helpWord(match2[1]); return; }
     const local = WORD_DEFS[word.toLowerCase()];
     if(local){ this.showVocab(local); return; }
 
-    try{
-      const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-      if(!r.ok) throw new Error('not found');
-      const d = await r.json();
-      const entry = d[0];
-      const meaning = entry.meanings[0];
-      const defObj = meaning.definitions[0];
-      const info = {
+   try{
+  const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+  if(!r.ok) throw new Error('not found');
+  const d = await r.json();
+  const entry = d[0];
+
+  // Try each meaning until we find a kid-safe one
+  let info = null;
+  for(const meaning of entry.meanings){
+    for(const defObj of meaning.definitions){
+      const def = (defObj.definition||'').toLowerCase();
+      const BAD = ['fuck', 'shit', 'ass', 'bitch', 'damn', 'crap', 'dick', 'piss', 'cock', 'cunt', 'bastard', 'slut', 'whore', 'douche',
+                   'fag', 'nigga', 'nigger', 'retard', 'twat', 'wanker', 'arse', 'bollocks', 'bugger', 'prick', 'tit', 'tits', 'titty', 'motherfucker',
+                   'motherfucking', 'fucking', 'shitty', 'asshole', 'dickhead', 'jackass', 'sonofabitch', 'goddamn', 'goddamnit', 'hell', 'damnit', 'pussy',
+                   'cocksucker', 'cum', 'jizz', 'blowjob', 'handjob', 'rimjob', 'anal', 'boner', 'clit', 'dildo', 'fuckface', 'fucktard', 'shithead', 'shitface',
+                   'dumbass', 'douchebag', 'bitchass', 'bitchface', 'crapface', 'craphole', 'shitbag', 'shitstick', 'fuckstick', 'fuckwad', 'fuckwit', 'dickwad',
+                   'dickweed', 'pissed', 'pissing', 'shitting', 'wtf', 'stfu', 'fml', 'lmfao', 'asshat', 'assclown', 'asswipe', 'bitchtits', 'cameltoe', 'dipshit',
+                   'dumbfuck', 'fuckbucket', 'fuckhead', 'fucknugget', 'fucknut', 'fuckoff', 'fuckpuppet', 'fucktrumpet', 'goatfucker', 'penis', 'vagina', 
+                   'clitoris', 'labia', 'scrotum', 'testicle', 'balls', 'nuts', 'boob', 'boobs', 'breast', 'breasts', 'nipple', 'nipples', 'anus', 'butthole', 
+                   'asshole', 'buttplug', 'masturbate', 'masturbation', 'orgasm', 'ejaculate', 'semen', 'sperm', 'urethra', 'rectum', 'genitals', 'pubic', 
+                   'pubes', 'horny', 'sex', 'sexual', 'sexy', 'porn', 'porno', 'pornography', 'erotic', 'kinky', 'fetish', 'bondage', 'bdsm', 'sadist',
+                   'masochist', 'rape', 'molest', 'pedophile', 'incest', 'bestiality', 'fisting', 'scat', 'piss', 'shit', 'crap', 'fart', 'poop', 'poopoo',
+                   'peepee', 'weewee', 'doodoo', 'bum', 'bumhole', 'bumbum',];
+      if(BAD.some(b=>def.includes(b))) continue;
+      info = {
         word: entry.word,
         pos:  meaning.partOfSpeech||'',
         def:  defObj.definition||'',
         example: defObj.example||''
       };
-      this.showVocab(info);
-    } catch(e){
-      ov.style.display='none'; ov.innerHTML='';
-      this.setStatus('❌ No definition found for "'+word+'"');
-      toast('❌ No definition found for "'+word+'"');
+      break;
     }
-  },
+    if(info) break;
+  }
+
+  if(!info) throw new Error('no safe definition found');
+  this.showVocab(info);
+} catch(e){
+  ov.style.display='none'; ov.innerHTML='';
+  this.setStatus('❌ No definition found for "'+word+'"');
+  toast('❌ No definition found for "'+word+'"');
+}
 
   saveVocabWord(info){
     let saved=[];
