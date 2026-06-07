@@ -2348,7 +2348,21 @@ if(match2){ this.helpWord(match2[1]); return; }
       // Don't fall through while popup is open — avoid accidental navigation
       return;
     }
-
+// ── OPEN BOOK BY NAME ──
+if(!this.bookId || !this.reading){
+  const books = await this.dbAll('books').catch(()=>[]);
+  for(const b of books){
+    const nameLo = b.name.toLowerCase().replace(/[^a-z0-9\s]/g,'');
+    const spokenLo = lo.replace(/[^a-z0-9\s]/g,'');
+    // Check if spoken words substantially match the book name
+    const nameWords = nameLo.split(/\s+/).filter(w=>w.length>2);
+    const matchCount = nameWords.filter(w=>spokenLo.includes(w)).length;
+    if(nameWords.length>0 && matchCount>=Math.ceil(nameWords.length*0.9)){
+      this.openBook(b.id);
+      return;
+    }
+  }
+}
     // Start/stop reading
     if(/\b(start|begin|go|listen)\b/.test(lo)&&!this.reading){ this.startReading(); return; }
     if(/\b(stop|pause|halt)\b/.test(lo)){ this.stopReading(); return; }
@@ -2861,7 +2875,7 @@ const MZ={
     this.selectGame(game);
   },
 
-onSpeech(raw){
+async onSpeech(raw){
     const lo=raw.toLowerCase().trim();
     // ── Difficulty voice commands ──
     let foundGame=null,foundLevel=null;
