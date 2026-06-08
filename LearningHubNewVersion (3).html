@@ -2784,11 +2784,11 @@ if(!this.bookId || !this.reading){
   if(!info) throw new Error('no safe definition found');
   this.showVocab(info);
 } catch(e){
-  ov.style.display='none'; ov.innerHTML='';
-  this.setStatus('❌ No definition found for "'+word+'"');
-  toast('❌ No definition found for "'+word+'"');
-   }
-},
+    ov.style.display='none'; ov.innerHTML='';
+    this.setStatus('❌ No definition found for "'+word+'"');
+    toast('❌ No definition found for "'+word+'"');
+  }
+  },
 
   saveVocabWord(info){
     let saved=[];
