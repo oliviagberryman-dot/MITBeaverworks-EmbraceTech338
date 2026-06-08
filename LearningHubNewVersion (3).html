@@ -2327,7 +2327,7 @@ const RB={
   onHide(){ this.stopReading(); },
 
   // ── VOICE COMMANDS ──
-  async onSpeech(raw){
+  onSpeech(raw){
     const lo=raw.toLowerCase();
 
     // ── VOCAB POPUP OPEN: single clear phrase "help me" ──
@@ -2348,21 +2348,7 @@ if(match2){ this.helpWord(match2[1]); return; }
       // Don't fall through while popup is open — avoid accidental navigation
       return;
     }
-// ── OPEN BOOK BY NAME ──
-if(!this.bookId || !this.reading){
-  const books = await this.dbAll('books').catch(()=>[]);
-  for(const b of books){
-    const nameLo = b.name.toLowerCase().replace(/[^a-z0-9\s]/g,'');
-    const spokenLo = lo.replace(/[^a-z0-9\s]/g,'');
-    // Check if spoken words substantially match the book name
-    const nameWords = nameLo.split(/\s+/).filter(w=>w.length>2);
-    const matchCount = nameWords.filter(w=>spokenLo.includes(w)).length;
-    if(nameWords.length>0 && matchCount>=Math.ceil(nameWords.length*0.9)){
-      this.openBook(b.id);
-      return;
-    }
-  }
-}
+
     // Start/stop reading
     if(/\b(start|begin|go|listen)\b/.test(lo)&&!this.reading){ this.startReading(); return; }
     if(/\b(stop|pause|halt)\b/.test(lo)){ this.stopReading(); return; }
@@ -2746,48 +2732,25 @@ if(!this.bookId || !this.reading){
     const local = WORD_DEFS[word.toLowerCase()];
     if(local){ this.showVocab(local); return; }
 
-   try{
-  const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-  if(!r.ok) throw new Error('not found');
-  const d = await r.json();
-  const entry = d[0];
-
-  // Try each meaning until we find a kid-safe one
-  let info = null;
-  for(const meaning of entry.meanings){
-    for(const defObj of meaning.definitions){
-      const def = (defObj.definition||'').toLowerCase();
-      const BAD = ['fuck', 'shit', 'ass', 'bitch', 'damn', 'crap', 'dick', 'piss', 'cock', 'cunt', 'bastard', 'slut', 'whore', 'douche',
-                   'fag', 'nigga', 'nigger', 'retard', 'twat', 'wanker', 'arse', 'bollocks', 'bugger', 'prick', 'tit', 'tits', 'titty', 'motherfucker',
-                   'motherfucking', 'fucking', 'shitty', 'asshole', 'dickhead', 'jackass', 'sonofabitch', 'goddamn', 'goddamnit', 'hell', 'damnit', 'pussy',
-                   'cocksucker', 'cum', 'jizz', 'blowjob', 'handjob', 'rimjob', 'anal', 'boner', 'clit', 'dildo', 'fuckface', 'fucktard', 'shithead', 'shitface',
-                   'dumbass', 'douchebag', 'bitchass', 'bitchface', 'crapface', 'craphole', 'shitbag', 'shitstick', 'fuckstick', 'fuckwad', 'fuckwit', 'dickwad',
-                   'dickweed', 'pissed', 'pissing', 'shitting', 'wtf', 'stfu', 'fml', 'lmfao', 'asshat', 'assclown', 'asswipe', 'bitchtits', 'cameltoe', 'dipshit',
-                   'dumbfuck', 'fuckbucket', 'fuckhead', 'fucknugget', 'fucknut', 'fuckoff', 'fuckpuppet', 'fucktrumpet', 'goatfucker', 'penis', 'vagina', 
-                   'clitoris', 'labia', 'scrotum', 'testicle', 'balls', 'nuts', 'boob', 'boobs', 'breast', 'breasts', 'nipple', 'nipples', 'anus', 'butthole', 
-                   'asshole', 'buttplug', 'masturbate', 'masturbation', 'orgasm', 'ejaculate', 'semen', 'sperm', 'urethra', 'rectum', 'genitals', 'pubic', 
-                   'pubes', 'horny', 'sex', 'sexual', 'sexy', 'porn', 'porno', 'pornography', 'erotic', 'kinky', 'fetish', 'bondage', 'bdsm', 'sadist',
-                   'masochist', 'rape', 'molest', 'pedophile', 'incest', 'bestiality', 'fisting', 'scat', 'piss', 'shit', 'crap', 'fart', 'poop', 'poopoo',
-                   'peepee', 'weewee', 'doodoo', 'bum', 'bumhole', 'bumbum',];
-      if(BAD.some(b=>def.includes(b))) continue;
-      info = {
+    try{
+      const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+      if(!r.ok) throw new Error('not found');
+      const d = await r.json();
+      const entry = d[0];
+      const meaning = entry.meanings[0];
+      const defObj = meaning.definitions[0];
+      const info = {
         word: entry.word,
         pos:  meaning.partOfSpeech||'',
         def:  defObj.definition||'',
         example: defObj.example||''
       };
-      break;
+      this.showVocab(info);
+    } catch(e){
+      ov.style.display='none'; ov.innerHTML='';
+      this.setStatus('❌ No definition found for "'+word+'"');
+      toast('❌ No definition found for "'+word+'"');
     }
-    if(info) break;
-  }
-
-  if(!info) throw new Error('no safe definition found');
-  this.showVocab(info);
-} catch(e){
-    ov.style.display='none'; ov.innerHTML='';
-    this.setStatus('❌ No definition found for "'+word+'"');
-    toast('❌ No definition found for "'+word+'"');
-  }
   },
 
   saveVocabWord(info){
@@ -2876,7 +2839,7 @@ const MZ={
     this.selectGame(game);
   },
 
-async onSpeech(raw){
+onSpeech(raw){
     const lo=raw.toLowerCase().trim();
     // ── Difficulty voice commands ──
     let foundGame=null,foundLevel=null;
